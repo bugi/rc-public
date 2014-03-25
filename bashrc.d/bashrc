@@ -1,0 +1,94 @@
+# vim:set ft=sh:
+
+#
+# symlink this file as ~/.bashrc
+#
+
+
+
+
+
+# some systems default to 002 or 000, or even stranger
+umask 022
+
+
+
+# make sure hostname is set and is the hostname, not the fqdn.
+# it's a stupid-common rookie mistake.
+if [ -z "$HOSTNAME" -o "${HOSTNAME%.*}" != "$HOSTNAME" ]
+then
+	HOSTNAME="${HOSTNAME:-$(hostname)}"
+	# HOSTNAME="$(hostname)"
+	HOSTNAME="${HOSTNAME%%.*}"
+	export HOSTNAME
+fi
+
+
+
+# yeah, java :(
+if [ -d /usr/lib/jvm/java-6-sun ]
+then
+	JAVA_HOME=/usr/lib/jvm/java-6-sun
+	export JAVA_HOME
+	JDK_HOME="${JAVA_HOME}"
+	export JDK_HOME
+	PATH="${JAVA_HOME}/bin:${PATH}"
+	export PATH
+fi
+
+
+# App setup needed even for non-interactive shells.
+# (Claws is run from a non-interactive shell.)
+
+PARINIT='rTbgqR B=.?_A_a Q=_s>|'
+export PARINIT
+
+
+
+if [ -z "$PS1" ] # non-interactive, so hedge PATH then leave
+then
+	PATH="$HOME/usr/bin:$PATH"
+	export PATH
+	return
+fi
+
+
+
+
+
+
+
+
+# from here, assumes bash.  not sh.  not ksh.  not ash.  not zsh.
+
+RC_public="$HOME/.rc-public"
+RC_private="$HOME/.rc-private"
+bash_RC_public="$RC_public/bashrc.d"
+bash_RC_private="$RC_private/bashrc.d"
+# or derive from this you must have it relocatable:
+#	"$(readlink -f "${BASH_SOURCE[0]}" )"
+
+
+. "$bash_RC_private"/jobs
+
+
+if [ "${-/i/}" = "$-" ]	# i is not present in shell options, so is non-interactive
+then
+	PATH="$HOME/usr/bin:$PATH"
+	export PATH
+	return
+fi
+
+
+
+
+
+
+#
+# put interactive parts below here
+#
+
+
+
+
+. "$bash_RC_public"/interactive
