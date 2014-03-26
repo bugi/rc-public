@@ -1,0 +1,58 @@
+# vim:set ft=sh:
+
+#
+# app-specific configs
+#
+
+export VISUAL=vi
+export EDITOR="$VISUAL"
+
+export PAGER=less
+
+export PGPPATH="$HOME"/mail/.pgppath
+
+
+# Set in basic bashrc instead of here.
+# PARINIT='rTbgqR B=.?_A_a Q=_s>|'
+# export PARINIT
+
+
+# make less more friendly for non-text input files, see lesspipe(1)
+[ -x /usr/bin/lesspipe ] && eval "$(SHELL=/bin/sh lesspipe)"
+
+
+if [ $(which git |wc -l) -ge 1 ]
+then
+	if [ ! -e "$bash_RC_public"/git-flow-completion.bash ]
+	then
+		(cd "$bash_RC_public" && . git-flow-completion.bash.README )
+	fi
+	if [ -r "$bash_RC_public"/git-flow-completion.bash ]
+	then
+		. "$bash_RC_public"/git-flow-completion.bash
+	fi
+fi
+
+if [ -d /etc/salt/. ]
+then
+	if [ ! -e "$bash_RC_public"/salt_bash_completion ]
+	then
+		(cd "$bash_RC_public" && . salt_bash_completion.README )
+	fi
+	if [ -r "$bash_RC_public"/salt_bash_completion ]
+	then
+		. "$bash_RC_public"/salt_bash_completion
+	fi
+fi
+
+
+
+
+
+if [ -x /usr/bin/ispell ]
+then
+	export ISPELL=/usr/bin/ispell
+elif [ -x /usr/local/bin/ispell ]
+then
+	export ISPELL=/usr/local/bin/ispell
+fi
