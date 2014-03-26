@@ -1,0 +1,105 @@
+# vim: set ft=sh:
+
+# safety first
+alias cp='cp -i'
+alias rm='rm -i'
+alias mv='mv -i'
+
+# then sanity
+alias ls='LC_COLLATE=C /bin/ls -CF'
+alias r='fc -s'
+alias z=suspend
+
+if [ -z "$ALIASd" ]
+then
+	ALIASd="$(dirname "$( readlink -f "${BASH_SOURCE[0]}" )" )"
+fi
+
+
+for x in dirs ssh jobs dev "$unameS" "$HOSTNAME"
+do
+	if [ -r "$ALIASd"/"$x" ]
+	then
+		. "$ALIASd"/"$x"
+	fi
+done
+
+
+
+#----------- GENERAL -----------
+alias xvm='xv -maxpect -geometry +0+0'
+alias mroe='more'
+alias jbos=jobs
+alias R='more [Rr][Ee][Aa][Dd]{,_,.}[Mm][Ee]*'
+spel () {
+	echo "$@" | aspell -a
+	}
+
+# colorize grep
+alias grep='grep --color=auto'
+alias fgrep='fgrep --color=auto'
+alias egrep='egrep --color=auto'
+
+
+
+#----------- ls BASED -----------
+alias ll='LC_COLLATE=C /bin/ls -l'
+lsd () {
+	local d
+	if [ $# -eq 0 ]
+	then
+		d=.
+	else
+		d="$*"
+	fi
+	if [ $# -eq 1 ]
+	then
+		pushd $d > /dev/null
+		d=.
+	fi
+	LC_COLLATE=C /bin/ls -Cd $( find $d -type d -maxdepth 1 | sed 's:^\./::' )
+	if [ $# -eq 1 ]
+	then
+		popd > /dev/null
+	fi
+	}
+
+
+
+#----------- OTHER -----------
+alias ]cd=cd   # for copy-paste
+
+
+#----------- ... -----------
+
+# alias lc='for f in *; do mv -f $f $(echo $f | tr A-Z a-z ) ; done'
+lc () { # rename all listed files to be fully lower-case
+	local f
+	for f in "$@"
+	do
+		mv -f "$f" $(echo "$f" | tr A-Z a-z )
+	done
+	}
+
+
+genpasswd() {
+	# or use pwgen
+	local l=$1
+	[ "$l" == "" ] && l=20
+	# the empty xargs is here on pupose
+	tr -dc A-Za-z0-9_ < /dev/urandom | head -c ${l} | xargs
+	}
+
+
+# an "alert" alias for long running commands.  Use like so:
+#   sleep 10; alert
+alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
+
+
+
+
+setWindowTitle() {
+	MyTitle="$*" # for persistence, in cooperation with PS1
+	# echo -ne "\e]2;$*\a"
+	echo -ne "\e]2;$MyTitle\a"
+	}
