@@ -1,0 +1,1 @@
+stty swtch ^Z susp ^Z erase ^H kill ^U intr ^C
