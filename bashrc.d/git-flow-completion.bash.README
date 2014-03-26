@@ -1,0 +1,3 @@
+wget --no-check-certificate -O- \
+https://github.com/bobthecow/git-flow-completion/raw/master/git-flow-completion.bash \
+>| git-flow-completion.bash

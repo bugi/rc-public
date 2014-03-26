@@ -1,0 +1,3 @@
+wget --no-check-certificate -O- \
+https://github.com/saltstack/salt/raw/develop/pkg/salt.bash \
+>| salt_bash_completion
