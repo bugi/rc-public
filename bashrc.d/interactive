@@ -1,0 +1,211 @@
+# vim:set ft=sh:
+
+# I use '>' and '# ' to indicate strange bashrc runs.
+# My normal prompt is ']'.
+PS1='>'
+
+
+#
+# machine-dependent config
+#
+
+export unameS="${unameS:-$(uname -s)}"
+export unameM="${unameM:-$(uname -m)}"
+
+if [ "${unameM%%/*}" = 9000 ]
+then
+	# treat 9000/715 and 9000/735 as hppa
+	unameM=hppa
+	export unameM
+fi
+
+for x in "$unameS" "$unameM" "$HOSTNAME"
+do
+	if [ -r "$bash_RC_public"/"$x" ]
+	then
+		. "$bash_RC_public"/"$x"
+	fi
+done
+
+
+# not all OSs set LOGNAME and/or USER.  weird.
+if [ -z "$LOGNAME" ]
+then
+	# A given uid can have more than one name.
+	# LOGNAME should be the canonical name.
+	if [ -n "$USER" ]
+	then
+		LOGNAME="$USER"
+	else
+		LOGNAME="$(id -urn)"
+	fi
+fi
+
+
+
+
+#
+# belabor the path
+#
+
+
+prepath=".:$HOME/usr/bin"
+postpath=''
+
+
+[ -n "$prepath" ] && PATH="$prepath:$PATH"
+[ -n "$postpath" ] && PATH="$PATH:$postpath"
+export PATH
+unset prepath postpath
+
+
+
+
+#
+# setup the shell
+#
+
+
+set -o emacs		# non-modal command-line
+set -o noclobber	# don't let ">" overwrite files directly
+set -o ignoreeof	# accidental ^D doesn't logout
+shopt -s checkwinsize	# keep LINES and COLUMNS up to date
+shopt -s nullglob	# matching nothing should return nothing
+shopt -s extglob	# fancy glob patterns
+
+
+# ignore .o and ~ extentions in file completion
+export FIGNORE='.o:~:.svn:.CVS:.git'
+
+
+ulimit -c 0		# if we want core files, we'll ask for core files
+
+
+
+
+#
+# history
+#
+
+# don't put duplicate lines in the history. See bash(1) for more options
+# ... or force ignoredups and ignorespace
+HISTCONTROL=ignoredups:ignorespace
+
+# append to the history file, don't overwrite it
+shopt -s histappend
+
+# for setting history length see HISTSIZE and HISTFILESIZE in bash(1)
+# HISTSIZE=1000 # defaults to 500
+HISTFILESIZE=1000 # defaults to infinite with histappend
+
+
+
+
+
+iam="$(id -un)" # NOT the same as $LOGNAME
+
+
+if [ "$iam" != "$LOGNAME" ]
+then
+	PS1='# '
+	unset IGNOREEOF
+else
+	PS1=']'
+fi
+
+
+
+# enable programmable completion features (you don't need to enable
+# this, if it's already enabled in /etc/bash.bashrc and /etc/profile
+# sources /etc/bash.bashrc).
+if ! shopt -oq posix
+then
+	if [ -r /etc/bash_completion ]
+	then
+		. /etc/bash_completion
+		PS1='$(__git_ps1 "git:%s")'"$PS1"
+	elif [ -r /etc/bash_completion.d/git ]
+	then
+		. /etc/bash_completion.d/git
+		PS1='$(__git_ps1 "git:%s")'"$PS1"
+	elif [ -r /usr/share/bash-completion/completions/git ]
+	then
+		. /usr/share/bash-completion/completions/git
+		PS1='$(__git_ps1 "git:%s")'"$PS1"
+	fi
+fi
+
+
+if [ "$iam" = "$LOGNAME" ]
+then
+	: stty -tabs
+fi
+
+
+
+
+
+
+for f in aliases.d/main \
+	bm.bash \
+	apps \
+; do
+	if [ -r "$bash_RC_public"/"$f" ]
+	then
+		. "$bash_RC_public"/"$f"
+	fi
+	if [ -r "$bash_RC_private"/"$f" ]
+	then
+		. "$bash_RC_private"/"$f"
+	fi
+done
+
+
+
+
+
+
+# mesg n
+if [ "$iam" = "$LOGNAME" ]
+then
+	# mesg y
+	w
+fi
+
+
+
+
+
+if [ ${LANG:-notset} != notset  -a  "$LANG" != 'en_US.UTF-8' ]
+then
+	# if it's set, but not to our favorite, clear it so's to default to C
+	unset LANG LC_COLLATE LC_CTYPE LC_MONETARY LC_NUMERIC LC_TIME LC_MESSAGES LC_ALL
+fi
+
+
+
+
+
+
+# If this is an xterm, (try to) keep the TITLE set to user@host:dir
+case "$TERM" in
+	(xterm*|rxvt*)
+	MyTitle=
+	PS1="\[\e]0;"'${MyTitle:-"'"\u@\h: \w"'"'"}\a\]$PS1"
+	if [ -z "$MyTitle" ]
+	then
+		: # MyTitle="$(hostname |cut -c 1)"
+	fi
+	# http://tldp.org/HOWTO/Xterm-Title-3.html
+		#setwindowtitle: echo -ne "\e]2;$*\a"
+		# ESC]0;stringBEL -- Set icon name and window title to string
+	;;
+	(*)
+	;;
+esac
+
+
+
+export HOME="$(pwd)" # so dirs shows ~s even through symlinks
+
+. "$bash_RC_public"/path-dedup
