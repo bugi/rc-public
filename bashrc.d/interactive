@@ -144,12 +144,18 @@ fi
 
 
 
+for ALIASd in "$bash_RC_public/aliases.d" "$bash_RC_private/aliases.d"
+do
+	if [ -r "$ALIASd/main" ]
+	then
+		. "$ALIASd/main"
+	fi
+done
+unset ALIASd
 
 
-for f in aliases.d/main \
-	bm.bash \
-	apps \
-; do
+for f in bm.bash apps
+do
 	if [ -r "$bash_RC_public"/"$f" ]
 	then
 		. "$bash_RC_public"/"$f"
