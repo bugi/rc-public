@@ -1,0 +1,6 @@
+# vim:set ft=sh:
+
+#----------- Linux -----------
+alias keys='loadkeys ~/.keymap.$(uname -s)'
+# example: fuser /usr/bin/xterm 2>&1 |fupid
+alias fupid="sed -e 's/^.*://;s/[^0-9 ]//g'"
