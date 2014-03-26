@@ -1,0 +1,10 @@
+# vim:set ft=sh:
+
+if [ "$HOSTNAME" =  chicken ]
+then
+	:
+	# prepath=/usr/local/xfree4.0/bin
+	# prepath=/usr/local/xfree-4.0.1/bin
+	# postpath=/usr/bin/X11:/usr/local/soffice/program
+	# postpath=/usr/local/xfree-4.0.1/bin:$postpath
+fi
