@@ -70,7 +70,9 @@ set -o emacs		# non-modal command-line
 set -o noclobber	# don't let ">" overwrite files directly
 set -o ignoreeof	# accidental ^D doesn't logout
 shopt -s checkwinsize	# keep LINES and COLUMNS up to date
-shopt -s nullglob	# matching nothing should return nothing
+# nullglob breaks completion!
+#	http://www.linuxhorizon.com/2-debian-linux/35d089e575a00342.htm
+# shopt -s nullglob	# matching nothing should return nothing
 shopt -s extglob	# fancy glob patterns
 
 
@@ -120,20 +122,23 @@ fi
 # sources /etc/bash.bashrc).
 if ! shopt -oq posix
 then
-	if [ -r /etc/bash_completion ]
+	if [ $(complete |wc -l) -lt 1 ]
 	then
-		. /etc/bash_completion
-		PS1='$(__git_ps1 "git:%s")'"$PS1"
-	elif [ -r /etc/bash_completion.d/git ]
+		if [ -r /etc/bash_completion ]
+		then
+			. /etc/bash_completion
+		elif [ -r /usr/share/bash-completion/bash_completion ]
+		then
+			. /usr/share/bash-completion/bash_completion
+		fi
+	fi
+	if [ -r /etc/bash_completion.d/git-prompt ]
 	then
-		. /etc/bash_completion.d/git
-		PS1='$(__git_ps1 "git:%s")'"$PS1"
-	elif [ -r /usr/share/bash-completion/completions/git ]
-	then
-		. /usr/share/bash-completion/completions/git
+		. /etc/bash_completion.d/git-prompt
 		PS1='$(__git_ps1 "git:%s")'"$PS1"
 	fi
 fi
+
 
 
 if [ "$iam" = "$LOGNAME" ]
