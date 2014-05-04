@@ -20,6 +20,11 @@ export PGPPATH="$HOME"/mail/.pgppath
 # make less more friendly for non-text input files, see lesspipe(1)
 [ -x /usr/bin/lesspipe ] && eval "$(SHELL=/bin/sh lesspipe)"
 
+for f in $( find "$HOME"/usr/bin/ -name '*.completion' )
+do
+	# (use find to avoid dancing around bash's unfortunate nullglob behavior; "shopt -s nullglob" should be the default)
+	. "$f"
+done
 
 if [ $(which git |wc -l) -ge 1 ]
 then
