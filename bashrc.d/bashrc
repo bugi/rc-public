@@ -71,6 +71,13 @@ bash_RC_private="$RC_private/bashrc.d"
 
 . "$bash_RC_private"/jobs
 
+# (macports) prioritize gnu utils over bsd utils
+if [ -d /opt/local/libexec/gnubin ]
+then
+	export PATH="/opt/local/libexec/gnubin:$PATH"
+fi
+
+
 
 if [ "${-/i/}" = "$-" ]	# i is not present in shell options, so is non-interactive
 then
