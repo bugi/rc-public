@@ -50,6 +50,13 @@ then
 	fi
 fi
 
+for f in /usr/share/doc/tmux/examples/bash_completion_tmux.sh
+do
+	if [ -f "$f" ]
+	then
+		. "$f"
+	fi
+done
 
 
 
