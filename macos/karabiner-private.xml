@@ -29,6 +29,18 @@
 
 
 
+	<!-- Two reasons for making pc_application be command-r:
+	     * iterm2 is configured to treat it as escape
+	     * on macos, command key is really useful
+	-->
+	<item>
+		<name>APPLICATION KEY: Command-R</name>
+		<identifier>private.pc_application.emulate_command_r</identifier>
+		<autogen>__KeyToKey__ KeyCode::PC_APPLICATION, KeyCode::COMMAND_R</autogen>
+	</item>
+
+
+
 	<item>
 		<name>TERMINAL: Escape Keys on Right-Ring</name>
 		<identifier>private.terminal.escape_right_ring</identifier>
