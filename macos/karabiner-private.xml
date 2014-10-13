@@ -45,6 +45,7 @@
 		<name>TERMINAL: Escape Keys on Right-Ring</name>
 		<identifier>private.terminal.escape_right_ring</identifier>
 		<only>TERMINAL</only>
+		<autogen>__KeyToKey__ KeyCode::PC_APPLICATION, KeyCode::ESCAPE</autogen>
 		<autogen>__KeyToKey__ KeyCode::COMMAND_R, KeyCode::ESCAPE</autogen>
 		<autogen>__KeyToKey__ KeyCode::OPTION_R, KeyCode::ESCAPE</autogen>
 	</item>
