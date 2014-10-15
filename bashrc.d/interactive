@@ -220,3 +220,8 @@ esac
 export HOME="$(pwd)" # so dirs shows ~s even through symlinks
 
 . "$bash_RC_public"/path-dedup
+
+for f in "$bash_RC_public"/tmux.d/*
+do
+	. "$f"
+done

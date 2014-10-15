@@ -1,0 +1,17 @@
+# if we're in tmux, bootstrap a few things
+
+if [ -n "$TMUX" ]
+then
+	tmup >/dev/null 2>&1
+	echo
+	echo Welcome to tmux:
+	echo
+	echo "	session:   $(tmux display -p '#S')"
+	echo
+	echo "	TMUX:      $TMUX"
+	echo "	TMUX_PANE: $TMUX_PANE"
+	echo
+	tmux ls |sed 's/^/	/'
+	echo
+	echo
+fi
