@@ -6,5 +6,5 @@ function TMUX () {
 	then
 		S=ts
 	fi
-	tmux -2u new-session -As "$S"
+	cd && tmux -2u new-session -As "$S"
 	}
