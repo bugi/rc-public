@@ -1,0 +1,93 @@
+<?xml version="1.0"?>
+<root>
+
+	<!-- symlink this file to ~/Library/Application\ Support/Karabiner/private.xml -->
+
+	<!-- 
+	     https://pqrs.org/osx/karabiner/xml.html.en
+	     (in basic syntax is a link to keycodes:
+	     https://github.com/tekezo/Karabiner/blob/version_10.3.0/src/bridge/generator/keycode/data/KeyCode.data
+	     )
+	-->
+
+	<!-- hyper key especially useful with slate+karabiner
+	     https://github.com/jigish/slate
+	     http://thume.ca/howto/2012/11/19/using-slate/
+	     http://stevelosh.com/blog/2012/10/a-modern-space-cadet/
+	     -->
+	<item>
+		<name>Remap Left Control to Hyper</name>
+		<appendix>OS X doesn't have a Hyper.  This maps Left Control to Control + Shift + Option + Command.</appendix>
+		<identifier>private.left_control_to_hyper</identifier>
+		<autogen>
+			__KeyToKey__
+				KeyCode::F19,
+				KeyCode::COMMAND_L,
+				ModifierFlag::OPTION_L | ModifierFlag::SHIFT_L | ModifierFlag::CONTROL_L
+		</autogen>
+	</item>
+
+
+
+	<!-- Two reasons for making pc_application be command-r:
+	     * iterm2 is configured to treat it as escape
+	     * on macos, command key is really useful
+	-->
+	<item>
+		<name>APPLICATION KEY: Command-R</name>
+		<identifier>private.pc_application.emulate_command_r</identifier>
+		<autogen>__KeyToKey__ KeyCode::PC_APPLICATION, KeyCode::COMMAND_R</autogen>
+	</item>
+
+
+
+	<item>
+		<name>TERMINAL: Escape Keys on Right-Ring</name>
+		<identifier>private.terminal.escape_right_ring</identifier>
+		<only>TERMINAL</only>
+		<autogen>__KeyToKey__ KeyCode::PC_APPLICATION, KeyCode::ESCAPE</autogen>
+		<autogen>__KeyToKey__ KeyCode::COMMAND_R, KeyCode::ESCAPE</autogen>
+		<autogen>__KeyToKey__ KeyCode::OPTION_R, KeyCode::ESCAPE</autogen>
+	</item>
+
+	<!-- instead of the capslock remaps here:
+	     * in syspref/keyboard, set capslock to control
+	     * in karabiner, set ctrl_l to be escape + with just ctrl_l send escape
+	     {
+	     -
+	<!- CAPSLOCK is mapped to JIS_UNDERSCORE via Seil. -
+	<item>
+		<name>TERMINAL: Map CAPSLOCK to CTRL</name>
+		<identifier>private.terminal.capslock_to_ctrl</identifier>
+		<only>TERMINAL</only>
+		<autogen>__KeyToKey__ KeyCode::JIS_UNDERSCORE, KeyCode::CONTROL_L</autogen>
+	</item>
+
+	<!- CAPSLOCK is mapped to JIS_UNDERSCORE via Seil. -
+	<item>
+		<name>TERMINAL: Map CAPSLOCK to ESCAPE</name>
+		<identifier>private.terminal.capslock_to_esc</identifier>
+		<only>TERMINAL</only>
+		<autogen>__KeyToKey__ KeyCode::JIS_UNDERSCORE, KeyCode::ESCAPE</autogen>
+	</item>
+	<!- } -->
+
+	<!-- chrome -->
+	<item>
+		<name>CHROME: Map special ctrl keys to command</name>
+		<identifier>private.chrome.ctrl_to_cmd</identifier>
+		<only>GOOGLE_CHROME</only>
+		<autogen>__KeyToKey__ KeyCode::T, ModifierFlag::CONTROL_L, KeyCode::T, ModifierFlag::COMMAND_L</autogen>
+		<autogen>__KeyToKey__ KeyCode::T, ModifierFlag::CONTROL_L, ModifierFlag::SHIFT_L, KeyCode::T, ModifierFlag::COMMAND_L, ModifierFlag::SHIFT_L</autogen>
+		<autogen>__KeyToKey__ KeyCode::W, ModifierFlag::CONTROL_L, KeyCode::W, ModifierFlag::COMMAND_L</autogen>
+		<autogen>__KeyToKey__ KeyCode::F, ModifierFlag::CONTROL_L, KeyCode::F, ModifierFlag::COMMAND_L</autogen>
+		<autogen>__KeyToKey__ KeyCode::R, ModifierFlag::CONTROL_L, KeyCode::R, ModifierFlag::COMMAND_L</autogen>
+		<autogen>__KeyToKey__ KeyCode::C, ModifierFlag::CONTROL_L, KeyCode::C, ModifierFlag::COMMAND_L</autogen>
+		<autogen>__KeyToKey__ KeyCode::V, ModifierFlag::CONTROL_L, KeyCode::V, ModifierFlag::COMMAND_L</autogen>
+		<autogen>__KeyToKey__ KeyCode::PAGEUP, ModifierFlag::CONTROL_L, KeyCode::CURSOR_LEFT, ModifierFlag::COMMAND_L, ModifierFlag::OPTION_L</autogen>
+		<autogen>__KeyToKey__ KeyCode::PAGEDOWN, ModifierFlag::CONTROL_L, KeyCode::CURSOR_RIGHT, ModifierFlag::COMMAND_L, ModifierFlag::OPTION_L</autogen>
+		<autogen>__KeyToKey__ KeyCode::BRACKET_LEFT, ModifierFlag::CONTROL_L, KeyCode::CURSOR_LEFT, ModifierFlag::COMMAND_L, ModifierFlag::OPTION_L</autogen>
+		<autogen>__KeyToKey__ KeyCode::BRACKET_RIGHT, ModifierFlag::CONTROL_L, KeyCode::CURSOR_RIGHT, ModifierFlag::COMMAND_L, ModifierFlag::OPTION_L</autogen>
+	</item>
+
+</root>
