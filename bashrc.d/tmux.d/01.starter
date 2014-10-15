@@ -1,0 +1,10 @@
+# this is what I type to start my "usual" tmux session
+
+function TMUX () {
+	local S="$1" ; shift
+	if [ -z "$S" ]
+	then
+		S=ts
+	fi
+	tmux -2u new-session -As "$S"
+	}
