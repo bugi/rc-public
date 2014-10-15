@@ -1,0 +1,27 @@
+# adapted in part from https://gist.github.com/simonjbeaumont/4672606
+
+# run tmup when you start a new tmux session
+# run tmup whenever, to sync (mostly) with the latest reality
+function tmup () { 
+	local tgt
+	if ! tgt="$(tmux display -p '#S')"
+	then
+		echo not in tmux 1>&2
+		false
+		return
+	fi
+	tmux source-file ~/.tmux.conf  # mainly for SSH_AUTH_SOCK
+	local line
+	# export IFS=","
+	IFS=,
+	for line in $(tmux showenv -t "$tgt" | tr "\n" ",")
+	do
+		if [[ $line == -* ]]
+		then
+			unset "$(echo $line | cut -c2-)"
+		else
+			export "$line"
+		fi
+	done
+	unset IFS
+	}
