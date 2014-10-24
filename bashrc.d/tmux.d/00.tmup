@@ -18,8 +18,10 @@ function tmup () {
 	do
 		if [[ $line == -* ]]
 		then
+			echo unset "$(echo $line | cut -c2-)"
 			unset "$(echo $line | cut -c2-)"
 		else
+			echo export "$line"
 			export "$line"
 		fi
 	done
