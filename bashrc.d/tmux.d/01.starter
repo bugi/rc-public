@@ -6,5 +6,24 @@ function TMUX () {
 	then
 		S=ts
 	fi
-	cd && tmux -2u new-session -As "$S"
+	case "$(tmux -V |awk '{print $2}')" in
+	(1.6)
+		# prior to tmux 1.8 new-session doesn't have -A, so emulate it
+		if ! cd
+		then
+			echo 'cd failed!'
+			false
+			return
+		fi
+		if ! tmux -2u attach-session -t 0
+		then
+			tmux -2u new-session -s "$S"
+		fi
+		return
+		;;
+	(*)
+		cd && tmux -2u new-session -As "$S"
+		return
+		;;
+	esac
 	}
