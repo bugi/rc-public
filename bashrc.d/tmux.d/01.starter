@@ -15,7 +15,7 @@ function TMUX () {
 			false
 			return
 		fi
-		if ! tmux -2u attach-session -t 0
+		if ! tmux -2u attach-session -t "$S"
 		then
 			tmux -2u new-session -s "$S"
 		fi
