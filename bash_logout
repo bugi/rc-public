@@ -1,6 +1,9 @@
 #!/bin/bash
 
-ssh-agent -k
+if [ -z "$TMUX" ]
+then # don't kill ssh-agent when tmux session goes away
+	ssh-agent -k
+fi
 
 if [ -x /usr/games/fortune ]
 then
