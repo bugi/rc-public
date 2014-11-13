@@ -1,4 +1,5 @@
 # adapted in part from https://gist.github.com/simonjbeaumont/4672606
+# and https://coderwall.com/p/_s_xda
 
 # run tmup when you start a new tmux session
 # run tmup whenever, to sync (mostly) with the latest reality
@@ -18,10 +19,10 @@ function tmup () {
 	do
 		if [[ $line == -* ]]
 		then
-			echo unset "$(echo $line | cut -c2-)"
+			# echo unset "$(echo $line | cut -c2-)"
 			unset "$(echo $line | cut -c2-)"
 		else
-			echo export "$line"
+			# echo export "$line"
 			export "$line"
 		fi
 	done
