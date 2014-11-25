@@ -1,6 +1,11 @@
 # this is what I type to start my "usual" tmux session
 
 function TMUX () {
+	if [ "$1" = ls ]
+	then
+		tmux ls
+		return
+	fi
 	local S="$1" ; shift
 	if [ -z "$S" ]
 	then
