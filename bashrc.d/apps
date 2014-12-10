@@ -68,3 +68,6 @@ elif [ -x /usr/local/bin/ispell ]
 then
 	export ISPELL=/usr/local/bin/ispell
 fi
+
+
+export GREP_OPTIONS='--exclude-dir=.git --exclude-dir=.hg --exclude-dir=.svn'
