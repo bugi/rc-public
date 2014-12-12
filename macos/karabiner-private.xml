@@ -7,6 +7,7 @@
 	     https://pqrs.org/osx/karabiner/xml.html.en
 	     (in basic syntax is a link to keycodes:
 	     https://github.com/tekezo/Karabiner/blob/version_10.3.0/src/bridge/generator/keycode/data/KeyCode.data
+	     https://github.com/tekezo/Karabiner/blob/master/src/bridge/generator/keycode/data/KeyCode.data
 	     )
 	-->
 
@@ -89,5 +90,81 @@
 		<autogen>__KeyToKey__ KeyCode::BRACKET_LEFT, ModifierFlag::CONTROL_L, KeyCode::CURSOR_LEFT, ModifierFlag::COMMAND_L, ModifierFlag::OPTION_L</autogen>
 		<autogen>__KeyToKey__ KeyCode::BRACKET_RIGHT, ModifierFlag::CONTROL_L, KeyCode::CURSOR_RIGHT, ModifierFlag::COMMAND_L, ModifierFlag::OPTION_L</autogen>
 	</item>
+
+
+
+
+
+	<item>
+		<!-- note that hyper+n are numbered left to right for home setup,
+		     while VK_OPEN_URL_SHELL_screen_n are numbered at osx-whim
+		-->
+		<name>Mouse Warping</name>
+
+		<vkopenurldef>
+			<name>KeyCode::VK_OPEN_URL_SHELL_screen_0</name>
+			<url type="shell">
+				<![CDATA[
+					/Applications/Karabiner.app/Contents/Library/utilities/bin/warp-mouse-cursor-position screen 0 middle 0 center 0
+				]]>
+			</url>
+		</vkopenurldef>
+
+		<vkopenurldef>
+			<name>KeyCode::VK_OPEN_URL_SHELL_screen_1</name>
+			<url type="shell">
+				<![CDATA[
+					/Applications/Karabiner.app/Contents/Library/utilities/bin/warp-mouse-cursor-position screen 1 middle 0 center 0
+				]]>
+			</url>
+		</vkopenurldef>
+
+		<vkopenurldef>
+			<name>KeyCode::VK_OPEN_URL_SHELL_screen_2</name>
+			<url type="shell">
+				<![CDATA[
+					/Applications/Karabiner.app/Contents/Library/utilities/bin/warp-mouse-cursor-position screen 2 middle 0 center 0
+				]]>
+			</url>
+		</vkopenurldef>
+
+		<item>
+			<identifier>private.screenwarp_0</identifier>
+			<name>hyper+0 to move the mouse to the center of screen 0</name>
+			<autogen>
+				__KeyToKey__
+				KeyCode::KEY_0,
+				ModifierFlag::COMMAND_L | ModifierFlag::OPTION_L | ModifierFlag::SHIFT_L | ModifierFlag::CONTROL_L,
+				KeyCode::VK_OPEN_URL_SHELL_screen_1
+			</autogen>
+		</item>
+
+		<item>
+			<identifier>private.screenwarp_1</identifier>
+			<name>hyper+1 to move the mouse to the center of screen 1</name>
+			<autogen>
+				__KeyToKey__
+				KeyCode::KEY_1,
+				ModifierFlag::COMMAND_L | ModifierFlag::OPTION_L | ModifierFlag::SHIFT_L | ModifierFlag::CONTROL_L,
+				KeyCode::VK_OPEN_URL_SHELL_screen_2
+			</autogen>
+		</item>
+
+		<item>
+			<identifier>private.screenwarp_2</identifier>
+			<name>hyper+2 to move the mouse to the center of screen 0</name>
+			<autogen>
+				__KeyToKey__
+				KeyCode::KEY_2,
+				ModifierFlag::COMMAND_L | ModifierFlag::OPTION_L | ModifierFlag::SHIFT_L | ModifierFlag::CONTROL_L,
+				KeyCode::VK_OPEN_URL_SHELL_screen_0
+			</autogen>
+		</item>
+
+	</item>
+
+
+
+
 
 </root>
