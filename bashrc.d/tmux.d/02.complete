@@ -1,0 +1,6 @@
+function _TMUX_complete () {
+	local cur prev
+	_get_comp_words_by_ref cur prev
+	COMPREPLY=( $( compgen -W "$(TMUX ls |sed 's/:.*//')" -- "$cur" ) )
+	}
+complete -F _TMUX_complete TMUX
