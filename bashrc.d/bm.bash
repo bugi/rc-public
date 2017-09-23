@@ -14,10 +14,13 @@ function go {
 	eval cd \$_bm_$1
 	}
 
-# go - go to the directory referenced by the given bookmark
+# wend - go to the directory referenced by the given bookmark
+# changed from "go" to "wend" because of golang
 # arg is boomark name
 # second and further args are optional
-function go {
+# "wend" because that is (or was) the present tense of "went"
+# "gan" because the old english "gān"
+function wend {
 	# The simpler, but safer version:
 	#	eval cd \$_bm_$1
 	#
@@ -31,6 +34,9 @@ function go {
 	# Be careful though.  That "\${2}" could've been "\$(hostname)" or "\$(rm -rf /)".
 	#
 	eval cd $(eval "echo \$_bm_$1")
+	}
+function gan {
+	wend "$@"
 	}
 
 # lsbm - list the bookmarks
