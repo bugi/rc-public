@@ -1,0 +1,4 @@
+_BM_[home]=~
+
+# Example for gan:
+# _BM_[foo]='bar ${1} baz'
