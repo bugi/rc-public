@@ -52,6 +52,12 @@ fi
 prepath=".:$HOME/usr/bin"
 postpath=''
 
+# path for snap apps
+if [ -d /snap/bin ]
+then
+	prepath="${prepath}:/snap/bin"
+fi
+
 
 [ -n "$prepath" ] && PATH="$prepath:$PATH"
 [ -n "$postpath" ] && PATH="$PATH:$postpath"
