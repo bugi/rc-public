@@ -112,7 +112,7 @@ bash_RC_private="$RC_private/bashrc.d"
 # (macports) prioritize gnu utils over bsd utils
 for f in /opt/local/bin /opt/local/libexec/gnubin /opt/local/sbin
 do
-	if [ -d /opt/local/bin ]
+	if [ -d "$f" ]
 	then
 		export PATH="$f:$PATH"
 	fi
