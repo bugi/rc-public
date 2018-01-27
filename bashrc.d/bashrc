@@ -44,20 +44,57 @@ PARINIT='rTbgqR B=.?_A_a Q=_s>|'
 export PARINIT
 
 
+#
+# belabor the path
+#
 
-if [ -z "$PS1" ] # non-interactive, so hedge PATH then leave
+# path for snap apps
+if [ -d /snap/bin ]
 then
-	PATH="$HOME/usr/bin:$PATH"
-	export PATH
+	PATH="/snap/bin:${PATH}"
+fi
+
+# setup for golang: GOPATH and PATH
+if [ -z "$GOPATH" ]
+then
+	if [ -d "$HOME/golang" ]
+	then
+		GOPATH="$HOME/golang"
+	elif [ -d "$HOME/go" ]
+	then
+		GOPATH="$HOME/go"
+	fi
+	export GOPATH
+fi
+if [ -n "$GOPATH" ]
+then
+	PATH="${GOPATH}/bin:${PATH}"
+fi
+
+# my own stuff comes first
+PATH="${HOME}/usr/bin:${PATH}"
+PATH="${HOME}/bin:${PATH}"
+PATH=".:${PATH}"
+
+export PATH
+
+
+#
+#
+#
+
+if [ -z "$PS1" ] # non-interactive, so we're done here
+then
 	return
 fi
 
 
 
+#
+#
+#
 
-
-
-
+# From here on is for interactive sessions bearable.
 
 # from here, assumes bash.  not sh.  not ksh.  not ash.  not zsh.
 
