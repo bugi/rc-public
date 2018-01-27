@@ -94,7 +94,7 @@ fi
 #
 #
 
-# From here on is for interactive sessions bearable.
+# From here on is for making interactive sessions bearable.
 
 # from here, assumes bash.  not sh.  not ksh.  not ash.  not zsh.
 
