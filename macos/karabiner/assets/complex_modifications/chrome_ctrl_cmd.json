@@ -1,0 +1,144 @@
+{
+    "title": "ctrl+key -> cmd+key in chrome",
+    "rules": [
+
+        {
+	    "description": "ctrl+t -> cmd+t in chrome",
+            "manipulators": [
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "t",
+			"modifiers": {
+				"mandatory": [
+					"left_control"
+				]
+			}
+                    },
+                    "to": [
+                        {
+                            "key_code": "t",
+                            "modifiers": [
+				    "left_command"
+				    ]
+                        }
+                    ],
+                    "conditions": [
+                        {
+                            "type": "frontmost_application_if",
+                            "bundle_identifiers": [
+                                "com.google.Chrome"
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+	
+	,
+
+        {
+	    "description": "ctrl+w -> cmd+w in chrome",
+            "manipulators": [
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "w",
+			"modifiers": {
+				"mandatory": [
+					"left_control"
+				]
+			}
+                    },
+                    "to": [
+                        {
+                            "key_code": "w",
+                            "modifiers": [
+				    "left_command"
+				    ]
+                        }
+                    ],
+                    "conditions": [
+                        {
+                            "type": "frontmost_application_if",
+                            "bundle_identifiers": [
+                                "com.google.Chrome"
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+	
+	,
+
+        {
+	    "description": "ctrl+f -> cmd+f in chrome",
+            "manipulators": [
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "f",
+			"modifiers": {
+				"mandatory": [
+					"left_control"
+				]
+			}
+                    },
+                    "to": [
+                        {
+                            "key_code": "f",
+                            "modifiers": [
+				    "left_command"
+				    ]
+                        }
+                    ],
+                    "conditions": [
+                        {
+                            "type": "frontmost_application_if",
+                            "bundle_identifiers": [
+                                "com.google.Chrome"
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+	
+	,
+
+        {
+	    "description": "ctrl+r -> cmd+r in chrome",
+            "manipulators": [
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "r",
+			"modifiers": {
+				"mandatory": [
+					"left_control"
+				]
+			}
+                    },
+                    "to": [
+                        {
+                            "key_code": "r",
+                            "modifiers": [
+				    "left_command"
+				    ]
+                        }
+                    ],
+                    "conditions": [
+                        {
+                            "type": "frontmost_application_if",
+                            "bundle_identifiers": [
+                                "com.google.Chrome"
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+
+    ]
+}
