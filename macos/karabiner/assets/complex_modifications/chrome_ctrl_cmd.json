@@ -11,9 +11,9 @@
                         "key_code": "t",
 			"modifiers": {
 				"mandatory": [
-					"left_control"
+					"control"
 				],
-				"optional": ["any"]
+				"optional": [ "shift" ]
 			}
                     },
                     "to": [
@@ -47,7 +47,7 @@
                         "key_code": "w",
 			"modifiers": {
 				"mandatory": [
-					"left_control"
+					"control"
 				]
 			}
                     },
@@ -82,7 +82,7 @@
                         "key_code": "f",
 			"modifiers": {
 				"mandatory": [
-					"left_control"
+					"control"
 				]
 			}
                     },
@@ -117,7 +117,7 @@
                         "key_code": "r",
 			"modifiers": {
 				"mandatory": [
-					"left_control"
+					"control"
 				]
 			}
                     },
