@@ -35,7 +35,7 @@
                 }
             ]
         }
-	
+
 	,
 
         {
@@ -70,7 +70,7 @@
                 }
             ]
         }
-	
+
 	,
 
         {
@@ -105,7 +105,7 @@
                 }
             ]
         }
-	
+
 	,
 
         {
@@ -124,6 +124,77 @@
                     "to": [
                         {
                             "key_code": "r",
+                            "modifiers": [
+				    "left_command"
+				    ]
+                        }
+                    ],
+                    "conditions": [
+                        {
+                            "type": "frontmost_application_if",
+                            "bundle_identifiers": [
+                                "com.google.Chrome"
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+
+	,
+
+        {
+	    "description": "ctrl++ -> cmd++ in chrome",
+            "manipulators": [
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "equal_sign",
+			"modifiers": {
+				"mandatory": [
+					"control"
+				],
+				"optional": [ "shift" ]
+			}
+                    },
+                    "to": [
+                        {
+                            "key_code": "equal_sign",
+                            "modifiers": [
+				    "left_command"
+				    ]
+                        }
+                    ],
+                    "conditions": [
+                        {
+                            "type": "frontmost_application_if",
+                            "bundle_identifiers": [
+                                "com.google.Chrome"
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+
+	,
+
+        {
+	    "description": "ctrl+- -> cmd+- in chrome",
+            "manipulators": [
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "hyphen",
+			"modifiers": {
+				"mandatory": [
+					"control"
+				]
+			}
+                    },
+                    "to": [
+                        {
+                            "key_code": "hyphen",
                             "modifiers": [
 				    "left_command"
 				    ]
