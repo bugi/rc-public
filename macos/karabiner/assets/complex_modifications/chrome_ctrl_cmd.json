@@ -212,5 +212,75 @@
             ]
         }
 
+	,
+
+        {
+	    "description": "ctrl+c -> cmd+c in chrome",
+            "manipulators": [
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "c",
+			"modifiers": {
+				"mandatory": [
+					"control"
+				]
+			}
+                    },
+                    "to": [
+                        {
+                            "key_code": "c",
+                            "modifiers": [
+				    "left_command"
+				    ]
+                        }
+                    ],
+                    "conditions": [
+                        {
+                            "type": "frontmost_application_if",
+                            "bundle_identifiers": [
+                                "com.google.Chrome"
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+
+	,
+
+        {
+	    "description": "ctrl+v -> cmd+v in chrome",
+            "manipulators": [
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "v",
+			"modifiers": {
+				"mandatory": [
+					"control"
+				]
+			}
+                    },
+                    "to": [
+                        {
+                            "key_code": "v",
+                            "modifiers": [
+				    "left_command"
+				    ]
+                        }
+                    ],
+                    "conditions": [
+                        {
+                            "type": "frontmost_application_if",
+                            "bundle_identifiers": [
+                                "com.google.Chrome"
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+
     ]
 }
