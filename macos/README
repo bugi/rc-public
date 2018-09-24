@@ -1,9 +1,14 @@
-Fix key repeat speed:
-	defaults read -g InitialKeyRepeat # min via gui is 15
-	defaults read -g KeyRepeat # min via gui is 2
-	#
-	defaults write -g InitialKeyRepeat -int 10
-	defaults write -g KeyRepeat -int 1
-	#
-	defaults read -g InitialKeyRepeat
-	defaults read -g KeyRepeat
+---
+
+key bindings:
+  - https://pqrs.org/osx/karabiner/
+
+Fix key repeat speed: |
+  defaults read -g InitialKeyRepeat # min via gui is 15
+  defaults read -g KeyRepeat # min via gui is 2
+  #
+  defaults write -g InitialKeyRepeat -int 10
+  defaults write -g KeyRepeat -int 1
+  #
+  defaults read -g InitialKeyRepeat
+  defaults read -g KeyRepeat
