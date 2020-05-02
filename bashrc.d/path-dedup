@@ -13,7 +13,7 @@ function dedupPath () {
 	# Empty elements are silently turned into explicit "."s.
 	# Eg /sbin:/bin::/usr/bin, the :: having an "empty" in the middle).
 	#
-	local pathOld=( $( echo "$1" | sed 's/^:/.:/ ; s/:$/:./ ; s/::/:.:/g ; s/:/ /g' ) )
+	local pathOld=( $( echo "$1" | sed 's/^:/.:/ ; s/:$/:./ ; s/::/:.:/g ; s,/:,:,g ; s,/$,,g ; s/:/ /g' ) )
 	shift
 	local f
 	local -A paths # if this fails, upgrade your bash
