@@ -229,8 +229,7 @@ done
 
 
 
-terraform_path="$( type -P terraform )"
-if $?
+if terraform_path="$( type -P terraform )"
 then
 	complete -C "$terraform_path" terraform
 fi
