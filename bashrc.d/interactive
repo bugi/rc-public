@@ -236,3 +236,8 @@ then
 fi
 unset terraform_path
 
+if aws_completer_path="$( type -P aws_completer )"
+then
+	complete -C "$aws_completer_path" aws
+fi
+unset aws_completer_path
