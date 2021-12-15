@@ -225,3 +225,14 @@ for f in "$bash_RC_public"/tmux.d/*
 do
 	. "$f"
 done
+
+
+
+
+terraform_path="$( type -P terraform )"
+if $?
+then
+	complete -C "$terraform_path" terraform
+fi
+unset terraform_path
+
