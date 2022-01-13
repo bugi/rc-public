@@ -109,6 +109,7 @@ bash_RC_private="$RC_private/bashrc.d"
 . "$bash_RC_private"/keys
 . "$bash_RC_private"/jobs
 . "$bash_RC_private"/kubectl
+. "$bash_RC_private"/terraform
 . "$bash_RC_private"/brew
 
 # (macports) prioritize gnu utils over bsd utils
