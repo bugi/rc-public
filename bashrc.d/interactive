@@ -137,6 +137,15 @@ then
 		. /etc/bash_completion.d/git-prompt
 		PS1='$(__git_ps1 "git:%s")'"$PS1"
 	fi
+	if [ "$SHELL" = /usr/local/bin/bash ] && [ -d /usr/local/etc/bash_completion.d ]
+	then
+		# probably macos via brew
+		for f in /usr/local/etc/bash_completion.d/*
+		do
+			. "$f"
+		done
+		PS1='$(__git_ps1 "git:%s")'"$PS1"
+	fi
 fi
 
 
