@@ -1,0 +1,19 @@
+#!bash
+# vim:set ft=sh tabstop=2 softtabstop=2 shiftwidth=2 expandtab autoindent copyindent :
+
+# initialize PROMPT_COMMAND and set expectations for its use as an array
+# http://www.gnu.org/savannah-checkouts/gnu/bash/manual/bash.html
+#   If this variable is set, and is an array, the value of each set element
+#   is interpreted as a command to execute before printing the primary prompt
+#   ($PS1). If this is set but not an array variable, its value is used as a
+#   command to execute instead.
+
+
+
+# bash env var PROMPT_COMMAND can be an array, a list of commands to run before issuing each prompt; or can be scalar which will be treated similarly
+
+# Most entries in PROMPT_COMMAND[] should set their own variables, then be incorporated into PS1 separately.
+
+PROMPT_COMMAND_misc_output=
+PROMPT_COMMAND=()
+PROMPT_COMMAND+=( PROMPT_COMMAND_misc_output='' )

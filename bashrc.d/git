@@ -1,0 +1,45 @@
+#!bash
+# vim:set ft=sh tabstop=2 softtabstop=2 shiftwidth=2 expandtab autoindent copyindent :
+
+# canonical git-prompt.sh: https://github.com/git/git/blob/master/contrib/completion/git-prompt.sh
+# a version of which can often be found at one of these locations:
+#   • /etc/bash_completion.d/git
+#   • /usr/local/etc/bash_completion.d/git-prompt.sh
+
+
+# For explanation of these variables look in git-prompt.sh.  They affect the output of __git_ps1().
+# GIT_PS1_SHOWDIRTYSTATE
+# GIT_PS1_SHOWSTASHSTATE
+# GIT_PS1_SHOWUNTRACKEDFILES
+# GIT_PS1_SHOWUPSTREAM
+# GIT_PS1_STATESEPARATOR
+# GIT_PS1_COMPRESSSPARSESTATE
+# GIT_PS1_SHOWUPSTREAM
+# GIT_PS1_DESCRIBE_STYLE
+# GIT_PS1_SHOWCOLORHINTS
+# GIT_PS1_HIDE_IF_PWD_IGNORED
+
+GIT_PS1_SHOWDIRTYSTATE=true
+GIT_PS1_SHOWSTASHSTATE=true
+GIT_PS1_SHOWUNTRACKEDFILES=true
+GIT_PS1_SHOWUPSTREAM="auto"
+GIT_PS1_SHOWCOLORHINTS=true
+GIT_PS1_HIDE_IF_PWD_IGNORED=true
+
+# enable programmable completion features
+for f in "${HOME}/.git-prompt.sh" \
+    /etc/bash_completion \
+    /usr/share/bash-completion/bash_completion \
+    /etc/bash_completion.d/git-prompt \
+    /etc/bash_completion.d/git \
+    /usr/local/etc/bash_completion.d/git-prompt.sh \
+; do
+  if [ -r "$f" ] && ! fn_exists __git_ps1
+  then
+    . "$f"
+  fi
+done
+
+
+__git_ps1_output=
+PROMPT_COMMAND+=( '__git_ps1_output="$(__git_ps1 "git:%s" )"' )

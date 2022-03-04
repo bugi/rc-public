@@ -115,39 +115,7 @@ else
 	PS1=']'
 fi
 
-
-
-# enable programmable completion features (you don't need to enable
-# this, if it's already enabled in /etc/bash.bashrc and /etc/profile
-# sources /etc/bash.bashrc).
-if ! shopt -oq posix
-then
-	if [ $(complete |wc -l) -lt 1 ]
-	then
-		if [ -r /etc/bash_completion ]
-		then
-			. /etc/bash_completion
-		elif [ -r /usr/share/bash-completion/bash_completion ]
-		then
-			. /usr/share/bash-completion/bash_completion
-		fi
-	fi
-	if [ -r /etc/bash_completion.d/git-prompt ]
-	then
-		. /etc/bash_completion.d/git-prompt
-		PS1='$(__git_ps1 "git:%s")'"$PS1"
-	fi
-	if [ "$SHELL" = /usr/local/bin/bash ] && [ -d /usr/local/etc/bash_completion.d ]
-	then
-		# probably macos via brew
-		for f in /usr/local/etc/bash_completion.d/*
-		do
-			. "$f"
-		done
-		PS1='$(__git_ps1 "git:%s")'"$PS1"
-	fi
-fi
-
+PS1='${__git_ps1_output}'"$PS1"
 
 
 if [ "$iam" = "$LOGNAME" ]
