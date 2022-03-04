@@ -106,6 +106,10 @@ bash_RC_private="$RC_private/bashrc.d"
 #	"$(readlink -f "${BASH_SOURCE[0]}" )"
 
 
+. "$RC_public"/00_fn
+. "$RC_public"/00_PROMPT_COMMAND
+. "$RC_public"/00_colors
+. "$RC_public"/git
 . "$bash_RC_private"/keys
 . "$bash_RC_private"/jobs
 . "$bash_RC_private"/kubectl
