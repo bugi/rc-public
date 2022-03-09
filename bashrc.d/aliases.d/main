@@ -43,7 +43,7 @@ alias egrep='egrep --color=auto'
 
 
 #----------- ls BASED -----------
-alias ll='LC_COLLATE=C /bin/ls -l'
+alias ll='LC_COLLATE=C /bin/ls -lh'
 lsd () {
 	local d
 	if [ $# -eq 0 ]
