@@ -133,13 +133,6 @@ done
 
 
 
-if [ "${-/i/}" = "$-" ]	# i is not present in shell options, so is non-interactive
-then
-	PATH="$HOME/usr/bin:$PATH"
-	export PATH
-	return
-fi
-
 
 
 
