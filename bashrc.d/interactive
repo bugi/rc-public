@@ -9,23 +9,7 @@ PS1='>'
 # machine-dependent config
 #
 
-export unameS="${unameS:-$(uname -s)}"
-export unameM="${unameM:-$(uname -m)}"
-
-if [ "${unameM%%/*}" = 9000 ]
-then
-	# treat 9000/715 and 9000/735 as hppa
-	unameM=hppa
-	export unameM
-fi
-
-for x in "$unameS" "$unameM" "$HOSTNAME"
-do
-	if [ -r "$bash_RC_public"/"$x" ]
-	then
-		. "$bash_RC_public"/"$x"
-	fi
-done
+. "${bash_RC_public}/conditional-machine"
 
 
 # not all OSs set LOGNAME and/or USER.  weird.
