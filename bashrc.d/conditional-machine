@@ -1,0 +1,24 @@
+#!bash
+# vim: set ft=sh tabstop=2 softtabstop=2 shiftwidth=2 expandtab autoindent copyindent :
+
+export unameS="${unameS:-$(uname -s)}"
+export unameM="${unameM:-$(uname -m)}"
+
+if [ "${unameM%%/*}" = 9000 ]
+then
+  # treat 9000/715 and 9000/735 as hppa
+  unameM=hppa
+  export unameM
+fi
+
+for x in "$unameS" "$unameM" "$HOSTNAME"
+do
+  X="${BASH_SOURCE[0]}.d/$x"
+  if [ -r "$X" ]
+  then
+    . "$X"
+  fi
+done
+unset x
+unset X
+
