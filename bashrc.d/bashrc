@@ -98,6 +98,12 @@ fi
 
 # from here, assumes bash.  not sh.  not ksh.  not ash.  not zsh.
 
+
+if [ "${-/i/}" = "$-" ] # i is not present in shell options, so is non-interactive
+then
+	return # non-interactive, so we're done here
+fi
+
 RC_public="$HOME/.rc-public"
 RC_private="$HOME/.rc-private"
 bash_RC_public="$RC_public/bashrc.d"
