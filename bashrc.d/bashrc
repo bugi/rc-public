@@ -109,6 +109,72 @@ then
   return # non-interactive, so we're done here
 fi
 
+
+function abspath ()
+{ # like `readlink -f` but should work on BSD, more or less
+  # $1     : relative filename
+  # return : absolute path
+  #   See description of -f in GNU's readlink(1).
+  #   Returns false if it can't resolve the path, true otherwise.
+  #   It can return an empty string along with false.
+  #   Doesn't fully resolve symlinks if the path is a symlink to a file.
+
+  # Best is to simply call GNU's `readlink -f` if it's available.
+  if [ "$(uname -s)" = Linux ]
+  then
+    readlink -f "$1"
+    return
+  elif type greadlink >/dev/null 2>&1
+  then
+    # This is for if you're running OSX and have installed coreutils utilities via homebrew.
+    greadlink -f "$1"
+    return
+  elif readlink -f / >/dev/null 2>&1
+  then
+    readlink -f "$1"
+    return
+  fi
+
+  # The implementation below will not always fully resolve symlinks.
+  # To do so, it would have to safely follow a symlink at the end of the path.
+
+  if [ -d "$1" ]
+  then
+    (cd "$1" && pwd -P )
+    true
+    return
+  elif [[ $1 == /*/* ]]
+  then
+    # This will fail in some cases:
+    #   • "/tmp/foo" symlinked to "/bin/ls" will return "/tmp/foo" (not /usr/bin/ls)
+    echo "$(cd "${1%/*}" && pwd -P)/${1##*/}"
+    true
+    return
+  elif [[ $1 == /* ]]
+  then
+    # This will fail in some cases:
+    #   • "/foo" symlinked to "bin/ls" will return "/foo" (not /usr/bin/ls)
+    echo "$1"
+    true
+    return
+  elif [[ $1 == */* ]]
+  then
+    # This will fail in some cases:
+    #   • "foo/bar" symlinked to "/bin/ls" will return ".../foo" (not /usr/bin/ls)
+    echo "$(cd "${1%/*}" && pwd -P)/${1##*/}"
+    true
+    return
+  else
+    # This will fail in some cases:
+    #   • "foo" symlinked to "/bin/ls" will return "$(pwd)/foo" (not /usr/bin/ls)
+    echo "$(pwd -P)/$1"
+    true
+    return
+  fi
+  false
+}
+
+
 RC_public="$HOME/.rc-public"
 RC_private="$HOME/.rc-private"
 bash_RC_public="$RC_public/bashrc.d"
