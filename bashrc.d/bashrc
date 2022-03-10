@@ -95,15 +95,14 @@ then
 fi
 
 
+#
+# From here on, assumes bash.  not sh.  not ksh.  not ash.  not zsh.
+#
+
 
 #
-#
-#
-
 # From here on is for making interactive sessions bearable.
-
-# from here, assumes bash.  not sh.  not ksh.  not ash.  not zsh.
-
+#
 
 if [ "${-/i/}" = "$-" ] # i is not present in shell options, so is non-interactive
 then
