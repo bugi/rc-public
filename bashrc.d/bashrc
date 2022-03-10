@@ -1,4 +1,5 @@
-# vim:set ft=sh:
+#!bash
+# vim:set ft=sh tabstop=2 softtabstop=2 shiftwidth=2 expandtab autoindent copyindent :
 
 #
 # symlink this file as ~/.bashrc
@@ -17,10 +18,10 @@ umask 022
 # it's a stupid-common rookie mistake.
 if [ -z "$HOSTNAME" -o "${HOSTNAME%.*}" != "$HOSTNAME" ]
 then
-	HOSTNAME="${HOSTNAME:-$(hostname)}"
-	# HOSTNAME="$(hostname)"
-	HOSTNAME="${HOSTNAME%%.*}"
-	export HOSTNAME
+  HOSTNAME="${HOSTNAME:-$(hostname)}"
+  # HOSTNAME="$(hostname)"
+  HOSTNAME="${HOSTNAME%%.*}"
+  export HOSTNAME
 fi
 
 
@@ -28,12 +29,12 @@ fi
 # yeah, java :(
 if [ -d /usr/lib/jvm/java-6-sun ]
 then
-	JAVA_HOME=/usr/lib/jvm/java-6-sun
-	export JAVA_HOME
-	JDK_HOME="${JAVA_HOME}"
-	export JDK_HOME
-	PATH="${JAVA_HOME}/bin:${PATH}"
-	export PATH
+  JAVA_HOME=/usr/lib/jvm/java-6-sun
+  export JAVA_HOME
+  JDK_HOME="${JAVA_HOME}"
+  export JDK_HOME
+  PATH="${JAVA_HOME}/bin:${PATH}"
+  export PATH
 fi
 
 
@@ -51,24 +52,24 @@ export PARINIT
 # path for snap apps
 if [ -d /snap/bin ]
 then
-	PATH="/snap/bin:${PATH}"
+  PATH="/snap/bin:${PATH}"
 fi
 
 # setup for golang: GOPATH and PATH
 if [ -z "$GOPATH" ]
 then
-	if [ -d "$HOME/golang" ]
-	then
-		GOPATH="$HOME/golang"
-	elif [ -d "$HOME/go" ]
-	then
-		GOPATH="$HOME/go"
-	fi
-	export GOPATH
+  if [ -d "$HOME/golang" ]
+  then
+    GOPATH="$HOME/golang"
+  elif [ -d "$HOME/go" ]
+  then
+    GOPATH="$HOME/go"
+  fi
+  export GOPATH
 fi
 if [ -n "$GOPATH" ]
 then
-	PATH="${GOPATH}/bin:${PATH}"
+  PATH="${GOPATH}/bin:${PATH}"
 fi
 
 # my own stuff comes first
@@ -85,7 +86,7 @@ export PATH
 
 if [ -z "$PS1" ] # non-interactive, so we're done here
 then
-	return
+  return
 fi
 
 
@@ -101,7 +102,7 @@ fi
 
 if [ "${-/i/}" = "$-" ] # i is not present in shell options, so is non-interactive
 then
-	return # non-interactive, so we're done here
+  return # non-interactive, so we're done here
 fi
 
 RC_public="$HOME/.rc-public"
@@ -109,19 +110,19 @@ RC_private="$HOME/.rc-private"
 bash_RC_public="$RC_public/bashrc.d"
 bash_RC_private="$RC_private/bashrc.d"
 # or derive from this you must have it relocatable:
-#	"$(readlink -f "${BASH_SOURCE[0]}" )"
+#  "$(readlink -f "${BASH_SOURCE[0]}" )"
 
 
 if [ -d "$HOME"/.oh-my-bash ] && [ -f "$RC_public"/oh-my-bash.rc ]
 then
-	# To enable oh-my-bash, do this:
-	#		git clone git://github.com/ohmybash/oh-my-bash.git ~/.oh-my-bash
+  # To enable oh-my-bash, do this:
+  #    git clone git://github.com/ohmybash/oh-my-bash.git ~/.oh-my-bash
 
-	# For more info on oh-my-bash, see:
-	#		https://ohmybash.nntoan.com/
-	#		https://ohmybash.github.io/
-	#		https://github.com/ohmybash/oh-my-bash
-	. "$RC_public"/oh-my-bash.rc
+  # For more info on oh-my-bash, see:
+  #    https://ohmybash.nntoan.com/
+  #    https://ohmybash.github.io/
+  #    https://github.com/ohmybash/oh-my-bash
+  . "$RC_public"/oh-my-bash.rc
 fi
 
 
@@ -138,10 +139,10 @@ fi
 # (macports) prioritize gnu utils over bsd utils
 for f in /opt/local/bin /opt/local/libexec/gnubin /opt/local/sbin
 do
-	if [ -d "$f" ]
-	then
-		export PATH="$f:$PATH"
-	fi
+  if [ -d "$f" ]
+  then
+    export PATH="$f:$PATH"
+  fi
 done
 
 
