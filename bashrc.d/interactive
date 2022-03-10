@@ -88,25 +88,20 @@ HISTFILESIZE=1000 # defaults to infinite with histappend
 
 
 
-iam="$(id -un)" # NOT the same as $LOGNAME
 
 
-if [ "$iam" != "$LOGNAME" ]
+if [ "$(id -un)" != "$LOGNAME" ]
+	# $(id -un) is not the same as $(id -urn)!
+	# and neither is the same as $LOGNAME in all cases
 then
 	PS1='# '
 	unset IGNOREEOF
 else
 	PS1=']'
-fi
-
-PS1='${__git_ps1_output}'"$PS1"
-
-
-if [ "$iam" = "$LOGNAME" ]
-then
 	: stty -tabs
 fi
 
+PS1='${__git_ps1_output}'"$PS1"
 
 
 
