@@ -1,4 +1,5 @@
-# vim:set ft=sh:
+#!bash
+# vim:set ft=sh tabstop=2 softtabstop=2 shiftwidth=2 expandtab autoindent copyindent :
 
 # I use '>' and '# ' to indicate strange bashrc runs.
 # My normal prompt is ']'.
@@ -15,14 +16,14 @@ PS1='>'
 # not all OSs set LOGNAME and/or USER.  weird.
 if [ -z "$LOGNAME" ]
 then
-	# A given uid can have more than one name.
-	# LOGNAME should be the canonical name.
-	if [ -n "$USER" ]
-	then
-		LOGNAME="$USER"
-	else
-		LOGNAME="$(id -urn)"
-	fi
+  # A given uid can have more than one name.
+  # LOGNAME should be the canonical name.
+  if [ -n "$USER" ]
+  then
+    LOGNAME="$USER"
+  else
+    LOGNAME="$(id -urn)"
+  fi
 fi
 
 
@@ -50,21 +51,21 @@ unset prepath postpath
 #
 
 
-set -o emacs		# non-modal command-line
-set -o noclobber	# don't let ">" overwrite files directly
-set -o ignoreeof	# accidental ^D doesn't logout
-shopt -s checkwinsize	# keep LINES and COLUMNS up to date
+set -o emacs    # non-modal command-line
+set -o noclobber  # don't let ">" overwrite files directly
+set -o ignoreeof  # accidental ^D doesn't logout
+shopt -s checkwinsize  # keep LINES and COLUMNS up to date
 # nullglob breaks completion!
-#	http://www.linuxhorizon.com/2-debian-linux/35d089e575a00342.htm
-# shopt -s nullglob	# matching nothing should return nothing
-shopt -s extglob	# fancy glob patterns
+#  http://www.linuxhorizon.com/2-debian-linux/35d089e575a00342.htm
+# shopt -s nullglob  # matching nothing should return nothing
+shopt -s extglob  # fancy glob patterns
 
 
 # ignore .o and ~ extentions in file completion
 export FIGNORE='.o:~:.svn:.CVS:.git'
 
 
-ulimit -c 0		# if we want core files, we'll ask for core files
+ulimit -c 0    # if we want core files, we'll ask for core files
 
 
 
@@ -91,14 +92,14 @@ HISTFILESIZE=1000 # defaults to infinite with histappend
 
 
 if [ "$(id -un)" != "$LOGNAME" ]
-	# $(id -un) is not the same as $(id -urn)!
-	# and neither is the same as $LOGNAME in all cases
+  # $(id -un) is not the same as $(id -urn)!
+  # and neither is the same as $LOGNAME in all cases
 then
-	PS1='# '
-	unset IGNOREEOF
+  PS1='# '
+  unset IGNOREEOF
 else
-	PS1=']'
-	: stty -tabs
+  PS1=']'
+  : stty -tabs
 fi
 
 PS1='${__git_ps1_output}'"$PS1"
@@ -107,24 +108,24 @@ PS1='${__git_ps1_output}'"$PS1"
 
 for ALIASd in "$bash_RC_public/aliases.d" "$bash_RC_private/aliases.d"
 do
-	if [ -r "$ALIASd/main" ]
-	then
-		. "$ALIASd/main"
-	fi
+  if [ -r "$ALIASd/main" ]
+  then
+    . "$ALIASd/main"
+  fi
 done
 unset ALIASd
 
 
 for f in bm.bash apps
 do
-	if [ -r "$bash_RC_public"/"$f" ]
-	then
-		. "$bash_RC_public"/"$f"
-	fi
-	if [ -r "$bash_RC_private"/"$f" ]
-	then
-		. "$bash_RC_private"/"$f"
-	fi
+  if [ -r "$bash_RC_public"/"$f" ]
+  then
+    . "$bash_RC_public"/"$f"
+  fi
+  if [ -r "$bash_RC_private"/"$f" ]
+  then
+    . "$bash_RC_private"/"$f"
+  fi
 done
 
 
@@ -135,8 +136,8 @@ done
 # mesg n
 if [ "$iam" = "$LOGNAME" ]
 then
-	# mesg y
-	w
+  # mesg y
+  w
 fi
 
 
@@ -145,8 +146,8 @@ fi
 
 if [ ${LANG:-notset} != notset  -a  "$LANG" != 'en_US.UTF-8' ]
 then
-	# if it's set, but not to our favorite, clear it so's to default to C
-	unset LANG LC_COLLATE LC_CTYPE LC_MONETARY LC_NUMERIC LC_TIME LC_MESSAGES LC_ALL
+  # if it's set, but not to our favorite, clear it so's to default to C
+  unset LANG LC_COLLATE LC_CTYPE LC_MONETARY LC_NUMERIC LC_TIME LC_MESSAGES LC_ALL
 fi
 
 
@@ -156,19 +157,19 @@ fi
 
 # If this is an xterm, (try to) keep the TITLE set to user@host:dir
 case "$TERM" in
-	(xterm*|rxvt*)
-	MyTitle=
-	PS1="\[\e]0;"'${MyTitle:-"'"\u@\h: \w"'"'"}\a\]$PS1"
-	if [ -z "$MyTitle" ]
-	then
-		: # MyTitle="$(hostname |cut -c 1)"
-	fi
-	# http://tldp.org/HOWTO/Xterm-Title-3.html
-		#setwindowtitle: echo -ne "\e]2;$*\a"
-		# ESC]0;stringBEL -- Set icon name and window title to string
-	;;
-	(*)
-	;;
+  (xterm*|rxvt*)
+  MyTitle=
+  PS1="\[\e]0;"'${MyTitle:-"'"\u@\h: \w"'"'"}\a\]$PS1"
+  if [ -z "$MyTitle" ]
+  then
+    : # MyTitle="$(hostname |cut -c 1)"
+  fi
+  # http://tldp.org/HOWTO/Xterm-Title-3.html
+    #setwindowtitle: echo -ne "\e]2;$*\a"
+    # ESC]0;stringBEL -- Set icon name and window title to string
+  ;;
+  (*)
+  ;;
 esac
 
 
@@ -184,12 +185,12 @@ export HOME="$(pwd)" # so dirs shows ~s even through symlinks
 
 if terraform_path="$( type -P terraform )"
 then
-	complete -C "$terraform_path" terraform
+  complete -C "$terraform_path" terraform
 fi
 unset terraform_path
 
 if aws_completer_path="$( type -P aws_completer )"
 then
-	complete -C "$aws_completer_path" aws
+  complete -C "$aws_completer_path" aws
 fi
 unset aws_completer_path
