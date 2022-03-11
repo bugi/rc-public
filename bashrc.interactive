@@ -1,0 +1,61 @@
+#!bash
+# vim:set ft=sh tabstop=2 softtabstop=2 shiftwidth=2 expandtab autoindent copyindent :
+
+
+RC_public="$HOME/.rc-public"
+RC_private="$HOME/.rc-private"
+bash_RC_public="$RC_public/bashrc.d"
+bash_RC_private="$RC_private/bashrc.d"
+# or derive from this you must have it relocatable:
+#  "$(readlink -f "${BASH_SOURCE[0]}" )"
+# echo "${BASH_SOURCE[0]}"
+# echo == "$(readlink -f "${BASH_SOURCE[0]}" )"
+# echo == "$(abspath "${BASH_SOURCE[0]}" )"
+
+
+if [ -d "$HOME"/.oh-my-bash ] && [ -f "$RC_public"/oh-my-bash.rc ]
+then
+  # To enable oh-my-bash, do this:
+  #    git clone git://github.com/ohmybash/oh-my-bash.git ~/.oh-my-bash
+
+  # For more info on oh-my-bash, see:
+  #    https://ohmybash.nntoan.com/
+  #    https://ohmybash.github.io/
+  #    https://github.com/ohmybash/oh-my-bash
+  . "$RC_public"/oh-my-bash.rc
+fi
+
+
+. "$bash_RC_public"/00_fn
+. "$bash_RC_public"/00_PROMPT_COMMAND
+. "$bash_RC_public"/00_colors
+. "$bash_RC_public"/git
+. "$bash_RC_private"/keys
+. "$bash_RC_private"/jobs
+. "$bash_RC_private"/kubectl
+. "$bash_RC_private"/terraform
+. "$bash_RC_private"/brew
+
+# (macports) prioritize gnu utils over bsd utils
+for f in /opt/local/bin /opt/local/libexec/gnubin /opt/local/sbin
+do
+  if [ -d "$f" ]
+  then
+    export PATH="$f:$PATH"
+  fi
+done
+
+
+
+
+
+
+
+#
+# put interactive parts below here
+#
+
+
+
+
+. "$bash_RC_public"/interactive
