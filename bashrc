@@ -116,7 +116,6 @@ function abspath ()
   #   See description of -f in GNU's readlink(1).
   #   Returns false if it can't resolve the path, true otherwise.
   #   It can return an empty string along with false.
-  #   Doesn't fully resolve symlinks if the path is a symlink to a file.
 
   # Best is to simply call GNU's `readlink -f` if it's available.
   if [ "$(uname -s)" = Linux ]
@@ -133,45 +132,19 @@ function abspath ()
     readlink -f "$1"
     return
   fi
-
-  # The implementation below will not always fully resolve symlinks.
-  # To do so, it would have to safely follow a symlink at the end of the path.
-
-  if [ -d "$1" ]
-  then
-    (cd "$1" && pwd -P )
-    true
-    return
-  elif [[ $1 == /*/* ]]
-  then
-    # This will fail in some cases:
-    #   • "/tmp/foo" symlinked to "/bin/ls" will return "/tmp/foo" (not /usr/bin/ls)
-    echo "$(cd "${1%/*}" && pwd -P)/${1##*/}"
-    true
-    return
-  elif [[ $1 == /* ]]
-  then
-    # This will fail in some cases:
-    #   • "/foo" symlinked to "bin/ls" will return "/foo" (not /usr/bin/ls)
-    echo "$1"
-    true
-    return
-  elif [[ $1 == */* ]]
-  then
-    # This will fail in some cases:
-    #   • "foo/bar" symlinked to "/bin/ls" will return ".../foo" (not /usr/bin/ls)
-    echo "$(cd "${1%/*}" && pwd -P)/${1##*/}"
-    true
-    return
-  else
-    # This will fail in some cases:
-    #   • "foo" symlinked to "/bin/ls" will return "$(pwd)/foo" (not /usr/bin/ls)
-    echo "$(pwd -P)/$1"
-    true
-    return
-  fi
-  false
 }
 
-. "$( abspath "${BASH_SOURCE[0]}" )".interactive
+f="$( abspath "${BASH_SOURCE[0]}" )".interactive
+if [ $? -ne 0 ]
+then
+  echo "readlink/greadlink -f doesn't work properly." 1>&2
+  return
+fi
+if ! [ -r "$f" ]
+then
+  echo "The file '$f' does not exist." 1>&2
+  return
+fi
+
+. "$f"
 
