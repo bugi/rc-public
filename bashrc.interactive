@@ -49,13 +49,12 @@ done
 
 
 
+# read all files in bashrc.d/
+declare bashdotd_filenames=()
+mapfile -d $'\0' bashdotd_filenames < <( find "${bash_RC_public}/" -maxdepth 1 -type f ! -name \*.sw? -print0 | LC_ALL=C sort -z )
+for bashdotd_filename in "${bashdotd_filenames[@]}"
+do
+  : # if [ -r "$bashdotd_filename" ] ; then . "$bashdotd_filename" ; fi
+done
+unset bashdotd_filename bashdotd_filenames
 
-
-#
-# put interactive parts below here
-#
-
-
-
-
-. "$bash_RC_public"/interactive
