@@ -32,31 +32,25 @@ function _abspath_the_hard_way ()
   then
     (cd "$1" && pwd -P )
     return
-
   elif [[ $1 == /*/* ]]
   then
     echo "$(cd "${1%/*}" && pwd -P)/${bn}"
     return
-
   elif [[ $1 == /* ]]
   then
     echo "/$bn"
     return
-
   elif [[ $1 == ./* ]]
   then
     echo "$(pwd -P)/$bn"
     return
-
   elif [[ $1 == */* ]]
   then
     echo "$(cd "${1%/*}" && pwd -P)/$bn"
     return
-
   else
     echo "$(pwd -P)/$bn"
     return
-
   fi
 
   false
