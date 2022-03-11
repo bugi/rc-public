@@ -1,4 +1,5 @@
-# vim:set ft=sh:
+#!bash
+# vim:set ft=sh tabstop=2 softtabstop=2 shiftwidth=2 expandtab autoindent copyindent :
 
 #
 # app-specific configs
@@ -22,40 +23,40 @@ export PGPPATH="$HOME"/mail/.pgppath
 
 for f in $( find "$HOME"/usr/bin/ -name '*.completion' )
 do
-	# (use find to avoid dancing around bash's unfortunate nullglob behavior; "shopt -s nullglob" should be the default)
-	. "$f"
+  # (use find to avoid dancing around bash's unfortunate nullglob behavior; "shopt -s nullglob" should be the default)
+  . "$f"
 done
 
 if [ $(which git |wc -l) -ge 1 ]
 then
-	if [ ! -e "$bash_RC_public"/git-flow-completion.bash ]
-	then
-		(cd "$bash_RC_public" && . git-flow-completion.bash.README )
-	fi
-	if [ -r "$bash_RC_public"/git-flow-completion.bash ]
-	then
-		. "$bash_RC_public"/git-flow-completion.bash
-	fi
+  if [ ! -e "$bash_RC_public"/git-flow-completion.bash ]
+  then
+    (cd "$bash_RC_public" && . git-flow-completion.bash.README )
+  fi
+  if [ -r "$bash_RC_public"/git-flow-completion.bash ]
+  then
+    . "$bash_RC_public"/git-flow-completion.bash
+  fi
 fi
 
 if [ -d /etc/salt/. ]
 then
-	if [ ! -e "$bash_RC_public"/salt_bash_completion ]
-	then
-		(cd "$bash_RC_public" && . salt_bash_completion.README )
-	fi
-	if [ -r "$bash_RC_public"/salt_bash_completion ]
-	then
-		. "$bash_RC_public"/salt_bash_completion
-	fi
+  if [ ! -e "$bash_RC_public"/salt_bash_completion ]
+  then
+    (cd "$bash_RC_public" && . salt_bash_completion.README )
+  fi
+  if [ -r "$bash_RC_public"/salt_bash_completion ]
+  then
+    . "$bash_RC_public"/salt_bash_completion
+  fi
 fi
 
 for f in /usr/share/doc/tmux/examples/bash_completion_tmux.sh
 do
-	if [ -f "$f" ]
-	then
-		. "$f"
-	fi
+  if [ -f "$f" ]
+  then
+    . "$f"
+  fi
 done
 
 
@@ -63,10 +64,10 @@ done
 
 if [ -x /usr/bin/ispell ]
 then
-	export ISPELL=/usr/bin/ispell
+  export ISPELL=/usr/bin/ispell
 elif [ -x /usr/local/bin/ispell ]
 then
-	export ISPELL=/usr/local/bin/ispell
+  export ISPELL=/usr/local/bin/ispell
 fi
 
 
@@ -74,9 +75,9 @@ fi
 export GREP_OPTIONS='--exclude-dir=.git --exclude-dir=.hg --exclude-dir=.svn'
 if [ -x /usr/bin/grep ]
 then
-	alias grep="/usr/bin/grep $GREP_OPTIONS"
+  alias grep="/usr/bin/grep $GREP_OPTIONS"
 elif [ -x /bin/grep ]
 then
-	alias grep="/bin/grep $GREP_OPTIONS"
+  alias grep="/bin/grep $GREP_OPTIONS"
 fi
 unset GREP_OPTIONS
