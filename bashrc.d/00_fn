@@ -9,6 +9,101 @@ fn_exists ()
   fi
 }
 
+function _abspath_the_hard_way ()
+{ # like gnu's `readlink -f` but should work on BSD, more or less
+  # assumes running under bash
+  # $1     : absolute or relative filename
+  # return : absolute path
+  #   See description of -f in GNU's readlink(1).
+  #   Returns false if it can't resolve the path, true otherwise.
+  #   It can return an empty string along with false.
+  #   Doesn't fully resolve symlinks if the path is a symlink to a file.
+
+  # The implementation below will not always fully resolve symlinks.
+  # To do so, it would have to safely follow a symlink at the end of the path.
+
+  local bn
+  bn="$(readlink "$1")"
+  if [ $? -ne 0 ] # if is not a symlink
+  then
+    bn="$(basename "$1")"
+  fi
+
+echo "1:'$1'" 1>&2
+
+echo hi 0 1>&2
+  if [ -d "$1" ]
+  then
+echo hi 10 1>&2
+    (cd "$1" && pwd -P )
+    true
+    return
+
+  elif [[ $1 == /*/* ]]
+  then
+echo hi 20 1>&2
+    # This will fail in some cases:
+    #   • "/tmp/foo" symlinked to "/bin/ls" will return "/tmp/foo" (not /usr/bin/ls)
+echo "${1%/*}" 1>&2
+    echo "$(cd "${1%/*}" && pwd -P)/${bn}"
+    true
+    return
+
+  elif [[ $1 == /* ]]
+  then
+echo hi 30 1>&2
+    # This will fail in some cases:
+    #   • "/foo" symlinked to "bin/ls" will return "/foo" (not /usr/bin/ls)
+    echo "$1"
+    true
+    return
+
+  elif [[ $1 == ./* ]]
+  then
+echo hi 50 1>&2
+    # This will fail in some cases:
+    #   • "foo" symlinked to "/bin/ls" will return "$(pwd)/foo" (not /usr/bin/ls)
+    if [ -L "$1" ]
+    then
+      # todo: detect infinite recursion
+      abspath "$bn"
+      return
+    else
+      echo "$(pwd -P)/$bn"
+      return
+    fi
+
+  elif [[ $1 == */* ]]
+  then
+echo hi 40 1>&2
+    # This will fail in some cases:
+    #   • "foo/bar" symlinked to "/bin/ls" will return ".../foo" (not /usr/bin/ls)
+    echo "$(cd "${1%/*}" && pwd -P)/$bn"
+    true
+    return
+
+  elif true
+  then
+echo hi 50 1>&2
+    # This will fail in some cases:
+    #   • "foo" symlinked to "/bin/ls" will return "$(pwd)/foo" (not /usr/bin/ls)
+    if [ -L "$1" ]
+    then
+      readlink "$1"
+      return
+    else
+      echo "$(pwd -P)/$1"
+      return
+    fi
+
+  else :
+  fi
+
+echo hi 60 1>&2
+  false
+}
+
+
 function abspath ()
 { # like `readlink -f` but should work on BSD, more or less
   # $1     : relative filename
