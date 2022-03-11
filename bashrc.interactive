@@ -27,8 +27,8 @@ fi
 
 
 . "$bash_RC_public"/00_fn
-. "$bash_RC_public"/00_PROMPT_COMMAND
-. "$bash_RC_public"/00_colors
+. "$bash_RC_public"/01_colors
+. "$bash_RC_public"/02_PROMPT_COMMAND
 . "$bash_RC_public"/git
 . "$bash_RC_private"/keys
 . "$bash_RC_private"/jobs
