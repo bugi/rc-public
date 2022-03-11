@@ -10,17 +10,10 @@ fn_exists ()
 }
 
 function _abspath_the_hard_way ()
-{ # like gnu's `readlink -f` but should work on BSD, more or less
+{ # See _abspath() for the rest of an implementation of something like GNU's `readlink -f`.
   # assumes running under bash
   # $1     : absolute or relative filename
-  # return : absolute path
-  #   See description of -f in GNU's readlink(1).
-  #   Returns false if it can't resolve the path, true otherwise.
-  #   It can return an empty string along with false.
-  #   Doesn't fully resolve symlinks if the path is a symlink to a file.
-
-  # The implementation below will not always fully resolve symlinks.
-  # To do so, it would have to safely follow a symlink at the end of the path.
+  # return : absolute path, sort of
 
   local bn
   bn="$(readlink "$1")"
@@ -70,7 +63,7 @@ function _abspath_the_hard_way ()
 }
 
 function _abspath ()
-{ # _abspath_avoid_inf_recursion
+{
   local x="$(sed -r 's,//+,/,g ; s,/[.]/,/,g' <<<"$1" )"
   local y="$(_abspath_the_hard_way "$x" | sed -r 's,//+,/,g ; s,/[.]/,/,g' )"
   while [ "$x" != "$y" ]
@@ -90,7 +83,6 @@ function abspath ()
   #   See description of -f in GNU's readlink(1).
   #   Returns false if it can't resolve the path, true otherwise.
   #   It can return an empty string along with false.
-  #   Doesn't fully resolve symlinks if the path is a symlink to a file.
 
   case "$_abspath_mechanism" in
   (readlink_f) readlink -f "$1" ; return ;;
