@@ -2,8 +2,8 @@
 # vim:set ft=sh tabstop=2 softtabstop=2 shiftwidth=2 expandtab autoindent copyindent :
 
 fn_exists ()
-{
-  if [ -n "$(LC_ALL=C type -t "$1")" ] && [ "$(LC_ALL=C type -t "$1")" = function ]
+{ # Does $1 exist as a function?
+  if [ "$(LC_ALL=C type -t "$1")" = function ]
   then return 0
   else return 1
   fi
