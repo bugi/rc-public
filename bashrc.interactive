@@ -58,3 +58,5 @@ do
 done
 unset bashdotd_filename bashdotd_filenames
 
+. "$bash_RC_public"/interactive
+
