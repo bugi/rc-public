@@ -1,6 +1,9 @@
+#!bash
+# vim:set ft=sh tabstop=2 softtabstop=2 shiftwidth=2 expandtab autoindent copyindent :
+
 function _TMUX_complete () {
-	local cur prev
-	_get_comp_words_by_ref cur prev
-	COMPREPLY=( $( compgen -W "$(TMUX ls |sed 's/:.*//')" -- "$cur" ) )
-	}
+  local cur prev
+  _get_comp_words_by_ref cur prev
+  COMPREPLY=( $( compgen -W "$(TMUX ls |sed 's/:.*//')" -- "$cur" ) )
+  }
 complete -F _TMUX_complete TMUX

@@ -1,4 +1,6 @@
-# vim: set ft=sh:
+#!bash
+# vim:set ft=sh tabstop=2 softtabstop=2 shiftwidth=2 expandtab autoindent copyindent :
+
 
 # safety first
 alias cp='cp -i'
@@ -12,16 +14,16 @@ alias z=suspend
 
 if [ -z "$ALIASd" ]
 then
-	ALIASd="$(dirname "$( readlink -f "${BASH_SOURCE[0]}" )" )"
+  ALIASd="$(dirname "$( readlink -f "${BASH_SOURCE[0]}" )" )"
 fi
 
 
 for x in dirs ssh jobs dev "$unameS" "$HOSTNAME"
 do
-	if [ -r "$ALIASd"/"$x" ]
-	then
-		. "$ALIASd"/"$x"
-	fi
+  if [ -r "$ALIASd"/"$x" ]
+  then
+    . "$ALIASd"/"$x"
+  fi
 done
 
 
@@ -32,8 +34,8 @@ alias mroe='more'
 alias jbos=jobs
 alias R='more [Rr][Ee][Aa][Dd]{,_,.}[Mm][Ee]*'
 spel () {
-	echo "$@" | aspell -a
-	}
+  echo "$@" | aspell -a
+  }
 
 # colorize grep
 alias grep='grep --color=auto'
@@ -45,24 +47,24 @@ alias egrep='egrep --color=auto'
 #----------- ls BASED -----------
 alias ll='LC_COLLATE=C /bin/ls -lh'
 lsd () {
-	local d
-	if [ $# -eq 0 ]
-	then
-		d=.
-	else
-		d="$*"
-	fi
-	if [ $# -eq 1 ]
-	then
-		pushd $d > /dev/null
-		d=.
-	fi
-	LC_COLLATE=C /bin/ls -Cd $( find $d -type d -maxdepth 1 | sed 's:^\./::' )
-	if [ $# -eq 1 ]
-	then
-		popd > /dev/null
-	fi
-	}
+  local d
+  if [ $# -eq 0 ]
+  then
+    d=.
+  else
+    d="$*"
+  fi
+  if [ $# -eq 1 ]
+  then
+    pushd $d > /dev/null
+    d=.
+  fi
+  LC_COLLATE=C /bin/ls -Cd $( find $d -type d -maxdepth 1 | sed 's:^\./::' )
+  if [ $# -eq 1 ]
+  then
+    popd > /dev/null
+  fi
+  }
 
 
 
@@ -74,21 +76,21 @@ alias ]cd=cd   # for copy-paste
 
 # alias lc='for f in *; do mv -f $f $(echo $f | tr A-Z a-z ) ; done'
 lc () { # rename all listed files to be fully lower-case
-	local f
-	for f in "$@"
-	do
-		mv -f "$f" $(echo "$f" | tr A-Z a-z )
-	done
-	}
+  local f
+  for f in "$@"
+  do
+    mv -f "$f" $(echo "$f" | tr A-Z a-z )
+  done
+  }
 
 
 genpasswd() {
-	# or use pwgen
-	local l=$1
-	[ "$l" == "" ] && l=20
-	# the empty xargs is here on pupose
-	tr -dc A-Za-z0-9_ < /dev/urandom | head -c ${l} | xargs
-	}
+  # or use pwgen
+  local l=$1
+  [ "$l" == "" ] && l=20
+  # the empty xargs is here on pupose
+  tr -dc A-Za-z0-9_ < /dev/urandom | head -c ${l} | xargs
+  }
 
 
 # an "alert" alias for long running commands.  Use like so:
@@ -99,7 +101,7 @@ alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo
 
 
 setWindowTitle() {
-	MyTitle="$*" # for persistence, in cooperation with PS1
-	# echo -ne "\e]2;$*\a"
-	echo -ne "\e]2;$MyTitle\a"
-	}
+  MyTitle="$*" # for persistence, in cooperation with PS1
+  # echo -ne "\e]2;$*\a"
+  echo -ne "\e]2;$MyTitle\a"
+  }

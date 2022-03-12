@@ -1,18 +1,21 @@
+#!bash
+# vim:set ft=sh tabstop=2 softtabstop=2 shiftwidth=2 expandtab autoindent copyindent :
+
 function mack () {
-	# find the closest make file, in this directory or upwards
-	# (stopping if we hit $HOME)
-	# and run make with it
-	local d="$(readlink -f .)"	# current directory, fully expanded
-	local home="$(readlink -f ~/.)"	# home directory, fully expanded
-	while [ "$d" != / -a "$d" != "$home" ]	# stop looking if we hit home directory or /
-	do
-		if [ -r "$d/Makefile" ]
-		then
-			echo "===>$d"
-			(cd "$d" && make "$@")
-			return
-		fi
-		d="${d%/*}"
-		echo not:$d
-	done
-	}
+  # find the closest make file, in this directory or upwards
+  # (stopping if we hit $HOME)
+  # and run make with it
+  local d="$(readlink -f .)"  # current directory, fully expanded
+  local home="$(readlink -f ~/.)"  # home directory, fully expanded
+  while [ "$d" != / -a "$d" != "$home" ]  # stop looking if we hit home directory or /
+  do
+    if [ -r "$d/Makefile" ]
+    then
+      echo "===>$d"
+      (cd "$d" && make "$@")
+      return
+    fi
+    d="${d%/*}"
+    echo not:$d
+  done
+  }
