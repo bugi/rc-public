@@ -1,58 +1,60 @@
-# vim:set ft=sh:
+#!bash
+# vim:set ft=sh tabstop=2 softtabstop=2 shiftwidth=2 expandtab autoindent copyindent :
+
 
 
 #----------- DIRS -----------
 
 function d () {
-	echo # to visually separate from prompt, which likely also includes the current path
-	dirs -v
-	echo # to visually separate from prompt, which likely also includes the current path
-	}
+  echo # to visually separate from prompt, which likely also includes the current path
+  dirs -v
+  echo # to visually separate from prompt, which likely also includes the current path
+  }
 
 function pd () {
-	if [ $# -eq 1 -a -z "$( echo "$1" |sed 's/^[0-9]*$//g' )" ]
-	then
-		pushd +"$1" >/dev/null
-	else
-		pushd "$@" >/dev/null
-	fi
-	d
-	}
+  if [ $# -eq 1 -a -z "$( echo "$1" |sed 's/^[0-9]*$//g' )" ]
+  then
+    pushd +"$1" >/dev/null
+  else
+    pushd "$@" >/dev/null
+  fi
+  d
+  }
 function pd- () {
-	pd -1
-	}
+  pd -1
+  }
 
-alias diirs='DIRS'	# or 'dirs -v' in a pinch
-alias dirss='DIRS'	# or 'dirs -v' in a pinch
+alias diirs='DIRS'  # or 'dirs -v' in a pinch
+alias dirss='DIRS'  # or 'dirs -v' in a pinch
 
 function PUSHD () {
-	pushd "$@" >/dev/null
-	echo
-	diirs
-	}
+  pushd "$@" >/dev/null
+  echo
+  diirs
+  }
 
 function POPD () {
-	popd "$@" >/dev/null
-	echo
-	diirs
-	}
+  popd "$@" >/dev/null
+  echo
+  diirs
+  }
 
 function UP () {
-	local n=1
-	if [ -n "$1" ]
-	then
-		n="$1" ; shift
-	fi
-	PUSHD +$n
-	}
+  local n=1
+  if [ -n "$1" ]
+  then
+    n="$1" ; shift
+  fi
+  PUSHD +$n
+  }
 
 function DOWN () {
-	local n=1
-	if [ -n "$1" ]
-	then
-		n="$1" ; shift
-	fi
-	n=$(( n - 1 ))
-	PUSHD -$n
-	}
+  local n=1
+  if [ -n "$1" ]
+  then
+    n="$1" ; shift
+  fi
+  n=$(( n - 1 ))
+  PUSHD -$n
+  }
 alias Down=DOWN

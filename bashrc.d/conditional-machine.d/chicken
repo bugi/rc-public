@@ -1,10 +1,12 @@
-# vim:set ft=sh:
+#!bash
+# vim:set ft=sh tabstop=2 softtabstop=2 shiftwidth=2 expandtab autoindent copyindent :
+
 
 if [ "$HOSTNAME" =  chicken ]
 then
-	:
-	# prepath=/usr/local/xfree4.0/bin
-	# prepath=/usr/local/xfree-4.0.1/bin
-	# postpath=/usr/bin/X11:/usr/local/soffice/program
-	# postpath=/usr/local/xfree-4.0.1/bin:$postpath
+  :
+  # prepath=/usr/local/xfree4.0/bin
+  # prepath=/usr/local/xfree-4.0.1/bin
+  # postpath=/usr/bin/X11:/usr/local/soffice/program
+  # postpath=/usr/local/xfree-4.0.1/bin:$postpath
 fi
