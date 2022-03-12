@@ -176,7 +176,7 @@ esac
 
 export HOME="$(pwd)" # so dirs shows ~s even through symlinks
 
-. "$bash_RC_public"/path-dedup
+. "$bash_RC_public"/z99_path-dedup
 
 . "$bash_RC_public"/tmux
 
