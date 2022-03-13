@@ -27,6 +27,7 @@ function dedupPath () {
 #       # include dirs that are mounted only sometimes.
 #       pathNew+=( "$f" )
 #     fi
+    pathNew+=( "$f" )
     fi
   done
   echo "${pathNew[@]}" | sed 's/ /:/g'
