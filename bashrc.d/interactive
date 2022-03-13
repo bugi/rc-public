@@ -106,6 +106,15 @@ PS1='${__git_ps1_output}'"$PS1"
 
 
 
+for ALIAS in "$bash_RC_public/aliases" "$bash_RC_private/aliases"
+do
+  if [ -r "$ALIAS" ]
+  then
+    . "$ALIAS"
+  fi
+done
+unset ALIAS
+
 for ALIASd in "$bash_RC_public/aliases.d" "$bash_RC_private/aliases.d"
 do
   if [ -r "$ALIASd/main" ]
