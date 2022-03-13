@@ -12,12 +12,7 @@ alias ls='LC_COLLATE=C /bin/ls -CF'
 alias r='fc -s'
 alias z=suspend
 
-if [ -z "$ALIASd" ]
-then
-  ALIASd="$(dirname "$( readlink -f "${BASH_SOURCE[0]}" )" )"
-fi
-
-
+ALIASd="${BASH_SOURCE[0]}.d"
 for x in dirs ssh jobs dev "$unameS" "$HOSTNAME"
 do
   if [ -r "$ALIASd"/"$x" ]
