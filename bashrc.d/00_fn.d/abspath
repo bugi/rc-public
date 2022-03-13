@@ -1,0 +1,104 @@
+#!bash
+# vim:set ft=sh tabstop=2 softtabstop=2 shiftwidth=2 expandtab autoindent copyindent :
+
+function _abspath_the_hard_way ()
+{ # See _abspath() for the rest of an implementation of something like GNU's `readlink -f`.
+  # assumes running under bash
+  # $1     : absolute or relative filename
+  # return : absolute path, sort of
+
+  local bn
+  bn="$(readlink "$1")"
+  if [ $? -ne 0 ] # if is not a symlink
+  then
+    bn="$(basename "$1")"
+  else
+    if [ -z "${bn%%/*}" ] # if linked-to starts with a /
+    then
+      echo "$bn"
+      return
+    fi
+  fi
+
+  if [ -d "$1" ]
+  then
+    (cd "$1" && pwd -P )
+    return
+  elif [[ $1 == /*/* ]]
+  then
+    echo "$(cd "${1%/*}" && pwd -P)/${bn}"
+    return
+  elif [[ $1 == /* ]]
+  then
+    echo "/$bn"
+    return
+  elif [[ $1 == ./* ]]
+  then
+    echo "$(pwd -P)/$bn"
+    return
+  elif [[ $1 == */* ]]
+  then
+    echo "$(cd "${1%/*}" && pwd -P)/$bn"
+    return
+  else
+    echo "$(pwd -P)/$bn"
+    return
+  fi
+
+  false
+}
+
+function _abspath ()
+{
+  local x="$(sed -r 's,//+,/,g ; s,/[.]/,/,g' <<<"$1" )"
+  local y="$(_abspath_the_hard_way "$x" | sed -r 's,//+,/,g ; s,/[.]/,/,g' )"
+  while [ "$x" != "$y" ]
+  do
+    x="$(sed -r 's,//+,/,g ; s,/[.]/,/,g' <<<"$y" )"
+    y="$(_abspath_the_hard_way "$x")"
+  done
+  echo "$y"
+}
+
+
+_abspath_mechanism=  # optimize to detect underlying mechanism only once
+function abspath ()
+{ # like `readlink -f` but should work on BSD, more or less
+  # $1     : relative filename
+  # return : absolute path
+  #   See description of -f in GNU's readlink(1).
+  #   Returns false if it can't resolve the path, true otherwise.
+  #   It can return an empty string along with false.
+
+  case "$_abspath_mechanism" in
+  (readlink_f) readlink -f "$1" ; return ;;
+  (greadlink_f) greadlink -f "$1" ; return ;;
+  (_abspath) _abspath "$1" ; return ;;
+  esac
+
+  # Best is to simply call GNU's `readlink -f` if it's available.
+  if [ "$(uname -s)" = Linux ]
+  then
+    _abspath_mechanism=readlink_f
+    readlink -f "$1"
+    return
+  elif type greadlink >/dev/null 2>&1
+  then
+    # This is for if you're running OSX and have installed coreutils utilities via homebrew.
+    _abspath_mechanism=greadlink_f
+    greadlink -f "$1"
+    return
+  elif readlink -f / >/dev/null 2>&1
+  then
+    # Maybe you're running a non-Linux system that has a GNU readlink?
+    _abspath_mechanism=readlink_f
+    readlink -f "$1"
+    return
+  else
+    _abspath_mechanism=_abspath
+    _abspath "$1"
+    return
+  fi
+
+}
+
