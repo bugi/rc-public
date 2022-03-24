@@ -49,6 +49,7 @@ function gan {
   local k="$1" ; shift
   local v="$( eval echo "${_BM_["$k"]}" )"
   cd "$v"
+  dirs -v |head -1 |sed 's/^ *[0-9][0-9]*  *//'  # show the newly current directory
   }
 
 # lsbm - list the bookmarks
@@ -77,7 +78,7 @@ function lsbm {
       v="${_BM_["$k"]}"
       echo "$k  $v"
     fi
-  done
+  done | column -t -s ' '
   }
 
 # rmbm - remove the referenced bookmark
