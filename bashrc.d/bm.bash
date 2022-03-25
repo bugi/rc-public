@@ -6,7 +6,6 @@
 #
 
 declare -A _BM_=()
-unset -f go
 
 # bm - set bookmark for current directory
 # arg is boomark name
@@ -27,7 +26,7 @@ function wend {
   }
 
 # wend - go to the directory referenced by the given bookmark
-# changed from "go" to "wend" because of golang
+# "wend" used to be "go", but then golang colonized the name.
 # arg is boomark name
 # second and further args are optional
 # "wend" because that is (or was) the present tense of "went"
@@ -50,6 +49,7 @@ function gan {
   local k="$1" ; shift
   local v="$( eval echo "${_BM_["$k"]}" )"
   cd "$v"
+  dirs -v |head -1 |sed 's/^ *[0-9][0-9]*  *//'  # show the newly current directory
   }
 
 # lsbm - list the bookmarks
@@ -78,7 +78,7 @@ function lsbm {
       v="${_BM_["$k"]}"
       echo "$k  $v"
     fi
-  done
+  done | column -t -s ' '
   }
 
 # rmbm - remove the referenced bookmark
