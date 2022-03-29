@@ -52,6 +52,15 @@ function gan {
   dirs -v |head -1 |sed 's/^ *[0-9][0-9]*  *//'  # show the newly current directory
   }
 
+function _bm_complete ()
+{
+  COMPREPLY=( $( compgen -W "${!_BM_[*]}" -- "${COMP_WORDS[COMP_CWORD]}" ) )
+  true
+}
+shopt -s progcomp
+complete -F _bm_complete gan
+complete -F _bm_complete wend
+
 # lsbm - list the bookmarks
 # optional arg restricts the beginning of the list
 # so, 'lsbm h' would list home, but not foo
