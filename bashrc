@@ -124,7 +124,7 @@ function abspath ()
     return
   elif type greadlink >/dev/null 2>&1
   then
-    # This is for if you're running OSX and have installed coreutils utilities via homebrew.
+    # This is for if you're running OSX (uname -s = Darwin) and have installed coreutils utilities via homebrew.
     greadlink -f "$1"
     return
   elif readlink -f / >/dev/null 2>&1
