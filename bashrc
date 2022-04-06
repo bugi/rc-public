@@ -132,7 +132,21 @@ function abspath ()
     readlink -f "$1"
     return
   fi
+  echo "Naive implementation of abspath failed." 1>&2
+  false
 }
+
+if ! abspath / >/dev/null 2>&1
+then
+  export PS1="(abspath fail)$PS1"
+  echo "I couldn't implement abspath with readlink -f, so giving up on fancy interactive settings." 1>&2
+  if [ "$(uname -s)" = Darwin ]
+  then
+    echo "For macos, you should brew install coreutils." 1>&2
+    echo "Or use a real unix, like linux. }-:)" 1>&2
+  fi
+  return
+fi
 
 f="$( abspath "${BASH_SOURCE[0]}" )".interactive
 if [ $? -ne 0 ]
