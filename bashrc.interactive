@@ -49,6 +49,5 @@ done
 . "$bash_RC_private"/keys
 . "$bash_RC_private"/jobs
 . "$bash_RC_private"/kubectl
-. "$bash_RC_private"/terraform
 . "$bash_RC_private"/brew
 
