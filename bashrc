@@ -109,46 +109,10 @@ then
   return # non-interactive, so we're done here
 fi
 
-function abspath ()
-{ # like `readlink -f` but should work on BSD, more or less
-  # $1     : relative filename
-  # return : absolute path
-  #   See description of -f in GNU's readlink(1).
-  #   Returns false if it can't resolve the path, true otherwise.
-  #   It can return an empty string along with false.
 
-  # Best is to simply call GNU's `readlink -f` if it's available.
-  if [ "$(uname -s)" = Linux ]
-  then
-    readlink -f "$1"
-    return
-  elif type greadlink >/dev/null 2>&1
-  then
-    # This is for if you're running OSX (uname -s = Darwin) and have installed coreutils utilities via homebrew.
-    greadlink -f "$1"
-    return
-  elif readlink -f / >/dev/null 2>&1
-  then
-    readlink -f "$1"
-    return
-  fi
-  echo "Naive implementation of abspath failed." 1>&2
-  false
-}
-
-if ! abspath / >/dev/null 2>&1
-then
-  export PS1="(abspath fail)$PS1"
-  echo "I couldn't implement abspath with readlink -f, so giving up on fancy interactive settings." 1>&2
-  if [ "$(uname -s)" = Darwin ]
-  then
-    echo "For macos, you should brew install coreutils." 1>&2
-    echo "Or use a real unix, like linux. }-:)" 1>&2
-  fi
-  return
-fi
-
-f="$( abspath "${BASH_SOURCE[0]}" )".interactive
+f="$( readlink "${BASH_SOURCE[0]}" )"
+this_bashdir="$(dirname "$f" )"
+f="$f".interactive
 if [ $? -ne 0 ]
 then
   echo "readlink/greadlink -f doesn't work properly." 1>&2
@@ -160,8 +124,9 @@ then
   return
 fi
 
-. "$f"
-
-
 # https://github.com/junegunn/fzf
+# Read fzf config here instead of in a separate file because
+# fzf's install really wants it in this file.
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
+
+. "$f"

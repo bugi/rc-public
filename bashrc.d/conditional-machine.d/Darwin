@@ -3,3 +3,12 @@
 
 # uname -s = Darwin = macos
 
+# (macports) prioritize gnu utils over bsd utils
+for f in /opt/local/bin /opt/local/libexec/gnubin /opt/local/sbin
+do
+  if [ -d "$f" ]
+  then
+    export PATH="$f:$PATH"
+  fi
+done
+

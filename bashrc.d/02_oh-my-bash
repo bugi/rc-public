@@ -1,0 +1,15 @@
+#!bash
+# vim:set ft=sh tabstop=2 softtabstop=2 shiftwidth=2 expandtab autoindent copyindent :
+
+if [ -d "$HOME"/.oh-my-bash ] && [ -f "$RC_public"/oh-my-bash.rc ]
+then
+  # To enable oh-my-bash, do this:
+  #    git clone git://github.com/ohmybash/oh-my-bash.git ~/.oh-my-bash
+
+  # For more info on oh-my-bash, see:
+  #    https://ohmybash.nntoan.com/
+  #    https://ohmybash.github.io/
+  #    https://github.com/ohmybash/oh-my-bash
+  . "$RC_public"/oh-my-bash.rc
+fi
+
