@@ -1,10 +1,18 @@
 #!bash
 # vim:set ft=sh tabstop=2 softtabstop=2 shiftwidth=2 expandtab autoindent copyindent :
 
+# The bashrc.other_rc_directories file in this directory
+# should do something like this:
+#   OTHER_RC_DIRS+=( "$HOME/.rc-private" )
 
-RC_public="$HOME/.rc-public"
-RC_private="$HOME/.rc-private"
+OTHER_RC_DIRS=()
+. "$this_bashdir"/bashrc.other_rc_directories
+
+
+# RC_public="$HOME/.rc-public"
+RC_public="$this_bashdir"
 bash_RC_public="$RC_public/bashrc.d"
+RC_private="$HOME/.rc-private"
 bash_RC_private="$RC_private/bashrc.d"
 # or derive from this you must have it relocatable:
 #  "$(readlink -f "${BASH_SOURCE[0]}" )"
@@ -13,50 +21,34 @@ bash_RC_private="$RC_private/bashrc.d"
 # echo == "$(abspath "${BASH_SOURCE[0]}" )"
 
 
-if [ -d "$HOME"/.oh-my-bash ] && [ -f "$RC_public"/oh-my-bash.rc ]
-then
-  # To enable oh-my-bash, do this:
-  #    git clone git://github.com/ohmybash/oh-my-bash.git ~/.oh-my-bash
-
-  # For more info on oh-my-bash, see:
-  #    https://ohmybash.nntoan.com/
-  #    https://ohmybash.github.io/
-  #    https://github.com/ohmybash/oh-my-bash
-  . "$RC_public"/oh-my-bash.rc
-fi
 
 
-. "$bash_RC_public"/00_fn
-. "$bash_RC_public"/01_colors
-. "$bash_RC_public"/02_PROMPT_COMMAND
-. "$bash_RC_public"/git
+
+# read all files in bashrc.d/ that don't end in .README
+declare bashdotd_filenames=()
+mapfile -d $'\0' bashdotd_filenames < <( find "${bash_RC_public}/" -maxdepth 1 -type f ! -name \*.sw? ! -name \*.README -print0 | LC_ALL=C sort -z )
+for bashdotd_filename in "${bashdotd_filenames[@]}"
+do
+  if [ -r "$bashdotd_filename" ] ; then . "$bashdotd_filename" ; fi
+done
+unset bashdotd_filename bashdotd_filenames
+
+
+
+# enable this after ferreting out all the RC_private and bash_RC_private references
+for other_rc_dir in "${OTHER_RC_DIRS[@]}"
+do
+  other_rc_dir_abs="$(abspath "$other_rc_dir/bashrc" )"
+  if [ -r "${other_rc_dir_abs}/bashrc" ]
+  then
+    : # . "${other_rc_dir_abs}/bashrc"
+  fi
+done
+
+# remove these after ferreting out all the other RC_private and bash_RC_private references
 . "$bash_RC_private"/keys
 . "$bash_RC_private"/jobs
 . "$bash_RC_private"/kubectl
 . "$bash_RC_private"/terraform
 . "$bash_RC_private"/brew
-
-# (macports) prioritize gnu utils over bsd utils
-for f in /opt/local/bin /opt/local/libexec/gnubin /opt/local/sbin
-do
-  if [ -d "$f" ]
-  then
-    export PATH="$f:$PATH"
-  fi
-done
-
-
-
-
-
-# read all files in bashrc.d/
-declare bashdotd_filenames=()
-mapfile -d $'\0' bashdotd_filenames < <( find "${bash_RC_public}/" -maxdepth 1 -type f ! -name \*.sw? ! -name \*.README -print0 | LC_ALL=C sort -z )
-for bashdotd_filename in "${bashdotd_filenames[@]}"
-do
-  : # if [ -r "$bashdotd_filename" ] ; then . "$bashdotd_filename" ; fi
-done
-unset bashdotd_filename bashdotd_filenames
-
-. "$bash_RC_public"/interactive
 
