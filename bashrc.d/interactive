@@ -10,9 +10,6 @@ PS1='>'
 # machine-dependent config
 #
 
-. "${bash_RC_public}/conditional-machine"
-
-
 # not all OSs set LOGNAME and/or USER.  weird.
 if [ -z "$LOGNAME" ]
 then
