@@ -1,0 +1,8 @@
+if type -P terraform >/dev/null
+then
+  complete -C "$(type -P terraform)" terraform
+fi
+if type -P tf >/dev/null
+then
+  complete -C "$(type -P terraform)" tf
+fi

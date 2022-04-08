@@ -185,18 +185,6 @@ esac
 
 export HOME="$(pwd)" # so dirs shows ~s even through symlinks
 
-. "$bash_RC_public"/z99_path-dedup
-
-. "$bash_RC_public"/tmux
-
-
-
-
-if terraform_path="$( type -P terraform )"
-then
-  complete -C "$terraform_path" terraform
-fi
-unset terraform_path
 
 if aws_completer_path="$( type -P aws_completer )"
 then
