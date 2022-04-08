@@ -50,4 +50,5 @@ done
 . "$bash_RC_private"/jobs
 . "$bash_RC_private"/kubectl
 . "$bash_RC_private"/brew
+. "$bash_RC_private"/supercd
 
