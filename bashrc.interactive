@@ -35,20 +35,13 @@ unset bashdotd_filename bashdotd_filenames
 
 
 
-# enable this after ferreting out all the RC_private and bash_RC_private references
+# Let the other concerns sort themselves out.
 for other_rc_dir in "${OTHER_RC_DIRS[@]}"
 do
-  other_rc_dir_abs="$(abspath "$other_rc_dir/bashrc" )"
-  if [ -r "${other_rc_dir_abs}/bashrc" ]
+  other_rc_dir_abs="$(abspath "$other_rc_dir/bashrc.interactive" )"
+  if [ -r "${other_rc_dir_abs}" ]
   then
-    : # . "${other_rc_dir_abs}/bashrc"
+    . "${other_rc_dir_abs}"
   fi
 done
-
-# remove these after ferreting out all the other RC_private and bash_RC_private references
-. "$bash_RC_private"/keys
-. "$bash_RC_private"/jobs
-. "$bash_RC_private"/kubectl
-. "$bash_RC_private"/brew
-. "$bash_RC_private"/supercd
 
