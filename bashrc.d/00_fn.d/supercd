@@ -1,0 +1,48 @@
+#!bash
+# vim: set tabstop=2 softtabstop=2 shiftwidth=2 expandtab autoindent copyindent :
+
+# This makes it easy to make specialized 'cd' commands
+# that tab-complete based on their context.
+# See the bottom of the file for an example.
+
+function _supercd_complete ()
+{
+  local dir="$1" ; shift
+  local cword="${COMP_WORDS[COMP_CWORD]}"
+  local subdir=.
+  local n1="${cword%/}"
+  n1="${#n1}"
+  local n2="${cword//\//}"
+  n2="${#n2}"
+  if [ $n1 -gt 0 ] && [ "${cword%/}" != "${cword}" ] && [ -d "$dir/$cword" ]
+    # ends with a slash and is a dir
+  then
+    subdir="$cword"
+  elif [ $(( n1 - n2 )) -gt 0 ]
+  then
+    subdir="${cword%/*}"
+  else
+    subdir=.
+  fi
+  if [ -z "$subdir" ]
+  then
+    subdir=.
+  fi
+  COMPREPLY=( $( compgen -W \
+    "$( cd "$dir" && \
+      find "$subdir" -mindepth 1 -maxdepth 1 -type d -printf "%p%y\n" \
+      |sed 's,[^d]$,, ; s,d$,/, ; s,$,, ; s,^[.]/,,' )" \
+    -- "${COMP_WORDS[COMP_CWORD]}" ) )
+  true
+}
+
+
+# These four commands make is so that the "home" command will change your
+# current directory to your home directory, with option to go further into your
+# home directory structure.  You get tab completion to help you with that.
+
+# function home () { cd ~/"$1" ; }
+# function _supercd_home_complete () { _supercd_complete ~/ ; }
+# shopt -s progcomp
+# complete -o nospace -F _supercd_home_complete home
+
