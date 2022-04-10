@@ -96,35 +96,35 @@ function rmbm {
   unset _BM_["$1"]
   }
 
-# savebm - save a bookmark set
+# __savebm - save a bookmark set
 #
-# The first arg is name of bookmark set, defaulting to "default".
+# The first arg is where to find the bookmark sets.
+#
+# The second arg is name of bookmark set, defaulting to "default".
 # That first arg can be "-" which means STDOUT.
 #
-# The second (optional) arg is like the optional arg of lsbm
+# The third (optional) arg is like the optional arg of lsbm
 #
 # However, I suggest maintaining most of your bookmark files manually.
 # That way you can make use of comments, loops and whatnot.
-function savebm {
+function __savebm {
+  local basefile="$1" ; shift
   local bum="$1" ; shift
   if [ -z "$bum" ]
   then
     bum=default
   fi
   local nm="$1" ; shift
-  local fn="$bash_RC_private/bm.bash.list.$bum"
+  local fn="${basefile}.list.$bum"
   if [ "$bum" = - ]
   then
     fn=/dev/stdout
-  elif [ -n "$bash_RC_private" ]
+  elif [ -r "$fn" ]
   then
-    fn="$HOME/.bm.bash.list.$bum"
-  elif [ -w "$bash_RC_private/bm.bash.list.$bum" ]
-  then
-    fn="$bash_RC_private/bm.bash.list.$bum"
-  elif [ -w "$bash_RC_public/bm.bash.list.$bum" ]
-  then
-    fn="$bash_RC_public/bm.bash.list.$bum"
+    :
+  else
+    true
+    return
   fi
   local k
   for k in $( lsbm_keys_filter "$nm" )
@@ -134,21 +134,20 @@ function savebm {
   done > "$fn"
   }
 
-# loadbm - load a bookmark set, as saved by savebm
-# arg is the name of the bookmark set
-function loadbm {
+# __loadbm - load a bookmark set, as saved by savebm
+#
+# The first arg is where to find the bookmark sets.
+# The second arg is the name of the bookmark set
+function __loadbm {
+  local basefile="$1" ; shift
   local bum="$1" ; shift
   if [ -z "$bum" ]
   then
     bum=default
   fi
-  if [ -r "$bash_RC_public/bm.bash.list.$bum" ]
+  if [ -r "${basefile}.list.$bum" ]
   then
-    . "$bash_RC_public/bm.bash.list.$bum"
-  fi
-  if [ -r "$bash_RC_private/bm.bash.list.$bum" ]
-  then
-    . "$bash_RC_private/bm.bash.list.$bum"
+    .  "${basefile}.list.$bum"
   fi
   if [ -r "$HOME/.bm.bash.list.$bum" ]
   then
@@ -156,4 +155,14 @@ function loadbm {
   fi
   }
 
-loadbm default
+bmbasefile="${BASH_SOURCE[0]}"
+public_bmbasefile="${BASH_SOURCE[0]}"
+
+function savebm_public { __savebm "$public_bmbasefile" "$@" ; }
+function loadbm_public { __loadbm "$public_bmbasefile" "$@" ; }
+function savebm { __savebm "$bmbasefile" "$@" ; }
+function loadbm { __loadbm "$bmbasefile" "$@" ; }
+
+
+
+loadbm_public default
