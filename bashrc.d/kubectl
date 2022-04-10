@@ -1,0 +1,9 @@
+#!bash
+# vim:set ft=sh tabstop=2 softtabstop=2 shiftwidth=2 expandtab autoindent copyindent :
+
+alias kubectl='minikube kubectl --'
+
+if type -P minikube >/dev/null
+then
+  source <(minikube kubectl -- completion bash)
+fi
