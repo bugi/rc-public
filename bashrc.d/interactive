@@ -104,20 +104,6 @@ PS1='${__git_ps1_output}'"$PS1"
 
 
 
-for f in bm.bash apps
-do
-  if [ -r "$bash_RC_public"/"$f" ]
-  then
-    . "$bash_RC_public"/"$f"
-  fi
-  if [ -r "$bash_RC_private"/"$f" ]
-  then
-    . "$bash_RC_private"/"$f"
-  fi
-done
-
-
-
 
 
 
