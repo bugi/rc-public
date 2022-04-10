@@ -9,16 +9,8 @@ OTHER_RC_DIRS=()
 . "$this_bashdir"/bashrc.other_rc_directories
 
 
-# RC_public="$HOME/.rc-public"
 RC_public="$this_bashdir"
 bash_RC_public="$RC_public/bashrc.d"
-RC_private="$HOME/.rc-private"
-bash_RC_private="$RC_private/bashrc.d"
-# or derive from this you must have it relocatable:
-#  "$(readlink -f "${BASH_SOURCE[0]}" )"
-# echo "${BASH_SOURCE[0]}"
-# echo == "$(readlink -f "${BASH_SOURCE[0]}" )"
-# echo == "$(abspath "${BASH_SOURCE[0]}" )"
 
 
 
