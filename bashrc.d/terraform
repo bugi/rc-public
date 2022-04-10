@@ -1,3 +1,6 @@
+#!bash
+# vim:set ft=sh tabstop=2 softtabstop=2 shiftwidth=2 expandtab autoindent copyindent :
+
 if type -P terraform >/dev/null
 then
   complete -C "$(type -P terraform)" terraform
