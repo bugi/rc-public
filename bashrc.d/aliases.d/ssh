@@ -5,9 +5,9 @@
 
 
 # for use when a machine is repurposed behind our back
-alias SSH='ssh -q -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
-alias SCP='scp -q -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
-alias ssh_=SSH
-alias scp_=SCP
+alias  SSH='ssh -q -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
+alias  SCP='scp -q -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
+alias ssh_='ssh    -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
+alias scp_='scp    -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
 alias _ssh=SSH
 alias _scp=SCP
