@@ -33,6 +33,7 @@ function pd- () {
   pd -1
   }
 
+# DIRS is a shell+perl script
 alias diirs='DIRS'  # or 'dirs -v' in a pinch
 alias dirss='DIRS'  # or 'dirs -v' in a pinch
 
