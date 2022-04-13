@@ -34,6 +34,9 @@ function pd ()
     then
       # treat '' as lack of an argument instead of just complaining
       builtin pushd >/dev/null || return
+    elif [ "$(dirs -p)" = '~' ]
+    then
+      builtin cd "$d" >/dev/null || return
     else
       builtin pushd "$d" >/dev/null || return
     fi
