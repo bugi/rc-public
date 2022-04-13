@@ -12,12 +12,21 @@ function d () {
   }
 
 function pd () {
-  if [ $# -eq 1 -a -z "$( echo "$1" |sed 's/^[0-9]*$//g' )" ]
+  if [ $# -eq 0 ]
   then
-    pushd +"$1" >/dev/null
-  else
-    pushd "$@" >/dev/null
+    pushd >/dev/null || return
   fi
+  local d
+  for d in "$@"
+  do
+    if [ -z "$d" ]
+    then
+      # treat '' as lack of an argument instead of just complaining
+      pushd >/dev/null || return
+    else
+      pushd "$d" >/dev/null || return
+    fi
+  done
   d
   }
 function pd- () {
