@@ -5,7 +5,8 @@
 
 #----------- DIRS -----------
 
-function d () {
+function d ()
+{
   echo # to visually separate from prompt, which likely also includes the current path
   dirs -v
   echo # to visually separate from prompt, which likely also includes the current path
@@ -14,9 +15,10 @@ function d () {
   # factors out common strings to reduce display complexity.  Left as an
   # exercise for the future.  The current DIRS.pl needs work, and should
   # be implemented as a native bash function anyway.
-  }
+}
 
-function pd () {
+function pd ()
+{
   if [ $# -eq 0 ]
   then
     builtin pushd >/dev/null || return
@@ -35,10 +37,8 @@ function pd () {
     fi
   done
   d
-  }
-function pd- () {
-  pd -1 "$@"
-  }
+}
+function pd- () { pd -1 "$@" ; }
 
 # DIRS is a shell+perl script that factors out common strings to reduce display complexity
 alias diirs='DIRS'  # or 'dirs -v' in a pinch
@@ -48,31 +48,36 @@ alias dirss='dirs -v'
 unalias diirs
 unalias dirss
 
-function PUSHD () {
+function PUSHD ()
+{
   pd "$@"
-  }
+}
 
-function popd () {
+function popd ()
+{
   builtin popd "$@" >/dev/null
   local R=$?
   d
   return $R
-  }
+}
 
-function POPD () {
+function POPD ()
+{
   popd "$@"
-  }
+}
 
-function UP () {
+function UP ()
+{
   local n=1
   if [ -n "$1" ]
   then
     n="$1" ; shift
   fi
   PUSHD +$n
-  }
+}
 
-function DOWN () {
+function DOWN ()
+{
   local n=1
   if [ -n "$1" ]
   then
@@ -80,5 +85,5 @@ function DOWN () {
   fi
   n=$(( n - 1 ))
   PUSHD -$n
-  }
+}
 alias Down=DOWN
