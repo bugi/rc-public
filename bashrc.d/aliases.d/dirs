@@ -18,16 +18,18 @@ function d ()
 }
 
 function pd ()
-{
+{ # like builtin pushd, but smarter
   if [ $# -eq 0 ]
   then
     builtin pushd >/dev/null || return
     d
     return
   fi
-  local d
-  for d in "$@"
+  # pushes onto stack in reverse order so that the first argument will be on top of the stack
+  local i d
+  for ((i=$#;i>0;i--))
   do
+    d="${!i}"
     if [ -z "$d" ]
     then
       # treat '' as lack of an argument instead of just complaining
