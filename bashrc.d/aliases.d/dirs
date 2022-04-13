@@ -9,12 +9,19 @@ function d () {
   echo # to visually separate from prompt, which likely also includes the current path
   dirs -v
   echo # to visually separate from prompt, which likely also includes the current path
+  #
+  # Alternately, could define in terms of DIRS, a shell+perl script that
+  # factors out common strings to reduce display complexity.  Left as an
+  # exercise for the future.  The current DIRS.pl needs work, and should
+  # be implemented as a native bash function anyway.
   }
 
 function pd () {
   if [ $# -eq 0 ]
   then
-    pushd >/dev/null || return
+    builtin pushd >/dev/null || return
+    d
+    return
   fi
   local d
   for d in "$@"
@@ -22,31 +29,38 @@ function pd () {
     if [ -z "$d" ]
     then
       # treat '' as lack of an argument instead of just complaining
-      pushd >/dev/null || return
+      builtin pushd >/dev/null || return
     else
-      pushd "$d" >/dev/null || return
+      builtin pushd "$d" >/dev/null || return
     fi
   done
   d
   }
 function pd- () {
-  pd -1
+  pd -1 "$@"
   }
 
-# DIRS is a shell+perl script
+# DIRS is a shell+perl script that factors out common strings to reduce display complexity
 alias diirs='DIRS'  # or 'dirs -v' in a pinch
 alias dirss='DIRS'  # or 'dirs -v' in a pinch
+alias diirs='dirs -v'
+alias dirss='dirs -v'
+unalias diirs
+unalias dirss
 
 function PUSHD () {
-  pushd "$@" >/dev/null
-  echo
-  diirs
+  pd "$@"
+  }
+
+function popd () {
+  builtin popd "$@" >/dev/null
+  local R=$?
+  d
+  return $R
   }
 
 function POPD () {
-  popd "$@" >/dev/null
-  echo
-  diirs
+  popd "$@"
   }
 
 function UP () {
