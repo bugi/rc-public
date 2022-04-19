@@ -20,13 +20,6 @@ function dedupPath () {
     if [ -z "${paths[$f]}" ]
     then
       paths["$f"]=true
-#     if [ -d "$f" ]
-#     then
-#       # Removes paths that don't presently exist.
-#       # This can be problematic if you want your PATH to
-#       # include dirs that are mounted only sometimes.
-#       pathNew+=( "$f" )
-#     fi
     pathNew+=( "$f" )
     fi
   done
