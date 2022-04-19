@@ -1,29 +1,50 @@
 #!bash
 # vim:set ft=sh tabstop=2 softtabstop=2 shiftwidth=2 expandtab autoindent copyindent :
 
-function dedupPath () {
+function dedupPath ()
+{
   # Leaves the first copy of a directory in the PATH.
   # Removes the later ones.
   #
-  # Assumes your PATH's directories do not contain spaces.  Blech!
+  # Accommodates spaces in PATH elements.
   #
-  # Empty elements are silently turned into explicit "."s.
-  # Eg /sbin:/bin::/usr/bin, the :: having an "empty" in the middle).
+  # As a side effect, empty elements are turned into explicit "."s.
+  # Eg "/sbin:/bin::/usr/bin", becomes "/sbin:/bin:.:/usr/bin"
+  # Eg ":/sbin:/bin::/usr/bin:", becomes ".:/sbin:/bin:/usr/bin"
+  # An empty PATH element is the same as ".", so there is no real effect.
   #
-  local pathOld=( $( echo "$1" | sed 's/^:/.:/ ; s/:$/:./ ; s/::/:.:/g ; s,/:,:,g ; s,/$,,g ; s/:/ /g' ) )
+  local p="$1"
   shift
-  local f
+
+  if [ "$p" = "${p%:}" ] # if p doesn't end with a colon
+  then
+    # Read doesn't report a final element if it doesn't end with the delimter,
+    # so make sure p end with the delimeter.
+    p="${p}:"
+  fi
+
   local -A paths # if this fails, upgrade your bash
-  local pathNew=()
-  for f in "${pathOld[@]}"
+  local NP=''
+  local f
+  while read -d ':' f
   do
+    echo "f($f)"
+    if [ -z "$f" ]
+    then
+      f=.
+    fi
     if [ -z "${paths[$f]}" ]
     then
       paths["$f"]=true
-    pathNew+=( "$f" )
+      if [ -n "$NP" ]
+      then
+        NP="${NP}:${f}"
+      else
+        NP="${f}"
+      fi
     fi
-  done
-  echo "${pathNew[@]}" | sed 's/ /:/g'
-  }
+  done <<<"$p"
+  echo "$NP"
+}
 
 export PATH="$( dedupPath "$PATH" )"
