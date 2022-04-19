@@ -33,4 +33,4 @@ function dedupPath () {
   echo "${pathNew[@]}" | sed 's/ /:/g'
   }
 
-export PATH=$( dedupPath "$PATH" )
+export PATH="$( dedupPath "$PATH" )"
