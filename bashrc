@@ -76,7 +76,7 @@ fi
 PATH="${HOME}/usr/bin:${PATH}"
 PATH="${HOME}/bin:${PATH}"
 PATH="${HOME}/.local/bin:${PATH}"
-PATH=".:${PATH}"
+# PATH=".:${PATH}"
 
 export PATH
 
