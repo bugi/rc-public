@@ -75,6 +75,7 @@ fi
 # my own stuff comes first
 PATH="${HOME}/usr/bin:${PATH}"
 PATH="${HOME}/bin:${PATH}"
+PATH="${HOME}/.local/bin:${PATH}"
 PATH=".:${PATH}"
 
 export PATH
