@@ -31,7 +31,7 @@ fi
 #
 
 
-prepath=.
+prepath=
 prepath="$prepath:$HOME/bin"
 prepath="$prepath:$HOME/usr/bin"
 postpath=''
