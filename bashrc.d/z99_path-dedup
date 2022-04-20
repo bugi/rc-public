@@ -28,7 +28,6 @@ function dedupPath ()
   local f
   while read -d ':' f
   do
-    echo "f($f)"
     if [ -z "$f" ]
     then
       f=.
