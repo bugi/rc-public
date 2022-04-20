@@ -1,49 +1,6 @@
 #!bash
 # vim:set ft=sh tabstop=2 softtabstop=2 shiftwidth=2 expandtab autoindent copyindent :
 
-function dedupPath ()
-{
-  # Leaves the first copy of a directory in the PATH.
-  # Removes the later ones.
-  #
-  # Accommodates spaces in PATH elements.
-  #
-  # As a side effect, empty elements are turned into explicit "."s.
-  # Eg "/sbin:/bin::/usr/bin", becomes "/sbin:/bin:.:/usr/bin"
-  # Eg ":/sbin:/bin::/usr/bin:", becomes ".:/sbin:/bin:/usr/bin"
-  # An empty PATH element is the same as ".", so there is no real effect.
-  #
-  local p="$1"
-  shift
-
-  if [ "$p" = "${p%:}" ] # if p doesn't end with a colon
-  then
-    # Read doesn't report a final element if it doesn't end with the delimter,
-    # so make sure p end with the delimeter.
-    p="${p}:"
-  fi
-
-  local -A paths # if this fails, upgrade your bash
-  local NP=''
-  local f
-  while read -d ':' f
-  do
-    if [ -z "$f" ]
-    then
-      f=.
-    fi
-    if [ -z "${paths[$f]}" ]
-    then
-      paths["$f"]=true
-      if [ -n "$NP" ]
-      then
-        NP="${NP}:${f}"
-      else
-        NP="${f}"
-      fi
-    fi
-  done <<<"$p"
-  echo "$NP"
-}
-
+# de-duplicates PATH entries
 export PATH="$( dedupPath "$PATH" )"
+export PATH="${PATH#.:}"
