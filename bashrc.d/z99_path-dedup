@@ -4,3 +4,7 @@
 # de-duplicates PATH entries
 export PATH="$( dedupPath "$PATH" )"
 export PATH="${PATH#.:}"
+export PATH="${PATH%:.}"
+export PATH="${PATH#:}"
+export PATH="${PATH%:}"
+export PATH="${PATH/::/:}"
