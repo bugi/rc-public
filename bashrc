@@ -85,6 +85,16 @@ export PATH
 LD_LIBRARY_PATH=/usr/local/lib/x86_64-linux-gnu/
 export LD_LIBRARY_PATH
 
+# nvm is used to manage which version of node/npm to use
+# https://github.com/nvm-sh/nvm
+# Reading nvm's config here instead
+# Reading nvm config here instead of in a separate file because
+# nvm's install searches this file for magic strings and puts them
+# there if it doesn't find them.
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ "${-/i/}" != "$-" ] && [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion if in an interactive shell
+
 
 #
 #
@@ -129,15 +139,5 @@ fi
 # Read fzf config here instead of in a separate file because
 # fzf's install really wants it in this file.
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
-
-# nvm is used to manage which version of node/npm to use
-# https://github.com/nvm-sh/nvm
-# Reading nvm's config here instead
-# Reading nvm config here instead of in a separate file because
-# nvm's install searches this file for magic strings and puts them
-# there if it doesn't find them.
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
 . "$f"
