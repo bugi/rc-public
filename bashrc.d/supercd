@@ -1,0 +1,13 @@
+#!bash
+# vim: set tabstop=2 softtabstop=2 shiftwidth=2 expandtab autoindent copyindent :
+
+function rc-public () { cd ~/.rc-public/"$1" ; }
+function _supercd_tf_infra_complete () { _supercd_complete ~/.rc-public/ ; }
+shopt -s progcomp
+complete -o nospace -F _supercd_tf_infra_complete rc-public
+
+function rc-private () { cd ~/.rc-private/"$1" ; }
+function _supercd_tf_modules_complete () { _supercd_complete ~/.rc-private/ ; }
+shopt -s progcomp
+complete -o nospace -F _supercd_tf_modules_complete rc-private
+
