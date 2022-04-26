@@ -18,50 +18,99 @@ function D ()
   # be implemented as a native bash function anyway.
 }
 
+function d_git ()
+{ # format input in git-aware form
+  # returns false if it disclaims as in a git directory
+  # returns true and a string in git-aware form otherwise
+  local f="$1" ; shift
+  local g R
+  local orig="$f"
+
+  if [ "$f" = '~' ]
+  then
+    # ignore user's home directory
+    false
+    return
+  fi
+
+  # cd doesn't work with ~ in a string
+  g="${f#~\/}"
+  if [ "$g" != "$f" ]
+  then
+    f="${HOME}/$g"
+  fi
+
+  # todo: handle ~username, for users' checkouts
+  if [ "${orig#~}" != "$orig" ]
+  then
+    # ignore anything # within another user's directory if in ~user form
+    false
+    return
+  fi
+
+  g="$( cd "$f" && git rev-parse --is-inside-work-tree 2>/dev/null )"
+  R=$?
+  if [ $R -ne 0 ] || [ "$g" != true ]
+  then # is not a git path
+    false
+    return
+  fi
+
+  local gitroot="$( cd "$f" && git rev-parse --show-toplevel 2>/dev/null )"
+  if [ "$gitroot" = "$f" ]
+  then
+    # is at root of a git checkout, so pretend is not git
+    false
+    return
+  fi
+
+  f="${f#$gitroot\/}"
+  # return formatted as repo name and position within repo
+  printf "%s:%s\n" \
+    "$(cd "$gitroot" && basename -s .git "$(git config --get remote.origin.url)")" \
+    "$f"
+}
+
 unalias d 2>/dev/null
 function d ()
 { # like `dirs -v` but with with edits to add context and usually shorten
   local head="$1" ; shift
   if [ -z "$head" ] ; then head=9 ; fi
-  local f g R i=0 n
-  local gitroot
+  local i=0 n
   local orig
+  local f g
   echo
   while read f
   do
     orig="$f"
+
     n="$i"
     i=$(( i + 1 ))
     if [ $n -gt $head ]
     then
       continue
     fi
-    if [ "$f" = '~' ]
+
+    # home directory is a special case
+    if [ "$f" = '~' ] || [ "$f" = "$HOME" ]
     then
-      printf "%2d  %s\n" $n "$f"
+      printf "%2d  %s\n" $n '~'
       continue
     fi
-    g="${f#~\/}"
-    if [ "$g" != "$f" ]
+
+    # add git context if applicable
+    if g="$(d_git "$f")"
     then
-      f="${HOME}/$g"
-    fi
-    g="$( cd "$f" && git rev-parse --is-inside-work-tree 2>/dev/null )"
-    R=$?
-    if [ $R -eq 0 ] && [ "$g" = true ]
-    then # is a git path
-      gitroot="$( cd "$f" && git rev-parse --show-toplevel 2>/dev/null )"
-    fi
-    if [ $R -eq 0 ] && [ "$g" = true ] && [ "$gitroot" != "$f" ]
-    then # is a git path
-      f="${f#$gitroot\/}"
-      printf "%2d  %s\n" $n "$(cd "$gitroot" && basename -s .git "$(git config --get remote.origin.url)"):${f#$gitroot\/}"
-      continue
-    else # is not in git or is at root of a git
-      printf "%2d  %s\n" $n "$orig"
+      printf "%2d  %s\n" $n "$g"
       continue
     fi
+
+    # otherwise pass it through unchanged
+    printf "%2d  %s\n" $n "$orig"
+    continue
+
   done <<<"$(dirs -p)"
+
   if [ $n -gt $head ]
   then
     printf "...\n"
