@@ -5,7 +5,8 @@
 
 #----------- DIRS -----------
 
-function d ()
+unalias D 2>/dev/null
+function D ()
 {
   echo # to visually separate from prompt, which likely also includes the current path
   dirs -v
@@ -15,6 +16,58 @@ function d ()
   # factors out common strings to reduce display complexity.  Left as an
   # exercise for the future.  The current DIRS.pl needs work, and should
   # be implemented as a native bash function anyway.
+}
+
+unalias d 2>/dev/null
+function d ()
+{ # like `dirs -v` but with with edits to add context and usually shorten
+  local head="$1" ; shift
+  if [ -z "$head" ] ; then head=9 ; fi
+  local f g R i=0 n
+  local gitroot
+  local orig
+  echo
+  while read f
+  do
+    orig="$f"
+    n="$i"
+    i=$(( i + 1 ))
+    if [ $n -gt $head ]
+    then
+      continue
+    fi
+    if [ "$f" = '~' ]
+    then
+      printf "%2d  %s\n" $n "$f"
+      continue
+    fi
+    g="${f#~\/}"
+    if [ "$g" != "$f" ]
+    then
+      f="${HOME}/$g"
+    fi
+    g="$( cd "$f" && git rev-parse --is-inside-work-tree 2>/dev/null )"
+    R=$?
+    if [ $R -eq 0 ] && [ "$g" = true ]
+    then # is a git path
+      gitroot="$( cd "$f" && git rev-parse --show-toplevel 2>/dev/null )"
+    fi
+    if [ $R -eq 0 ] && [ "$g" = true ] && [ "$gitroot" != "$f" ]
+    then # is a git path
+      f="${f#$gitroot\/}"
+      printf "%2d  %s\n" $n "$(cd "$gitroot" && basename -s .git "$(git config --get remote.origin.url)"):${f#$gitroot\/}"
+      continue
+    else # is not in git or is at root of a git
+      printf "%2d  %s\n" $n "$orig"
+      continue
+    fi
+  done <<<"$(dirs -p)"
+  if [ $n -gt $head ]
+  then
+    printf "...\n"
+    printf "%2d  ?\n" $n
+  fi
+  echo
 }
 
 function pd ()
