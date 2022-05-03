@@ -98,6 +98,12 @@ function d ()
       continue
     fi
 
+    if ! [ -e "$f" ]
+    then
+      printf "%2d  DNE: %s\n" $n "$f"
+      continue
+    fi
+
     # add git context if applicable
     if g="$(d_git "$f")"
     then
