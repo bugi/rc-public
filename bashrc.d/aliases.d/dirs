@@ -22,28 +22,13 @@ function d_git ()
 { # format input in git-aware form
   # returns false if it disclaims as in a git directory
   # returns true and a string in git-aware form otherwise
-  local f="$1" ; shift
+  local f="$1" ; shift # expects full path, without "~" for $HOME
   local g R
   local orig="$f"
 
-  if [ "$f" = '~' ]
+  if [ "$f" = "$HOME" ]
   then
     # ignore user's home directory
-    false
-    return
-  fi
-
-  # cd doesn't work with ~ in a string
-  g="${f#~\/}"
-  if [ "$g" != "$f" ]
-  then
-    f="${HOME}/$g"
-  fi
-
-  # todo: handle ~username, for users' checkouts
-  if [ "${orig#~}" != "$orig" ]
-  then
-    # ignore anything # within another user's directory if in ~user form
     false
     return
   fi
@@ -65,6 +50,14 @@ function d_git ()
   fi
 
   f="${f#$gitroot\/}"
+  # The $HOME=>~ transformation is useful for when there's a symlink
+  # in ~ to another directory within a git repo.  It's a bit of a
+  # compromise, to avoid expanding all symlinks using abspath.
+  g="${f#$HOME/}"
+  if [ "$f" != "$g" ]
+  then
+    f="~/$g"
+  fi
   # return formatted as repo name and position within repo
   printf "%s:%s\n" \
     "$(cd "$gitroot" && basename -s .git "$(git config --get remote.origin.url)")" \
@@ -100,6 +93,7 @@ function d ()
 
     if ! [ -e "$f" ]
     then
+      f="~/${f#$HOME/}"
       printf "%2d  DNE: %s\n" $n "$f"
       continue
     fi
@@ -112,10 +106,10 @@ function d ()
     fi
 
     # otherwise pass it through unchanged
-    printf "%2d  %s\n" $n "$orig"
+    printf "%2d  %s\n" $n "~/${orig#$HOME/}"
     continue
 
-  done <<<"$(dirs -p)"
+  done <<<"$(dirs -l -p)"
 
   if [ $n -gt $head ]
   then
