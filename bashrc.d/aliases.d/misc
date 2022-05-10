@@ -29,7 +29,7 @@ alias fgrep='fgrep --color=auto'
 alias egrep='egrep --color=auto'
 
 # colorize other things
-alias bdiff='diff -burNd --color=auto'
+alias bdiff='diff -burNd --color=always'
 
 
 #----------- ls BASED -----------
