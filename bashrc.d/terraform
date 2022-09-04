@@ -1,11 +1,70 @@
 #!bash
 # vim:set ft=sh tabstop=2 softtabstop=2 shiftwidth=2 expandtab autoindent copyindent :
 
+#
+# First, tfswitch and tgswitch
+#
+
+# See:
+# • https://tfswitch.warrensbox.com/Install/
+# • https://tgswitch.warrensbox.com/Install/
+
+# These works for both homebrew and linuxbrew:
+# • brew install warrensbox/tap/tfswitch
+# • brew install warrensbox/tap/tgswitch
+# You do have to specify the full tap path.
+
+type -P tfswitch >/dev/null || echo "Please install tfswitch.  See $(abspath "${BASH_SOURCE[0]}")"
+type -P tgswitch >/dev/null || echo "Please install tgswitch.  See $(abspath "${BASH_SOURCE[0]}")"
+
+
+#
+# Then terraform and terragrunt
+#
+
+if ! type -P terraform >/dev/null
+then
+  if [ -x "${HOME}/bin/"terraform ]
+  then
+    export PATH="${HOME}/bin/${PATH:+:$PATH}"
+  fi
+fi
+
+
+if ! type -P terraform >/dev/null
+then
+  echo "I see no terraform.  I will attempt to install it for you via tfswitch."
+  if type -P tfswitch >/dev/null
+  then
+    tfswitch -u
+  fi
+  if ! type -P terraform >/dev/null
+  then
+    if [ -x "${HOME}/bin/"terraform ]
+    then
+      export PATH="${HOME}/bin/${PATH:+:$PATH}"
+    fi
+  fi
+fi
+
+
+# For tab-completion to work, you may have to also install
+# terraform with apt, brew, etc.
+
 if type -P terraform >/dev/null
 then
   complete -C "$(type -P terraform)" terraform
 fi
-if type -P tf >/dev/null
+if type -P tf >/dev/null && type -P terraform >/dev/null
 then
   complete -C "$(type -P terraform)" tf
+fi
+
+if type -P terragrunt >/dev/null
+then
+  complete -C "$(type -P terragrunt)" terragrunt
+fi
+if type -P tg >/dev/null && type -P terragrunt >/dev/null
+then
+  complete -C "$(type -P terragrunt)" tg
 fi
