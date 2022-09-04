@@ -1,0 +1,34 @@
+#!bash
+# vim:set ft=sh tabstop=2 softtabstop=2 shiftwidth=2 expandtab autoindent copyindent :
+
+
+# See https://brew.sh/ for macos
+# and https://docs.brew.sh/Homebrew-on-Linux for linux.
+
+type -P brew >/dev/null && return
+
+known_breweries=()
+known_breweries+=( "${HOME}"/.linuxbrew/bin/brew )
+known_breweries+=( "${HOME}"/.homebrew/bin/brew )
+known_breweries+=( /home/linuxbrew/.linuxbrew/bin/brew )
+known_breweries+=( /opt/homebrew/bin/brew )
+known_breweries+=( /usr/local/bin/brew )
+
+for f in "${known_breweries[@]}"
+do
+  if [ -x "$f" ]
+  then
+    eval "$("$f" shellenv)"
+    break
+  fi
+done
+
+unset known_breweries
+
+# `brew shellenv` does this if brew not in PATH:
+# export HOMEBREW_PREFIX="/home/linuxbrew/.linuxbrew";
+# export HOMEBREW_CELLAR="/home/linuxbrew/.linuxbrew/Cellar";
+# export HOMEBREW_REPOSITORY="/home/linuxbrew/.linuxbrew/Homebrew";
+# export PATH="/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin${PATH+:$PATH}";
+# export MANPATH="/home/linuxbrew/.linuxbrew/share/man${MANPATH+:$MANPATH}:";
+# export INFOPATH="/home/linuxbrew/.linuxbrew/share/info:${INFOPATH:-}";
