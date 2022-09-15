@@ -5,6 +5,11 @@
 # See https://brew.sh/ for macos
 # and https://docs.brew.sh/Homebrew-on-Linux for linux.
 
+# You might also want to set your HOMEBREW_GITHUB_API_TOKEN.
+# https://stackoverflow.com/questions/20130681/setting-github-api-token-for-homebrew
+# https://gist.github.com/willgarcia/7347306870779bfa664e
+
+
 type -P brew >/dev/null && return
 
 known_breweries=()
