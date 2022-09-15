@@ -8,6 +8,10 @@
 #  git clone https://github.com/pyenv/pyenv.git ~/.pyenv
 #  cd ~/.pyenv && src/configure && make -C src
 
+# You may need to install some libraries to get newer pythons to install.
+# There should be an error message to help you, but here's a hint:
+# sudo apt install libbz2-dev libncurses-dev libreadline-dev libssl-dev libsqlite3-dev
+
 if [ -x "$HOME/.pyenv/bin/pyenv" ]
 then
 
@@ -21,6 +25,8 @@ then
   fi
 
   # If the virtualenv plugin is installed, enable it.
+  #  https://github.com/pyenv/pyenv-virtualenv
+  #  git clone https://github.com/pyenv/pyenv-virtualenv.git $(pyenv root)/plugins/pyenv-virtualenv
   if [ -d "${PYENV_ROOT}/plugins/pyenv-virtualenv/shims" ]
   then
     eval "$(pyenv virtualenv-init -)"
