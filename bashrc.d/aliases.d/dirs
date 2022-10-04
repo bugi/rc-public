@@ -147,6 +147,16 @@ function pd ()
 }
 function pd- () { pd -1 "$@" ; }
 
+for f in `seq 1 9`
+do
+  eval "function +$f { pd '+$f' \"\$@\" ; }"
+  eval "function  $f { +$f \"\$@\" ; }"
+  eval "function -$f { pd '-$f' \"\$@\" ; }"
+done
+function 0 { pd ; "$@" ; }
+function +0 { pd ; "$@" ; }
+function -0 { pd ; "$@" ; }
+
 # DIRS is a shell+perl script that factors out common strings to reduce display complexity
 alias diirs='DIRS'  # or 'dirs -v' in a pinch
 alias dirss='DIRS'  # or 'dirs -v' in a pinch
