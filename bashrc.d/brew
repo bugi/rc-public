@@ -10,7 +10,7 @@
 # https://gist.github.com/willgarcia/7347306870779bfa664e
 
 
-type -P brew >/dev/null && return
+type -P brew >/dev/null && return   # don't bother if brew is already set up
 
 known_breweries=()
 known_breweries+=( "${HOME}"/.linuxbrew/bin/brew )
@@ -30,7 +30,53 @@ done
 
 unset known_breweries
 
-# `brew shellenv` does this if brew not in PATH:
+
+# list of brew gnubins safe to add to PATH
+#
+# This is my list; your mileage may vary.  Please offer
+# a pull request if you think I should change this list
+# for all who use this repository.
+#
+# Adding these to your path will make it so you don't
+# have to use names like `gfind` and `ggrep` to run
+# GNU versions of `find` and `grep`.
+# Don't do this blindly, to avoid interfering with xcode.
+gnubin_whitelist=()
+gnubin_whitelist+=( coreutils )   # basic stuff like readlink, date, and df
+gnubin_whitelist+=( ed )
+gnubin_whitelist+=( findutils )
+gnubin_whitelist+=( gawk )
+gnubin_whitelist+=( gnu-indent )
+gnubin_whitelist+=( gnu-sed )
+gnubin_whitelist+=( gnu-tar )
+gnubin_whitelist+=( gnu-which )
+gnubin_whitelist+=( grep )
+gnubin_whitelist+=( gsed )
+# gnubin_whitelist+=( libtool )
+# gnubin_whitelist+=( make )
+
+for f in "${gnubin_whitelist[@]}"
+do
+  g="${HOMEBREW_PREFIX}/opt/$f/libexec/gnubin"
+  if [ -e "$g" ]
+  then
+    export PATH="$g:$PATH"
+  fi
+  g="${HOMEBREW_PREFIX}/opt/$f/libexec/gnuman"
+  if [ -e "$g" ]
+  then
+    export MANPATH="$g:${MANPATH+:$MANPATH}"
+  fi
+  g="${HOMEBREW_PREFIX}/opt/$f/share/info"
+  if [ -e "$g" ]
+  then
+    export INFOPATH="$g:${INFOPATH+:$INFOPATH}"
+  fi
+done
+
+unset gnubin_whitelist
+
+# `brew shellenv` does something like this:
 # export HOMEBREW_PREFIX="/home/linuxbrew/.linuxbrew";
 # export HOMEBREW_CELLAR="/home/linuxbrew/.linuxbrew/Cellar";
 # export HOMEBREW_REPOSITORY="/home/linuxbrew/.linuxbrew/Homebrew";
