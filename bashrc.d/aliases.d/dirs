@@ -49,7 +49,7 @@ function d_git ()
     # return formatted as repo name and position within repo
     f=.
     printf "%s:%s\n" \
-      "$(basename -s .git "$(git config --get remote.origin.url)")" \
+      "$(cd "$gitroot" && basename -s .git "$(git config --get remote.origin.url)")" \
       "$f"
     return
   fi
