@@ -1,0 +1,69 @@
+#!bash
+# vim: set tabstop=2 softtabstop=2 shiftwidth=2 expandtab autoindent copyindent :
+
+function base36_to_base10 ()
+{
+  local b36
+  for b36 in "$@"
+  do
+    echo "$(( 36#$b36 ))"
+  done
+}
+
+# base36_to_base10  6e
+# base36_to_base10  6ez
+# base36_to_base10  6eZ
+# base36_to_base10  6e 6ez 6eZ
+# base36_to_base10  6z
+# base36_to_base10 0
+# base36_to_base10 7
+# base36_to_base10 a # 10
+# base36_to_base10 m # 22
+# base36_to_base10 z # 35
+# base36_to_base10 z
+
+function base10_to_base36 ()
+{
+  # base 10: a=97 ; z=122 ; A=65 ; Z=90
+  local i b36 b10 b16
+  for i in "$@"
+  do
+    for b10 in $( bc <<<"ibase=10 ; obase=36 ; $i" )
+    do
+      b10="${b10#0}"
+      if [ -z "$b10" ]
+      then
+        b10=0
+      fi
+      if [ $b10 -lt 10 ]
+      then
+        echo -n "$b10"
+        continue
+      fi
+      b10=$(( b10 + 97 - 10 )) # ascii code
+      b16="$( printf %x $b10 )"
+      b36="$( printf "\x$b16" )" # alternate: b36="$( xxd -p -r <<<"$b16" )"
+      echo -n "$b36"
+    done
+    echo
+  done
+}
+
+# base10_to_base36 1
+# base36_to_base10  6z
+# echo base10_to_base36_digit 34 ; base10_to_base36_digit 34 ; echo $?
+# base10_to_base36  97
+# base10_to_base36  12
+# base10_to_base36  25
+# base10_to_base36  34
+# base36_to_base10  6ez
+# base10_to_base36  8315
+# base36_to_base10  bez
+# base10_to_base36  14795
+# base36_to_base10  9ez
+# base10_to_base36  12203
+# base36_to_base10  6ez bez 9ez
+# base10_to_base36  8315 14795 12203
+# base36_to_base10 0
+# base10_to_base36 0
+
