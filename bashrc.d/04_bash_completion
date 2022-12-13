@@ -1,0 +1,21 @@
+#!bash
+# vim:set ft=sh tabstop=2 softtabstop=2 shiftwidth=2 expandtab autoindent copyindent :
+
+# enable bash programmable completion features
+for f in \
+  /etc/bash_completion \
+  /etc/bash_completion.d \
+  /usr/share/bash-completion/bash_completion \
+  /opt/homebrew/etc/bash_completion.d \
+  /usr/local/etc/bash_completion.d \
+; do
+  if [ -r "$f" ]
+  then
+    for g in $( find "$f" -type f -o -type l )
+    do
+      . "$g"
+    done
+  fi
+done
+
+unset f g
