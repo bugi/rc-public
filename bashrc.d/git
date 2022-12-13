@@ -28,14 +28,8 @@ GIT_PS1_HIDE_IF_PWD_IGNORED=true
 
 # enable programmable completion features
 for f in "${HOME}/.git-prompt.sh" \
-    /etc/bash_completion \
-    /usr/share/bash-completion/bash_completion \
-    /etc/bash_completion.d/git-prompt \
-    /etc/bash_completion.d/git \
-    /opt/homebrew/etc/bash_completion.d/git-prompt.sh \
-    /usr/local/etc/bash_completion.d/git-prompt.sh \
 ; do
-  if [ -r "$f" ] && ! fn_exists __git_ps1
+  if [ -r "$f" ]
   then
     . "$f"
   fi
