@@ -1,4 +1,8 @@
 #!bash
 # vim:set ft=sh tabstop=2 softtabstop=2 shiftwidth=2 expandtab autoindent copyindent :
 
-export PATH="$HOME/.rd/bin:$PATH"
+x="$HOME/.rd/bin"
+if [ -d "$x" ]
+then
+  export PATH="$x:$PATH"
+fi
