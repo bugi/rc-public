@@ -3,7 +3,8 @@
 
 function pathAdd ()
 {
-  # Append all arguments to PATH if they exist as directories.
+  # Prepend all arguments to PATH if they exist as directories.
+  # Prepend are added in reverse order.
   # example usage:
   #   pathAdd "$HOME/.rd/bin"
   local x
