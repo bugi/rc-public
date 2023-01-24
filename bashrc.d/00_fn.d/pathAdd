@@ -1,0 +1,17 @@
+#!bash
+# vim:set ft=sh tabstop=2 softtabstop=2 shiftwidth=2 expandtab autoindent copyindent :
+
+function pathAdd ()
+{
+  # Append all arguments to PATH if they exist as directories.
+  # example usage:
+  #   pathAdd "$HOME/.rd/bin"
+  local x
+  for x in "$@"
+  do
+    if [ -d "$x" ]
+    then
+      export PATH="$x:$PATH"
+    fi
+  done
+}
