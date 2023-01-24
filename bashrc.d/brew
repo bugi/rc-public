@@ -57,17 +57,18 @@ gnubin_whitelist+=( gsed )
 
 for f in "${gnubin_whitelist[@]}"
 do
-  g="${HOMEBREW_PREFIX}/opt/$f/libexec/gnubin"
+  p="${HOMEBREW_PREFIX}/opt/$f"
+  g="$p/libexec/gnubin"
   if [ -e "$g" ]
   then
     export PATH="$g:$PATH"
   fi
-  g="${HOMEBREW_PREFIX}/opt/$f/libexec/gnuman"
+  g="$p/libexec/gnuman"
   if [ -e "$g" ]
   then
     export MANPATH="$g:${MANPATH+:$MANPATH}"
   fi
-  g="${HOMEBREW_PREFIX}/opt/$f/share/info"
+  g="$p/share/info"
   if [ -e "$g" ]
   then
     export INFOPATH="$g:${INFOPATH+:$INFOPATH}"
@@ -75,6 +76,38 @@ do
 done
 
 unset gnubin_whitelist
+
+unset f p g
+
+
+# list of brew bins that must be added manually to PATH,
+# ie is keg-only.  This is often because the package
+# has conflicts with another package.  An example is
+# mysql-client vs mysql.
+keg_whitelist=()
+keg_whitelist+=( mysql-client )
+
+for f in "${keg_whitelist[@]}"
+do
+  p="${HOMEBREW_PREFIX}/opt/$f"
+  g="$p/bin"
+  if [ -e "$g" ]
+  then
+    export PATH="$g:$PATH"
+  fi
+  g="$p/share/main"
+  if [ -e "$g" ]
+  then
+    export MANPATH="$g:${MANPATH+:$MANPATH}"
+  fi
+  g="$p/share/info"
+  if [ -e "$g" ]
+  then
+    export INFOPATH="$g:${INFOPATH+:$INFOPATH}"
+  fi
+done
+
+unset keg_whitelist
 
 # `brew shellenv` does something like this:
 # export HOMEBREW_PREFIX="/home/linuxbrew/.linuxbrew";
