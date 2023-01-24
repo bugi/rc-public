@@ -77,8 +77,6 @@ done
 
 unset gnubin_whitelist
 
-unset f p g
-
 
 # list of brew bins that must be added manually to PATH,
 # ie is keg-only.  This is often because the package
@@ -108,6 +106,8 @@ do
 done
 
 unset keg_whitelist
+
+unset f p g
 
 # `brew shellenv` does something like this:
 # export HOMEBREW_PREFIX="/home/linuxbrew/.linuxbrew";
