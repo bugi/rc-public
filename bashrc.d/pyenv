@@ -6,7 +6,7 @@
 #  https://github.com/pyenv/pyenv-virtualenv
 
 #  git clone https://github.com/pyenv/pyenv.git ~/.pyenv
-#  cd ~/.pyenv && src/configure && make -C src
+#  cd ~/.pyenv && ./src/configure && make -C src
 
 # You may need to install some libraries to get newer pythons to install.
 # There should be an error message to help you, but here's a hint:
