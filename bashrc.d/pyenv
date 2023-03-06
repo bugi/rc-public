@@ -5,12 +5,21 @@
 #  https://github.com/pyenv/pyenv
 #  https://github.com/pyenv/pyenv-virtualenv
 
+# install:
 #  git clone https://github.com/pyenv/pyenv.git ~/.pyenv
 #  cd ~/.pyenv && ./src/configure && make -C src
+# getting started:
+#  pyenv versions
+#  pyenv install --list
+#  pyenv install --list |grep '^[[:space:]]*[[:digit:]]' | sort -V
+#  pyenv install "$( pyenv install --list |grep '^[[:space:]]*[[:digit:]]' | sort -V |grep -v '[^0-9. ]' |tail -1 | sed -E 's/[[:space:]]//g ; s/[.][0-9]+$//' )"
+#  pyenv global "$( pyenv versions |grep -v system |sed -E 's/^[*]?[[:space:]]*// ; s/[[:space:]]+.*$//' |grep -v '[^0-9. ]' |tail -1 |sed -E 's/[.][0-9]+$//' )"
+#  pip3 install --upgrade pip wheel setuptools
 
 # You may need to install some libraries to get newer pythons to install.
 # There should be an error message to help you, but here's a hint:
 # sudo apt install libbz2-dev libncurses-dev libreadline-dev libssl-dev libsqlite3-dev
+# brew install pyenv bzip2 zlib
 
 if [ -x "$HOME/.pyenv/bin/pyenv" ]
 then
