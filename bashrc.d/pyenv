@@ -5,23 +5,30 @@
 #  https://github.com/pyenv/pyenv
 #  https://github.com/pyenv/pyenv-virtualenv
 
-# install:
+# install pyenv:
 #  git clone https://github.com/pyenv/pyenv.git ~/.pyenv
 #  cd ~/.pyenv && ./src/configure && make -C src
+#  git clone https://github.com/pyenv/pyenv-virtualenv.git ~/.pyenv/plugins/pyenv-virtualenv
 #  source THIS_FILE
-# getting started:
+#
+# install the latest python:
 #  pyenv versions
-#  pyenv install --list
-#  pyenv install --list |grep '^[[:space:]]*[[:digit:]]' | sort -V
-#  pyenv install "$( pyenv install --list |grep '^[[:space:]]*[[:digit:]]' | sort -V |grep -v '[^0-9. ]' |tail -1 | sed -E 's/[[:space:]]//g ; s/[.][0-9]+$//' )"
-#  pyenv global "$( pyenv versions |grep -v system |sed -E 's/^[*]?[[:space:]]*// ; s/[[:space:]]+.*$//' |grep -v '[^0-9. ]' |tail -1 |sed -E 's/[.][0-9]+$//' )"
+#  pyenv install --list | tail
+#  pyenv install --list | grep '^[[:space:]]*[[:digit:]]' | sort -V | tail
+#  py_latest_stable="$( pyenv install --list |grep '^[[:space:]]*[[:digit:]]' | sort -V |grep -v '[^0-9. ]' |tail -1 | sed -E 's/[[:space:]]//g' )"
+#  py_major_latest_stable="$( sed -E 's/[.][0-9]+$//' <<<"$py_latest_stable")"
+#  echo "py_latest_stable=$py_latest_stable  /  py_major_latest_stable=$py_major_latest_stable"
+#  pyenv install "$py_latest_stable"
+#  pyenv global "$py_latest_stable"
 #  hash -r
 #  pip3 install --upgrade pip wheel setuptools
 
 # You may need to install some libraries to get newer pythons to install.
-# There should be an error message to help you, but here's a hint:
-# sudo apt install libbz2-dev libncurses-dev libreadline-dev libssl-dev libsqlite3-dev
-# brew install pyenv bzip2 zlib
+# There should be an error message to help you, but here's some hints:
+# * sudo apt install libbz2-dev libncurses-dev libreadline-dev libssl-dev libsqlite3-dev
+# * brew install pyenv bzip2 zlib
+# * For centos7, this should be helpful:
+#   https://github.com/pyenv/pyenv/issues/2416#issuecomment-1326064266
 
 if [ -x "$HOME/.pyenv/bin/pyenv" ]
 then
