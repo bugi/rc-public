@@ -9,7 +9,7 @@
 # • https://tfswitch.warrensbox.com/Install/
 # • https://tgswitch.warrensbox.com/Install/
 
-# These works for both homebrew and linuxbrew:
+# These work for both homebrew and linuxbrew:
 # • brew install warrensbox/tap/tfswitch
 # • brew install warrensbox/tap/tgswitch
 # You do have to specify the full tap path.
