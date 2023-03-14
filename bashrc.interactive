@@ -8,7 +8,10 @@
 # bashrc.other_rc_directories.d/.
 
 OTHER_RC_DIRS=()
-. "$this_bashdir"/bashrc.other_rc_directories
+if [ -r "$this_bashdir"/bashrc.other_rc_directories ]
+then
+  . "$this_bashdir"/bashrc.other_rc_directories
+fi
 
 
 RC_public="$this_bashdir"
