@@ -5,7 +5,7 @@ function dedupPath ()
 {
   # Deduplicate strings like one finds in $PATH and $LD_LIBRARY_PATH.
   # Leaves the first copy of a directory in the variable.
-  # Removes the later ones, so preserves precendence.
+  # Removes the later ones, so preserves precedence.
   #
   # Accommodates spaces in elements.
   #
