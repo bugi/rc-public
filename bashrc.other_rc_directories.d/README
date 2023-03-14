@@ -1,0 +1,5 @@
+Make symlinks in this directory to other directories
+you want me to look in for other bash related files.
+
+Don't check in the symlinks.  No sense exposing your
+other rc directories.
