@@ -76,5 +76,6 @@ fi
 
 # grep: warning: GREP_OPTIONS is deprecated; please use an alias or script
 export GREP_OPTIONS='--exclude-dir=.git --exclude-dir=.hg --exclude-dir=.svn'
-alias grep='\grep'" $GREP_OPTIONS"
-unset GREP_OPTIONS
+GREP="$(type -P grep)"
+alias grep="$GREP $GREP_OPTIONS"
+unset GREP GREP_OPTIONS
