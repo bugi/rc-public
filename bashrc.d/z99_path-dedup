@@ -3,6 +3,8 @@
 
 # de-duplicates PATH entries
 export PATH="$( dedupPath "$PATH" )"
+
+# and removes current directory from PATH
 export PATH="${PATH#.:}"
 export PATH="${PATH%:.}"
 export PATH="${PATH#:}"
