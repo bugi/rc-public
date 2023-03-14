@@ -23,7 +23,7 @@ bash_RC_public="$RC_public/bashrc.d"
 
 # read all files in bashrc.d/ that don't end in .README
 declare bashdotd_filenames=()
-mapfile -d $'\0' bashdotd_filenames < <( find "${bash_RC_public}/" -maxdepth 1 -type f ! -name \*.sw? ! -name \*.README -print0 | LC_ALL=C sort -z )
+mapfile -d $'\0' bashdotd_filenames < <( find "${bash_RC_public}/" -maxdepth 1 -type f ! -name \*.sw? ! -name \*.README ! -name \*.md ! -name README -print0 | LC_ALL=C sort -z )
 for bashdotd_filename in "${bashdotd_filenames[@]}"
 do
   if [ -r "$bashdotd_filename" ] ; then . "$bashdotd_filename" ; fi
@@ -59,7 +59,9 @@ do
   if [ -r "${other_rc_dir_abs}" ]
   then
     # echo "  reading" 1>&2
+    pushd "$other_rc_dir" >/dev/null
     . "${other_rc_dir_abs}"
+    popd >/dev/null
   else
     :
     # echo "  unreadable" 1>&2
