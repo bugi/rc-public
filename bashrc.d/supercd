@@ -1,13 +1,13 @@
 #!bash
 # vim: set tabstop=2 softtabstop=2 shiftwidth=2 expandtab autoindent copyindent :
 
+function bin () { cd ~/usr/bin/"$1" ; }
+function _supercd_bin_complete () { _supercd_complete ~/usr/bin/ ; }
+shopt -s progcomp
+complete -o nospace -F _supercd_bin_complete bin
+
 function rc-public () { cd ~/.rc-public/"$1" ; }
 function _supercd_rc_public_complete () { _supercd_complete ~/.rc-public/ ; }
 shopt -s progcomp
 complete -o nospace -F _supercd_rc_public_complete rc-public
-
-function rc-private () { cd ~/.rc-private/"$1" ; }
-function _supercd_rc_private_complete () { _supercd_complete ~/.rc-private/ ; }
-shopt -s progcomp
-complete -o nospace -F _supercd_rc_private_complete rc-private
 
