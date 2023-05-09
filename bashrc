@@ -15,18 +15,16 @@ umask 022
 
 
 # make sure hostname is set and is the hostname, not the fqdn.
-# it's a stupid-common rookie mistake.
 if [ -z "$HOSTNAME" -o "${HOSTNAME%.*}" != "$HOSTNAME" ]
 then
-  HOSTNAME="${HOSTNAME:-$(hostname)}"
-  # HOSTNAME="$(hostname)"
-  HOSTNAME="${HOSTNAME%%.*}"
+  [ "${-/i/}" = "$-" ] || echo "Your local hostname shouldn't be a fully qualified domain name." 1>&2
+  HOSTNAME="$(hostname -s)"
   export HOSTNAME
 fi
 
 
 
-# yeah, java :(
+# ancient java :(
 if [ -d /usr/lib/jvm/java-6-sun ]
 then
   JAVA_HOME=/usr/lib/jvm/java-6-sun
@@ -82,9 +80,16 @@ export PATH
 
 
 # for wlroots/sway manual install
-LD_LIBRARY_PATH=/usr/local/lib/x86_64-linux-gnu/
-export LD_LIBRARY_PATH
+case "$(uname -s)" in
+(Linux)
+  LD_LIBRARY_PATH=/usr/local/lib/x86_64-linux-gnu/
+  export LD_LIBRARY_PATH
+  ;;
+esac
 
+if [ "${-/i/}" = "$-" ] # i is not present in shell options, so is non-interactive
+                        # (handled via bashrc.d if interactive)
+then
 # nvm is used to manage which version of node/npm to use
 # https://github.com/nvm-sh/nvm
 # Reading nvm's config here instead
@@ -94,6 +99,7 @@ export LD_LIBRARY_PATH
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ "${-/i/}" != "$-" ] && [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion if in an interactive shell
+fi
 
 
 if [ "${-/i/}" = "$-" ] # i is not present in shell options, so is non-interactive
