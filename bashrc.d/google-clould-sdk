@@ -1,6 +1,9 @@
 #!bash
 # vim: set tabstop=2 softtabstop=2 shiftwidth=2 expandtab autoindent copyindent :
 
+# Google Cloud cli tools
+# https://cloud.google.com/sdk/docs/install
+
 # The next line updates PATH for the Google Cloud SDK.
 if [ -f "${HOME}/google-cloud-sdk/path.bash.inc" ]; then . "${HOME}/google-cloud-sdk/path.bash.inc"; fi
 
