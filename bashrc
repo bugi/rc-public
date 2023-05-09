@@ -96,6 +96,20 @@ export NVM_DIR="$HOME/.nvm"
 [ "${-/i/}" != "$-" ] && [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion if in an interactive shell
 
 
+if [ "${-/i/}" = "$-" ] # i is not present in shell options, so is non-interactive
+                        # (handled via bashrc.d if interactive)
+then
+# Google Cloud cli tools
+# https://cloud.google.com/sdk/docs/install
+# Here instead of in a separate file because gcp's install searches this file for magic strings.
+# The next line updates PATH for the Google Cloud SDK.
+if [ -f "${HOME}/google-cloud-sdk/path.bash.inc" ]; then . "${HOME}/google-cloud-sdk/path.bash.inc"; fi
+#
+# The next line enables shell command completion for gcloud.
+if [ -f "${HOME}/google-cloud-sdk/completion.bash.inc" ]; then . "${HOME}/google-cloud-sdk/completion.bash.inc"; fi
+fi
+
+
 #
 #
 #
