@@ -1,0 +1,12 @@
+#!bash
+# vim:set ft=sh tabstop=2 softtabstop=2 shiftwidth=2 expandtab autoindent copyindent :
+
+# nvm is used to manage which version of node/npm to use
+# https://github.com/nvm-sh/nvm
+if [ -d "$HOME/.nvm" ]
+then
+  export NVM_DIR="$HOME/.nvm"
+  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+  [ "${-/i/}" != "$-" ] && [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion if in an interactive shell
+fi
+
