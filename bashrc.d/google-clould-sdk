@@ -4,6 +4,9 @@
 # Google Cloud cli tools
 # https://cloud.google.com/sdk/docs/install
 
+# to enable numpy if you've installed it yourself
+export CLOUDSDK_PYTHON_SITEPACKAGES=1
+
 # The next line updates PATH for the Google Cloud SDK.
 if [ -f "${HOME}/google-cloud-sdk/path.bash.inc" ]; then . "${HOME}/google-cloud-sdk/path.bash.inc"; fi
 
