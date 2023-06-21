@@ -11,3 +11,15 @@ alias ssh_='ssh    -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
 alias scp_='scp    -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
 alias _ssh=SSH
 alias _scp=SCP
+
+
+# For those cases where you must manually load a set of ssh keys
+# after each login.  You are responsible for setting SSH_ASKPASS
+# and friends if applicable before calling this function.
+#
+# Your private rc's from bashrc.other_rc_directories.d/ should append to SSH_KEYS_FILES[].
+SSH_KEYS_FILES=()
+init_ssh_add ()
+{
+  ssh-add "${SSH_KEYS_FILES[@]}"
+}
