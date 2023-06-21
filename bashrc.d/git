@@ -27,7 +27,9 @@ GIT_PS1_SHOWCOLORHINTS=true
 GIT_PS1_HIDE_IF_PWD_IGNORED=true
 
 # enable programmable completion features
-for f in "${HOME}/.git-prompt.sh" \
+for f in \
+/usr/share/git-core/contrib/completion/git-prompt.sh \
+"${HOME}/.git-prompt.sh" \
 ; do
   if [ -r "$f" ]
   then
