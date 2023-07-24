@@ -71,9 +71,17 @@ then
 fi
 
 # my own stuff comes first
-PATH="${HOME}/usr/bin:${PATH}"
-PATH="${HOME}/bin:${PATH}"
-PATH="${HOME}/.local/bin:${PATH}"
+for f in \
+  "${HOME}/usr/bin-public" \
+  "${HOME}/usr/bin" \
+  "${HOME}/bin" \
+  "${HOME}/.local/bin" \
+; do
+  if [ -d "$f"/ ]
+  then
+    PATH="${f}:${PATH}"
+  fi
+done
 # PATH=".:${PATH}"
 
 export PATH
