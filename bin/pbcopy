@@ -15,10 +15,10 @@ die ()
 do_darwin ()
 {
   local mode="$1" ; shift
-  exe=()
+  local exe=()
   read -r -d'\n' -a exe < <(type -apf "$mode" )
-  EXE="${exe[1]}"
-  exec "${exe[1]}" "$@"
+  local EXE="${exe[-1]}"
+  exec "$EXE" "$@"
 }
 
 do_wayland ()
