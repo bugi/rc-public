@@ -1,0 +1,168 @@
+#!/bin/bash
+# vim: set tabstop=2 softtabstop=2 shiftwidth=2 expandtab autoindent copyindent :
+
+die ()
+{
+  local f
+  for f in "$@"
+  do
+    printf '%s' "$f" 1>&2
+    echo
+  done
+  exit 1
+}
+
+do_darwin ()
+{
+  local mode="$1" ; shift
+  exe=()
+  read -r -d'\n' -a exe < <(type -apf "$mode" )
+  EXE="${exe[1]}"
+  exec "${exe[1]}" "$@"
+}
+
+do_wayland ()
+{
+  local mode="$1" ; shift
+  case "$1" in
+    (pbcopy)
+      if type -f wl-copy >/dev/null 2>&1
+      then
+        exec wl-copy "$@"
+      else
+        die "can't '$mode' because there's no wl-copy"
+      fi
+      ;;
+    (pbpaste)
+      if type -f wl-paste >/dev/null 2>&1
+      then
+        exec wl-paste "$@"
+      else
+        die "can't '$mode' because there's no wl-copy"
+      fi
+      ;;
+    (*) die "unknown mode '$mode' for wayland" ;;
+  esac
+}
+
+do_x11 ()
+{
+  local mode="$1" ; shift
+  case "$1" in
+    (pbcopy)
+      if type -f xsel >/dev/null 2>&1
+      then
+        exec xsel --clipboard --input "$@"
+      elif type -f xclip >/dev/null 2>&1
+      then
+        exec xclip -selection clipboard "$@"
+      else
+        die "can't '$mode' because there's no xsel nor xclip"
+      fi
+      ;;
+    (pbpaste)
+      if type -f xclip >/dev/null 2>&1
+      then
+        exec xclip -selection clipboard -o "$@"
+      elif type -f xsel >/dev/null 2>&1
+      then
+        exec xsel --clipboard --output "$@"
+      else
+        die "can't '$mode' because there's no xsel nor xclip"
+      fi
+      ;;
+    (*) die "unknown mode '$mode' for x11" ;;
+  esac
+}
+
+do_ms ()
+{
+  local mode="$1" ; shift
+  case "$1" in
+    (pbcopy)
+      exec clip.exe "$@"
+      ;;
+    (pbpaste)
+      exec powershell.exe -command "Get-Clipboard" "$@"
+      ;;
+    (*) die "unknown mode '$mode' for ms" ;;
+  esac
+}
+
+
+# the wayland way
+if [ -n "$WAYLAND_DISPLAY" ]
+then
+  do_wayland "$(basename "$0")" "$@"
+  die "can't happen"
+fi
+
+# the x11 way
+if [ -n "$DISPLAY" ]
+then
+  do_x11 "$(basename "$0")" "$@"
+  die "can't happen"
+fi
+
+# freedesktop.org way
+# https://specifications.freedesktop.org/basedir-spec/latest/ar01s03.html
+case "$XDG_SESSION_TYPE" in
+  (x11)
+    do_x11 "$(basename "$0")" "$@"
+    die "can't happen"
+    ;;
+  (wayland)
+    do_wayland "$(basename "$0")" "$@"
+    die "can't happen"
+    ;;
+esac
+
+
+case "$OSTYPE" in
+(darwin*) # Mac OSX
+  # We don't check for macos first, because there are x11 servers for macos.
+  # If x11 or wayland are detected but fail, this will block will still run.
+  do_darwin "$(basename "$0")" "$@"
+  die "can't happen"
+  ;;
+(linux-gnu*)
+  if ! grep -q Microsoft /proc/version
+  then
+    # For WSL if x11 or wayland isn't running.
+    # WSL transparently handles clipboard sharing with x11! and presumably wayland.
+    do_ms "$(basename "$0")" "$@"
+    die "can't happen"
+  fi
+  ;;
+esac
+
+
+# the systemd way
+if type -f loginctl >/dev/null 2>&1
+then
+  t="$( loginctl show-session $(loginctl | grep " $(id -un) " | awk '{print $1}') -p Type )"
+  case "$t" in
+  (Type=x11)
+    do_x11 "$(basename "$0")" "$@"
+    die "can't happen"
+    ;;
+  (Type=wayland)
+    do_wayland "$(basename "$0")" "$@"
+    die "can't happen"
+    ;;
+  esac
+fi
+
+
+case "$OSTYPE" in
+(cygwin*|msys*|win32*)
+  # cygwin: POSIX compatibility layer and Linux environment emulation for Windows
+  # msys: Lightweight shell and GNU utilities compiled for Windows (part of MinGW)
+  # win32: I'm not sure this can happen.
+  # This might be caught as x11 or wayland before things get this far.
+  do_ms "$(basename "$0")" "$@"
+  die "can't happen"
+  ;;
+esac
+
+die "ERROR: unsupported configuration.  Please fix this script."

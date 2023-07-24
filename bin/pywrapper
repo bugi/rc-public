@@ -1,0 +1,400 @@
+#!/usr/bin/env bash
+# vim: set tabstop=2 softtabstop=2 shiftwidth=2 expandtab autoindent copyindent :
+
+# == Purpose ==
+#
+# This tool makes it easy to use many python-based tools, including
+# visidata, yq, conan, mycli, and ansible.
+#
+# Straight up pyenv might be better for your use case.  You should evaluate
+# on a case by case basis.
+#
+# For yq, there is a python one and a golang one.  Frankly, you're probably better
+# off using the golang one rather than the python one.
+# Get it from your native package manager, homebrew, or https://github.com/mikefarah/yq
+
+
+# == Basic usage ==
+#
+# Symlink this file to the name of a tool available via pip.
+# If the tool has aliases, symlink those too.
+#
+# Example setup:
+#   ln -s pywrapper yq
+#   ln -s yq xq
+#
+# Example setup:
+#   cp -a pywrapper conan
+#   ./conan =install
+#
+# Example usage:
+#   xq --help
+# That will build the python virtual environment (in a directory called yq.d)
+# (yes, yq.d not xq.d) then run xq with the "--help" argument.
+#
+# Runs after the first won't try to install into the python environment
+# unless you explicitly ask it to.
+
+
+# == Features, requirements, and caveats ==
+#
+# • You can use different python versions via pyenv.
+# • Supports both python3 and python2.
+# • Many libraries have dropped support for python2.  Dealing with that is on you.
+# • Assumes that you start with pip and virtualenv available.
+#
+# • This tool overlaps with but doesn't cover the same use case as virtualenvwrapper.
+# • This tool can use pythons installed and managed by pyenv.
+# • This tool can use external configuration files to override static configurations in confdata.
+#
+# • Configuration can be done by placing json files in ~/.pywrapper/.
+# • jq is required for parsing configuration.
+#
+# • A few configurations are provided embedded in this file as examples.
+#
+# • Simple python tools require no configuration.  Those default to using whatever
+#   python3 is handy.
+
+# == Configuration format ==
+#
+# The first element in the packages list is special.  It is
+# the basis for the place where the python virtual environment
+# is located.  If it has a version number specified, that will
+# be included in the directory name.  This is a feature, to
+# help users not have to deal with crufty venvs when their pinned
+# version changes.
+
+
+
+if ! type -P jq >/dev/null
+then
+  echo "jq is required for parsing configuration." 1>&2
+  exit 1
+fi
+
+
+# Below are some builtin configurations.  They are here both
+# as examples and to provide some basic built in functionality.
+
+# To override the builtin configurations, put them in a file in
+# ~/.pywrapper/.  For example, but the visidata json into a file called
+# ~/.pywrapper/visidata.json and symlink vd.json to that.
+
+
+set_via_heredoc() { IFS='\n' read -r -d '' "${1}" || true ; }
+
+declare -A confdata=()
+
+set_via_heredoc 'confdata[visidata]' <<'EOF'
+    {
+      "name": "visidata",
+      "aliases": [
+        "vd"
+      ],
+      "packages": [
+        "visidata",
+        "openpyxl"
+      ],
+      "python": {
+        "major_version": "3",
+        "pyenv_version": "3.8.10"
+      }
+    }
+EOF
+
+set_via_heredoc 'confdata[rich]' <<'EOF'
+    { "name": "rich",
+      "aliases": [],
+      "packages": [ "rich-cli" ],
+      "python": { "major_version": "3" }
+    }
+EOF
+
+confdata[vd]="${confdata[visidata]}"
+
+set_via_heredoc 'confdata[mycli]' <<'EOF'
+  {
+    "name": "mycli",
+    "aliases": [],
+    "packages": [
+      "mycli",
+      "paramiko"
+    ],
+    "python": {
+      "major_version": "3"
+    }
+  }
+EOF
+
+set_via_heredoc 'confdata[yq]' <<'EOF'
+    {
+      "name": "yq",
+      "aliases": [ "xq" ],
+      "packages": [ "yq" ],
+      "python": {
+        "major_version": "3"
+      }
+    }
+EOF
+confdata[xq]="${confdata[yq]}"
+# there's another yq that we don't want to interfere with :(
+confdata[yq-]="${confdata[yq]}"
+confdata[xq-]="${confdata[yq]}"
+
+set_via_heredoc 'confdata[ansible]' <<'EOF'
+    {
+      "name": "ansible",
+      "aliases": [
+          "ansible-config" ,
+          "ansible-connection" ,
+          "ansible-console" ,
+          "ansible-doc" ,
+          "ansible-galaxy" ,
+          "ansible-inventory" ,
+          "ansible-lint" ,
+          "ansible-playbook" ,
+          "ansible-pull" ,
+          "ansible-vault"
+          ],
+      "packages": [ "ansible==2.9.17", "ansible-lint" ],
+      "python": {
+        "major_version": "3"
+      }
+    }
+EOF
+# For ansible, you might also want some of these packages: jmespath httplib2 simplejson docker
+
+for f in "${!confdata[@]}"
+do
+  confdata[$f]="$( jq '.file = "builtin"' <<<"${confdata[$f]}" )"
+  for k in $( jq -r '.aliases[]' <<<"${confdata[$f]}" )
+  do
+    confdata[$k]="${confdata[$f]}"
+  done
+done
+
+
+zero="$(readlink -f "$0")"
+bname="$(basename "$zero")"
+dname="$(dirname "$zero" )"
+zdname="$(dirname "$0" )"
+zbname="$(basename "$0")"
+
+vdir="$zdname"
+
+datafile="${HOME}/.pywrapper/${zbname}.json"
+if [ -r "$datafile" ]
+then
+  confdata[$zbname]="$( jq '.file = "'"$datafile"'"' <<<"$(cat "$datafile")" )"
+elif [ -z "${confdata[$zbname]}" ]
+then
+  # This heredoc will have variable interpolation, so be careful here.
+  set_via_heredoc "confdata[$zbname]" <<EOF
+  {
+    "name": "$zbname",
+    "packages": [ "$zbname" ],
+    "python": { "major_version": "3" },
+    "file": "default"
+  }
+EOF
+fi
+unset datafile
+
+if [ -z "${confdata[$zbname]}" ]
+then
+  echo "I could neither find nor construct any configuration for '$zbname'.  What?!" 1>&2
+  exit 1
+fi
+
+cnf="${confdata[$zbname]}"
+packages=( $( jq -r '.packages[]' <<<"${cnf}" ) )
+vdir="${vdir}/${packages[0]}.d"
+
+if [ "${#packages[@]}" -eq 0 ]
+then
+  echo "An empty list of packages must not happen." 1>&2
+  exit 1
+elif [ "${#packages[@]}" -gt 0 ] && [ "${packages[0]}" = null ]
+then
+  echo "There must be a non-empty list of packages." 1>&2
+  exit 1
+fi
+
+pyversion="$( jq -r ".python.major_version" <<<"${cnf}" )"
+if [ "$x" = null ]
+then
+  echo "The configuration must specify the python major version." 1>&2
+  exit 1
+fi
+
+pyenv_version="$( jq -r ".python.pyenv_version" <<<"${cnf}" )"
+if [ "$pyenv_version" = null ]
+then
+  pyenv_version=
+elif [ -z "$pyenv_version" ]
+then
+  pyenv_version=
+else
+  pyenv_version="$pyenv_version"
+fi
+if [ -n "$pyenv_version" ]
+then
+  if [ -z "$PYENV_ROOT" ]
+  then
+    export PYENV_ROOT="$HOME/.pyenv"
+  fi
+  if [ ! -d "$PYENV_ROOT" ]
+  then
+    echo "You asked for pyenv, but it's not installed at '$PYENV_ROOT'." 1>&2
+    exit 1
+  fi
+  export PATH="$PYENV_ROOT/bin:$PATH"
+  eval "$(pyenv init --path)"
+  eval "$(pyenv sh-shell "$pyenv_version")"
+  R=$?
+  if [ $R -ne 0 ]
+  then
+    echo "Python version $pyenv_version is not installed via pyenv."
+    echo "You will need to install that version manually or adjust the configuration file." 1>&2
+    echo "Something like: pyenv install $pyenv_version" 1>&2
+    exit $R
+  fi
+fi
+
+if [ -d "${vdir}" ]
+then
+  # assume it's all setup and ready to go
+  do_install=false
+else
+  do_install=true
+fi
+
+dorun=exec
+runcmd="$zbname"
+
+cont=true
+while $cont && [ $# -gt 0 ]
+do
+  # Parse wrapper-specific args from beginning of arg list.
+  # Wrapper-specific args start with "=" (think "--" but stacked) because
+  # I haven't seen that used for real args, so it's unlikely to conflict with real args.
+  # Once an arg that's not wrapper-specific is found,
+  # any other args are passed to the wrapped command.
+  case "$1" in
+    (=*)
+      # parse meta-args
+      # echo "PARSING meta-arg «$*»"
+      marg="${1#=}"
+      case "$marg" in
+      (upgrade|update|install)
+        # force upgrade of whatever's in the venv
+        shift
+        do_install=true
+        dorun=echo
+        ;;
+      (run)
+        # run something else in the context of the venv
+        shift
+        runcmd="$1"
+        shift
+        ;;
+      (echo)
+        # don't run; just show what would've been run
+        shift
+        dorun=echo
+        ;;
+      (*)
+        echo "I don't understand the meta-arg «$marg» of «$*»." 1>&2
+        exit 1
+        ;;
+      esac
+      ;;
+  (*) cont=false ;;
+  esac
+done
+
+case "$pyversion" in
+(2|3) ;;
+(*) echo "unsupported pyversion($pyversion)" 1>&2 ; exit 1 ;;
+esac
+
+venv_type=none
+if type -P virtualenv 2>&1 >/dev/null
+then
+  venv_type=virtualenv
+elif [ "$pyversion" = 3 ]
+then
+  venv_type=venv
+fi
+
+case "$venv_type" in
+(virtualenv)
+  # preferring virtualenv instead of venv module to specify --python=
+  # even for python3
+  if $do_install
+  then
+    virtualenv --python="$(type -P python"$pyversion")" "${vdir}"
+    R=$?
+    if [ $R -ne 0 ]
+    then
+      echo "virtualenv failed" 1>&2
+      exit $R
+    fi
+  fi
+  ;;
+(venv)
+  $do_install && python"$pyversion" -m venv "${vdir}"
+  R=$?
+  if [ $R -ne 0 ]
+  then
+    echo "venv failed" 1>&2
+    exit $R
+  fi
+  ;;
+(none)
+  echo "no python virtualizer available" 1>&2
+  exit 1
+  ;;
+(*)
+  echo "can't happen and no python virtualizer available" 1>&2
+  exit 1
+  ;;
+esac
+
+if [ -r "${vdir}"/bin/activate ]
+then
+  source "${vdir}"/bin/activate
+  R=$?
+  if [ $R -ne 0 ]
+  then
+    echo "activating python virtual environment failed" 1>&2
+    exit $R
+  fi
+fi
+
+pip=false
+if type -P "pip$pyversion" 2>&1 >/dev/null
+then
+  pip="pip$pyversion"
+elif type -P pip 2>&1 >/dev/null
+then
+  pip=pip
+else
+  echo "I found no pip.  Sorry, this isn't working out." 1>&2
+  exit 1
+fi
+
+if $do_install
+then
+  $pip install --upgrade pip wheel setuptools
+  $pip install --upgrade "${packages[@]}"
+fi
+
+CMD=( "${runcmd}" "$@" )
+
+case "$dorun" in
+  (echo) echo "${CMD[*]}" ;;
+  (exec) exec "${CMD[@]}" ; echo "can't happen" 1>&2 ; exit 1 ;;
+  (yes) "${CMD[@]}" ; exit $? ;;
+esac
+

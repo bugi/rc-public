@@ -1,0 +1,97 @@
+#!/usr/bin/env bash
+# "Super aliases" like this script allow for symlinks
+# instead of aliases, so can be used with `watch`.
+#
+# This can also be used to enhance the command being wrapped.
+
+# To use this tool, write a script that looks something like this:
+#   #!/usr/bin/env bash
+#   exec superalias terraform "$@"
+# If you call that script "tf" then tf will act like an alias for terraform,
+# but you can use it with the `watch` command.
+#
+# In cases like terraform, you should also activate shell completion:
+#   if type -P tf >/dev/null
+#   then
+#     complete -C "$(type -P terraform)" tf
+#   fi
+
+
+
+function find_real_exe ()
+{
+  # Picks the first executable in PATH that is not equivalent to the first one.
+  # You should pass in one argument, the real command name.
+  # If you don't, I will automatically choose based on $0.
+  # From $0 I could pick wrong because of symlinks.  You've been warned.
+  local cmd="$1"
+  if [ -z "$cmd" ]
+  then
+    cmd="${0##*/}"
+  fi
+  type -apf "$cmd" >/dev/null 2>&1 || return $?
+  local full0="$($readlink -f "$0")"
+  # echo "full0:$full0" 1>&2
+  local f full exe=
+  # todo: use `while read` instead of `for` to manage paths with spaces
+  for f in $( type -apf "$cmd" )
+  do
+    if [ -n "$exe" ]
+    then
+      break
+    fi
+    full="$($readlink -f "$f")"
+    if [ "$full" != "$full0" ]
+    then
+      if [ -n "$full" ]
+      then
+        exe="$full"
+      fi
+    fi
+  done
+  if [ -z "$exe" ]
+  then
+    return 1
+  fi
+  echo "$exe"
+}
+
+readlink=las8udf8sdkgibberish
+case "$OSTYPE" in
+(linux-gnu*)
+  readlink=readlink
+  ;;
+(darwin*) # Mac OSX
+  readlink=greadlink
+  if ! type "$readlink" >/dev/null 2>&1
+  then
+    echo "ERROR: '$OSTYPE' supported only if $readlink is present in PATH.  It is not." 1>&2
+    exit 1
+  fi
+  ;;
+(cygwin|msys|win32|freebsd*)
+  # cygwin: POSIX compatibility layer and Linux environment emulation for Windows
+  # msys: Lightweight shell and GNU utilities compiled for Windows (part of MinGW)
+  # win32: I'm not sure this can happen.
+  echo "ERROR: '$OSTYPE' unsupported" 1>&2
+  exit 1
+  ;;
+(*)
+  echo "ERROR: '$OSTYPE' unsupported" 1>&2
+  exit 1
+  ;;
+esac
+
+
+name="$1" ; shift
+EXE="$( find_real_exe "$name" )" || exit
+# echo "$? EXE:$EXE" ; EXE="$( find_real_exe )" || exit ; echo "$? EXE:$EXE" ; exit
+
+if [ "$1" = =which ]
+then
+  echo "$EXE"
+  exit
+fi
+
+exec "$EXE" "$@"
+

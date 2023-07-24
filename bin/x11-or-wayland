@@ -1,0 +1,42 @@
+#!/bin/bash
+# vim: set tabstop=2 softtabstop=2 shiftwidth=2 expandtab autoindent copyindent :
+
+# Returns true if the detected renderer matches what the caller specified as $1.
+# The "unknown" can be specified as $1.
+#
+# Returns true and the detected renderer if there is nothing in $1
+# and the renderer is x11 or wayland.
+#
+# Returns false and the detected renderer if there is nothing in $1
+# and the renderer is not x11 or wayland.
+#
+# Returns false and "unknown" if no known renderer could be detected.
+
+renderer=unknown
+
+if [ -n "$WAYLAND_DISPLAY" ]
+then
+  renderer=wayland
+elif [ -n "$DISPLAY" ]
+then
+  renderer=x11
+elif [ -n "$XDG_SESSION_ID" ]
+then
+  answer="$( loginctl show-session "$XDG_SESSION_ID" -p Type | cut -s -f2 -d= )"
+  case "$answer" in
+    (x11|wayland) renderer="$answer" ;;
+    (tty) renderer=tty ;; # means no display manager, like if one were to tunnel x11 via ssh
+  esac
+fi
+
+if [ -n "$1" ] && [ "$1" = "$renderer" ]
+then
+  exit 0
+fi
+
+case "$renderer" in
+  (x11|wayland) echo "$renderer" ; exit 0 ;;
+  (tty) echo unknown ; exit 1 ;;
+  (*) echo "$renderer" ; exit 1 ;;
+esac
+
