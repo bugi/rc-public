@@ -106,23 +106,6 @@ case "$XDG_SESSION_TYPE" in
 esac
 
 
-case "$OSTYPE" in
-(darwin*) # Mac OSX
-  # We don't check for macos first, because there are x11 servers for macos.
-  # If x11 or wayland are detected but fail, this will block will still run.
-  do_darwin "$(basename "$0")" "$@"
-  ;;
-(linux-gnu*)
-  if ! grep -q Microsoft /proc/version
-  then
-    # For WSL if x11 or wayland isn't running.
-    # WSL transparently handles clipboard sharing with x11! and presumably wayland.
-    do_ms "$(basename "$0")" "$@"
-  fi
-  ;;
-esac
-
-
 # the systemd way
 if type -f loginctl >/dev/null 2>&1
 then
@@ -139,6 +122,19 @@ fi
 
 
 case "$OSTYPE" in
+(darwin*) # Mac OSX
+  # We don't check for macos first, because there are x11 servers for macos.
+  # If x11 or wayland are detected but fail, this will block will still run.
+  do_darwin "$(basename "$0")" "$@"
+  ;;
+(linux-gnu*)
+  if ! grep -q Microsoft /proc/version
+  then
+    # For WSL if x11 or wayland isn't running.
+    # WSL transparently handles clipboard sharing with x11! and presumably wayland.
+    do_ms "$(basename "$0")" "$@"
+  fi
+  ;;
 (cygwin*|msys*|win32*)
   # cygwin: POSIX compatibility layer and Linux environment emulation for Windows
   # msys: Lightweight shell and GNU utilities compiled for Windows (part of MinGW)
@@ -148,4 +144,5 @@ case "$OSTYPE" in
   ;;
 esac
 
-die "ERROR: unsupported configuration.  Please fix this script."
+
+die "ERROR: unsupported configuration.  Please fix this wrapper script."
