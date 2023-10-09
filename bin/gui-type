@@ -138,16 +138,15 @@ then
 fi
 
 
-# [ -n "$wanted" ] is taken care of earlier.
 # x11-or-wayland is taken care of above, manifesting below as $R_on_match.
 
 if $isQuartz
 then
-  echo quartz
+  [ -z "$wanted" ] && echo quartz
   exit $R_on_match
 elif $isTTY
 then
-  echo tty
+  [ -z "$wanted" ] && echo tty
   exit $R_on_match
 fi
 
