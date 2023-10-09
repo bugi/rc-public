@@ -1,0 +1,157 @@
+#!/bin/bash
+# vim: set tabstop=2 softtabstop=2 shiftwidth=2 expandtab autoindent copyindent :
+
+# Tells user what renderer is in use.
+#
+# Returns true if $1 is specified and that renderer is available for use.
+# Returns false if $1 is specified and that renderer is available for use.
+# No text is returned when $1 is specified.
+#
+# $1 can be specified as "unknown".
+#
+# Returns true and a renderer name if one is detected, unless $1 is
+# specified.  If there is more than one renderer, the more native one is
+# returned.  For example, quartz is returned on macos even if an Xorg
+# server is running.  Wayland is returned when both Wayland and Xorg are
+# running.
+#
+# "tty" can be returned, but it is not the fallback.
+#
+# Returns false and "unknown" if no known renderer could be detected.
+
+# If called as program name x11-or-wayland, always returns false
+# if neither x11 nor wayland is available for use.
+
+wanted="$1" ; shift
+bname="$(basename "$0")"
+
+check_macos_gui ()
+{
+  command -v swift >/dev/null && swift <(cat <<"EOF"
+  import Security
+  var attrs = SessionAttributeBits(rawValue:0)
+  let result = SessionGetInfo(callerSecuritySession, nil, &attrs)
+  exit((result == 0 && attrs.contains(.sessionHasGraphicAccess)) ? 0 : 1)
+EOF
+  )
+}
+
+# true if was called as x11-or-wayland
+is_x11_or_wayland=false
+if [ "$bname" = x11-or-wayland ]
+then
+  is_x11_or_wayland=true
+fi
+
+special_x11_or_wayland ()
+{ # exits if the special case of x11-or-wayland is satisfied
+  # If it returns, it returns true, but true doesn't mean anything.
+  if ! $is_x11_or_wayland
+  then
+    true
+    return
+  fi
+  # check the x11-or-wayland case early to avoid OS calls in a common case
+  if [ -n "$wanted" ]
+  then
+    if $isWayland && [ "$wanted" = wayland ]
+    then
+      exit 0
+    elif $isX11 && [ "$wanted" = x11 ]
+    then
+      exit 0
+    fi
+  elif [ -z "$wanted" ]
+  then
+    if $isWayland
+    then
+      echo wayland
+      exit 0
+    elif $isX11
+    then
+      echo x11
+      exit 0
+    fi
+  fi
+  true
+}
+
+
+isWayland=false
+if [ -n "$WAYLAND_DISPLAY" ]
+then
+  isWayland=true
+  [ "$wanted" = wayland ] && exit 0
+fi
+
+isX11=false
+if [ -n "$DISPLAY" ]
+then
+  isX11=true
+  [ "$wanted" = x11 ] && exit 0
+fi
+
+special_x11_or_wayland
+
+isQuartz=false
+if check_macos_gui
+then
+  isQuartz=true
+  if ! $is_x11_or_wayland
+  then # quick path to avoid path search for loginctl
+    [ "$wanted" = quartz ] && exit 0
+    [ "$wanted" = macos ] && exit 0
+  fi
+fi
+
+isTTY=false
+if [ -n "$XDG_SESSION_ID" ] && type -f loginctl >/dev/null 2>&1
+then
+  answer="$( loginctl show-session "$XDG_SESSION_ID" -p Type | cut -s -f2 -d= )"
+  case "$answer" in
+    (x11)
+      isX11=true
+      [ "$wanted" = "$answer" ] && exit 0
+      ;;
+    (wayland)
+      isWayland=true
+      [ "$wanted" = "$answer" ] && exit 0
+      ;;
+    (tty)
+      # means no display manager, like if one were to tunnel x11 via ssh
+      isTTY=true
+      if ! $is_x11_or_wayland
+      then
+        [ "$wanted" = "$answer" ] && exit 0
+      fi
+      ;;
+  esac
+fi
+
+special_x11_or_wayland
+
+# Return is special if called as x11-or-wayland.
+R_on_match=0
+if $is_x11_or_wayland
+then
+  R_on_match=1
+fi
+
+
+# [ -n "$wanted" ] is taken care of earlier.
+# x11-or-wayland is taken care of above, manifesting below as $R_on_match.
+
+if $isQuartz
+then
+  echo quartz
+  exit $R_on_match
+elif $isTTY
+then
+  echo tty
+  exit $R_on_match
+fi
+
+[ "$wanted" = unknown ] && exit $R_on_match
+
+echo unknown
+exit 1
