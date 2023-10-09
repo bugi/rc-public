@@ -24,7 +24,7 @@ do_darwin ()
 do_wayland ()
 {
   local mode="$1" ; shift
-  case "$1" in
+  case "$mode" in
     (pbcopy)
       if type -f wl-copy >/dev/null 2>&1
       then
@@ -48,7 +48,7 @@ do_wayland ()
 do_x11 ()
 {
   local mode="$1" ; shift
-  case "$1" in
+  case "$mode" in
     (pbcopy)
       if type -f xsel >/dev/null 2>&1
       then
@@ -78,7 +78,7 @@ do_x11 ()
 do_ms ()
 {
   local mode="$1" ; shift
-  case "$1" in
+  case "$mode" in
     (pbcopy)
       exec clip.exe "$@"
       ;;
