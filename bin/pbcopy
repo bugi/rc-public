@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # vim: set tabstop=2 softtabstop=2 shiftwidth=2 expandtab autoindent copyindent :
 
+bname="$(basename "$0")"
+
 die ()
 {
   local f
@@ -85,23 +87,23 @@ do_ms ()
 # the wayland way
 if [ -n "$WAYLAND_DISPLAY" ]
 then
-  do_wayland "$(basename "$0")" "$@"
+  do_wayland "$bname" "$@"
 fi
 
 # the x11 way
 if [ -n "$DISPLAY" ]
 then
-  do_x11 "$(basename "$0")" "$@"
+  do_x11 "$bname" "$@"
 fi
 
 # freedesktop.org way
 # https://specifications.freedesktop.org/basedir-spec/latest/ar01s03.html
 case "$XDG_SESSION_TYPE" in
   (x11)
-    do_x11 "$(basename "$0")" "$@"
+    do_x11 "$bname" "$@"
     ;;
   (wayland)
-    do_wayland "$(basename "$0")" "$@"
+    do_wayland "$bname" "$@"
     ;;
 esac
 
@@ -112,10 +114,10 @@ then
   t="$( loginctl show-session $(loginctl | grep " $(id -un) " | awk '{print $1}') -p Type )"
   case "$t" in
   (Type=x11)
-    do_x11 "$(basename "$0")" "$@"
+    do_x11 "$bname" "$@"
     ;;
   (Type=wayland)
-    do_wayland "$(basename "$0")" "$@"
+    do_wayland "$bname" "$@"
     ;;
   esac
 fi
@@ -125,14 +127,14 @@ case "$OSTYPE" in
 (darwin*) # Mac OSX
   # We don't check for macos first, because there are x11 servers for macos.
   # If x11 or wayland are detected but fail, this will block will still run.
-  do_darwin "$(basename "$0")" "$@"
+  do_darwin "$bname" "$@"
   ;;
 (linux-gnu*)
   if ! grep -q Microsoft /proc/version
   then
     # For WSL if x11 or wayland isn't running.
     # WSL transparently handles clipboard sharing with x11! and presumably wayland.
-    do_ms "$(basename "$0")" "$@"
+    do_ms "$bname" "$@"
   fi
   ;;
 (cygwin*|msys*|win32*)
@@ -140,7 +142,7 @@ case "$OSTYPE" in
   # msys: Lightweight shell and GNU utilities compiled for Windows (part of MinGW)
   # win32: I'm not sure this can happen.
   # This might be caught as x11 or wayland before things get this far.
-  do_ms "$(basename "$0")" "$@"
+  do_ms "$bname" "$@"
   ;;
 esac
 
