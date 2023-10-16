@@ -3,10 +3,7 @@
 
 # enable bash programmable completion features
 for f in \
-  /etc/bash_completion \
-  /etc/bash_completion.d \
-  /usr/share/bash-completion/bash_completion \
-  /usr/local/etc/bash_completion.d \
+  "$HOMEBREW_PREFIX"/etc/bash_completion.d \
 ; do
   if [ -r "$f" ]
   then
