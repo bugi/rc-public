@@ -1,7 +1,7 @@
 #!bash
 # vim:set ft=sh tabstop=2 softtabstop=2 shiftwidth=2 expandtab autoindent copyindent :
 
-# This is a sample bash_profile.
+# This is a stub bash_profile.  Your .bashrc must handle any complexities.
 #
 # I don't symlink it to ~/.bash_profile because
 # other utilities append to it.  Those stanzas
@@ -13,6 +13,7 @@
 # COPY this file as ~/.bash_profile
 #
 
+if [ -n "$BASH_ENV" ] ; then export BASH_ENV= ; fi   # runs away screaming
 if [ -f ~/.bashrc ]; then . ~/.bashrc; fi
 
 # Below here is stuff that automated tools added.
