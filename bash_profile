@@ -16,9 +16,9 @@
 # COPY this file as ~/.bash_profile  or  ~/.profile
 #
 
-if [ -n "$BASH_ENV" ] ; then export BASH_ENV= ; fi   # runs away screaming
 if [ -n "$BASH_VERSION" ]
 then
+  if [ -n "$BASH_ENV" ] ; then export BASH_ENV= ; fi   # runs away screaming
   if [ -f "$HOME/.bashrc" ]
   then
     . "$HOME/.bashrc"
