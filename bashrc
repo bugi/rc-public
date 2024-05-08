@@ -5,6 +5,7 @@
 # symlink this file as ~/.bashrc
 #
 
+if [ -n "$BASH_ENV" ] ; then export BASH_ENV= ; fi   # runs away screaming
 
 
 
