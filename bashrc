@@ -27,9 +27,17 @@ fi
 
 
 
-# ancient java :(
-if [ -d /usr/lib/jvm/java-6-sun ]
+if [ -z "$JAVA_HOME" ] && type -P java >/dev/null
 then
+  JAVA_HOME="$( "$(type -P java)" -XshowSettings:properties -version 2>&1 > /dev/null | grep 'java.home' )"
+  export JAVA_HOME
+  JDK_HOME="${JAVA_HOME}"
+  export JDK_HOME
+  PATH="${JAVA_HOME}/bin:${PATH}"
+  export PATH
+elif [ -z "$JAVA_HOME" ] && [ -d /usr/lib/jvm/java-6-sun ]
+then
+  # fallback to ancient java :(
   JAVA_HOME=/usr/lib/jvm/java-6-sun
   export JAVA_HOME
   JDK_HOME="${JAVA_HOME}"
