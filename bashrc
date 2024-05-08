@@ -93,7 +93,7 @@ for f in \
     PATH="${f}:${PATH}"
   fi
 done
-# PATH=".:${PATH}"
+# never do this!  PATH=".:${PATH}"
 
 export PATH
 
