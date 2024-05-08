@@ -4,6 +4,8 @@
 #
 # symlink this file as ~/.bashrc
 #
+# The first part tries to be compatible with POSIX sh, probably not with complete success.
+#
 
 if [ -n "$BASH_ENV" ] ; then export BASH_ENV= ; fi   # runs away screaming
 
