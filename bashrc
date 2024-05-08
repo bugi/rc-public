@@ -24,7 +24,7 @@ umask 022
 
 
 # make sure hostname is set and is the hostname, not the fqdn.
-if [ -z "$HOSTNAME" -o "${HOSTNAME%.*}" != "$HOSTNAME" ]
+if [ -z "$HOSTNAME" ] || [ "${HOSTNAME%.*}" != "$HOSTNAME" ]
 then
   $is_interactive || echo "Your local hostname shouldn't be a fully qualified domain name." 1>&2
   HOSTNAME="$(hostname -s)"
