@@ -161,13 +161,13 @@ fi
 
 
 f="$( readlink "${BASH_SOURCE[0]}" )"
-this_bashdir="$(dirname "$f" )"
-f="$f".interactive
 if [ $? -ne 0 ]
 then
   echo "readlink/greadlink -f doesn't work properly." 1>&2
   return
 fi
+this_bashdir="$(dirname "$f" )"
+f="$f".interactive
 if ! [ -r "$f" ]
 then
   echo "The file '$f' does not exist." 1>&2
