@@ -164,13 +164,10 @@ export is_interactive
 
 
 #
-# From here on is for making interactive sessions bearable.
+# From here on is for making interactive bash sessions bearable.
 #
 
-if ! $is_interactive    # non-interactive, so we're done here
-then
-  return
-fi
+$is_interactive || return    # non-interactive, so we're done here
 
 
 f="$( readlink "${BASH_SOURCE[0]}" )"
