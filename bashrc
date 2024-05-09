@@ -37,7 +37,7 @@ if [ -z "$JAVA_HOME" ] && type -P java >/dev/null
 then
   # on macos, even this doesn't really work;
   # will need to try this again once homebrew is configured
-  JAVA_HOME="$( "$(type -P java)" -XshowSettings:properties -version 2>&1 > /dev/null | grep 'java[.]home' |sed 's/^  *java[.]home *= *//' )"
+  JAVA_HOME="$( "$(type -P java)" -XshowSettings:properties -version 2>&1 > /dev/null | grep 'java[.]home' |sed 's/^ *java[.]home *= *//' )"
   export JAVA_HOME
   JDK_HOME="${JAVA_HOME}"
   export JDK_HOME
