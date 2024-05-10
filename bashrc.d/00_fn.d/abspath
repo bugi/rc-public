@@ -55,13 +55,19 @@ function _abspath2 ()
   fi
 }
 
+_abspath_the_hard_way_debug_=false
+function _abspath_the_hard_way_debug ()
+{
+  $_abspath_the_hard_way_debug_ || return 0
+  printf '%s (1=%s) (bn=%s) -> (%s)\n' "$1" "$2" "$3" "$4" 1>&2
+}
 function _abspath_the_hard_way ()
 { # See _abspath() for the rest of an implementation of something like GNU's `readlink -f`.
   # assumes running under bash
   # $1     : absolute or relative filename
   # return : absolute path, sort of
 
-  local bn
+  local bn ret R
   bn="$(readlink "$1")"
   if [ $? -ne 0 ] # if is not a symlink
   then
@@ -69,35 +75,72 @@ function _abspath_the_hard_way ()
   else
     if [ -z "${bn%%/*}" ] # if linked-to starts with a /
     then
+      _abspath_the_hard_way_debug "->/..." "$1" "$bn" "$bn"
       echo "$bn"
       return
     fi
   fi
 
-  # BUG: overly complex; non-directory cases are basically (cd basename $1 && pwd -P)
-  if [ -d "$1" ]
+  if [ -d "$1"/ ]
   then
-    (cd "$1" && pwd -P )
-    return
+    ret="$(cd "$1" && pwd -P )"
+    R=$?
+    _abspath_the_hard_way_debug "is a directory" "$1" "$bn" "$ret"
+    echo "$ret"
+    return $R
   elif [[ $1 == /*/* ]]
   then
-    echo "$(cd "${1%/*}" && pwd -P)/${bn}"
-    return
+    # is multilevel path starting at /
+    # resolve dirname($1) absolutely; we known that $bn is not a symlink so can use it
+    if ! [[ -d "${1%/*}" ]]
+    then
+      _abspath_the_hard_way_debug "1.dir-not-exist" "$1" "$bn" ---
+      return 1
+    fi
+    ret="$(cd "${1%/*}" && pwd -P)/${bn}"
+    R=$?
+    _abspath_the_hard_way_debug "1" "$1" "$bn" "$ret"
+    echo "$ret"
+    return $R
   elif [[ $1 == /* ]]
   then
-    echo "/$bn"
-    return
+    # is a direct descendant of /
+    # we known that $bn is not a symlink so can use it
+    ret="/$bn"
+    R=$?
+    _abspath_the_hard_way_debug "2" "$1" "$bn" "$ret"
+    echo "$ret"
+    return $R
   elif [[ $1 == ./* ]]
   then
-    echo "$(pwd -P)/$bn"
-    return
+    # is anchored at .
+    # resolve . absolutely; we known that $bn is not a symlink so can use it
+    ret="$(pwd -P)/$bn"
+    R=$?
+    _abspath_the_hard_way_debug "3" "$1" "$bn" "$ret"
+    echo "$ret"
+    return $R
   elif [[ $1 == */* ]]
   then
-    echo "$(cd "${1%/*}" && pwd -P)/$bn"
-    return
+    # is a relative path
+    # resolve dirname($1) absolutely; we known that $bn is not a symlink so can use it
+    ret="$(cd "${1%/*}" && pwd -P)/$bn"
+    R=$?
+    _abspath_the_hard_way_debug "4" "$1" "$bn" "$ret"
+    echo "$ret"
+    return $R
+  elif [[ "$(dirname "$1")" = . ]]
+  then
+    # otherwise it must be a bare file in .
+    ret="$(pwd -P)/$bn"
+    R=$?
+    _abspath_the_hard_way_debug "5" "$1" "$bn" "$ret"
+    echo "$ret"
+    return $R
   else
-    echo "$(pwd -P)/$bn"
-    return
+    _abspath_the_hard_way_debug "can't happen" "$1" "$bn" FAIL
+    echo "can't happen; please fix" 1>&2
+    return 1
   fi
 
   false
@@ -105,13 +148,34 @@ function _abspath_the_hard_way ()
 
 function _abspath ()
 {
-  local x="$(sed -r 's,//+,/,g ; s,/[.]/,/,g' <<<"$1" )"
-  local y="$(_abspath_the_hard_way "$x" | sed -r 's,//+,/,g ; s,/[.]/,/,g' )"
+  # The sed flattens "//" and "/./" to "/".
+  local R x y
+  x="$(sed -r 's,//+,/,g ; s,/[.]/,/,g' <<<"$1" )"
+  y="$(_abspath_the_hard_way "$x")"
+  R=$?
+  [ $R -eq 0 ] || return $R
+  y="$(sed -r 's,//+,/,g ; s,/[.]/,/,g' <<<"$y" )"
+
+  local i=0
+
   while [ "$x" != "$y" ]
   do
+    let i=i+1
+    if [[ $i -gt 128 ]]
+    then
+      echo "$i is too many levels of symbolic links." 1>&2
+      return 1
+    fi
     x="$(sed -r 's,//+,/,g ; s,/[.]/,/,g' <<<"$y" )"
     y="$(_abspath_the_hard_way "$x")"
+    R=$?
+    [ $R -eq 0 ] || return $R
   done
+  if [ -L "$y" ]
+  then
+    # must be a link to itself
+    return 1
+  fi
   echo "$y"
 }
 
