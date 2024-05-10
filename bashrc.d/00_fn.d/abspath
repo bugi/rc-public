@@ -190,34 +190,30 @@ function abspath ()
   #   It can return an empty string along with false.
 
   case "$_abspath_mechanism" in
-  (readlink_f) readlink -f "$1" ; return ;;
-  (greadlink_f) greadlink -f "$1" ; return ;;
+  (/*) "$_abspath_mechanism" -f "$1" ; return ;;
   (_abspath) _abspath "$1" ; return ;;
   esac
 
-  # Best is to simply call GNU's `readlink -f` if it's available.
-  if [ "$(uname -s)" = Linux ]
+  local bin
+
+  bin="$(type -P readlink)"
+  if "$bin" --version 2>/dev/null |grep -q GNU
   then
-    _abspath_mechanism=readlink_f
-    readlink -f "$1"
-    return
-  elif type greadlink >/dev/null 2>&1
-  then
-    # This is for if you're running OSX and have installed coreutils utilities via homebrew.
-    _abspath_mechanism=greadlink_f
-    greadlink -f "$1"
-    return
-  elif readlink -f / >/dev/null 2>&1
-  then
-    # Maybe you're running a non-Linux system that has a GNU readlink?
-    _abspath_mechanism=readlink_f
-    readlink -f "$1"
-    return
-  else
-    _abspath_mechanism=_abspath
-    _abspath "$1"
+    _abspath_mechanism="$bin"
+    "$bin" -f "$1"
     return
   fi
 
-}
+  # Maybe you've installed coreutils utilities via homebrew.
+  bin="$(type -P greadlink)"
+  if "$bin" --version 2>/dev/null |grep -q GNU
+  then
+    _abspath_mechanism="$bin"
+    "$bin" -f "$1"
+    return
+  fi
 
+  _abspath_mechanism=_abspath
+  "$_abspath_mechanism" "$1"
+  return
+}
