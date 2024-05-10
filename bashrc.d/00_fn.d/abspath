@@ -6,6 +6,13 @@
 #   jj -> /dev/null
 #   jjj -> ../tmux.d/02.complete
 #   jjjj -> ../tmux.d
+#   j5 -> j6
+#   j6 -> j5
+#   j7 -> jjj
+#   j8 -> j8
+#   j9 -> ./jdne
+#   ja -> /foo/bar/baz
+#   jb -> jj
 
 function _abspath2 ()
 { # BUG: assumes the basename is the same on both sides of a symlink; returns wrong
