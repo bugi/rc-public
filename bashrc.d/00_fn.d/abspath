@@ -17,22 +17,32 @@
 function _abspath2 ()
 {
   local P="$1"
+  local -A LL=() # record of readlink transitions for loop detection
+  local maxi=128
   local cur_dir dn i p
   if [ -d "$P" ]
   then
     ( cd "$P" && pwd -P )
+    true
     return
   else
     i=0
     while p="$( readlink "$P" )"
     do
       let i=i+1
-      if [[ $i -gt 128 ]]
+      if [[ $i -gt $maxi ]]
       then
         echo "$i is too many levels of symbolic links." 1>&2
         false
         return
       fi
+      if [[ -v LL["$P"] ]]
+      then
+        echo "symlink loop detected at iteration i=$i" 1>&2
+        false
+        return
+      fi
+      LL["$P"]=
       P="$p"
     done
     dn="$(dirname "$P")"
@@ -49,10 +59,15 @@ function _abspath2 ()
     elif [ "$cur_dir" = / ]
     then
       echo "$cur_dir$(basename "$P")"
+      true
+      return
     else
       echo "$cur_dir/$(basename "$P")"
+      true
+      return
     fi
   fi
+  false
 }
 
 _abspath_the_hard_way_debug_=false
