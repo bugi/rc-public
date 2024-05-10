@@ -191,6 +191,7 @@ function abspath ()
 
   case "$_abspath_mechanism" in
   (/*) "$_abspath_mechanism" -f "$1" ; return ;;
+  (_abspath2) _abspath2 "$1" ; return ;;
   (_abspath) _abspath "$1" ; return ;;
   esac
 
@@ -214,6 +215,7 @@ function abspath ()
   fi
 
   _abspath_mechanism=_abspath
+  _abspath_mechanism=_abspath2
   "$_abspath_mechanism" "$1"
   return
 }
