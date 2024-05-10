@@ -15,15 +15,33 @@
 #   jb -> jj
 
 function _abspath2 ()
-{ # BUG: assumes the basename is the same on both sides of a symlink; returns wrong
+{
   local P="$1"
-  local cur_dir
+  local cur_dir dn i p
   if [ -d "$P" ]
   then
     ( cd "$P" && pwd -P )
     return
   else
-    cur_dir="$( cd "$(dirname "$P")" && pwd -P )"
+    i=0
+    while p="$( readlink "$P" )"
+    do
+      let i=i+1
+      if [[ $i -gt 128 ]]
+      then
+        echo "$i is too many levels of symbolic links." 1>&2
+        false
+        return
+      fi
+      P="$p"
+    done
+    dn="$(dirname "$P")"
+    if ! [ -d "$dn" ]
+    then
+      false
+      return
+    fi
+    cur_dir="$( cd "$dn" && pwd -P )"
     if [ -z "$cur_dir" ]
     then
       false
