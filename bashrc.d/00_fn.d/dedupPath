@@ -35,7 +35,7 @@ function dedupPath ()
     fi
     if [ -z "${paths[$f]}" ]
     then
-      paths["$f"]=true
+      paths[$f]=true
       if [ -n "$NP" ]
       then
         NP="${NP}:${f}"
