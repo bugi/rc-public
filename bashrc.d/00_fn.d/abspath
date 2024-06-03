@@ -212,7 +212,7 @@ function abspath ()
 
   local bin
 
-  bin="$(type -P readlink)"
+  bin="$(type -p readlink)"
   if "$bin" --version 2>/dev/null |grep -q GNU
   then
     _abspath_mechanism="$bin"
@@ -221,7 +221,7 @@ function abspath ()
   fi
 
   # Maybe you've installed coreutils utilities via homebrew.
-  bin="$(type -P greadlink)"
+  bin="$(type -p greadlink)"
   if "$bin" --version 2>/dev/null |grep -q GNU
   then
     _abspath_mechanism="$bin"
