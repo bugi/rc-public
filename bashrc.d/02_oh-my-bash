@@ -1,5 +1,8 @@
 #!bash
 # vim:set ft=sh tabstop=2 softtabstop=2 shiftwidth=2 expandtab autoindent copyindent :
+#!zsh skip if zsh
+
+[[ -n $ZSH_VERSION ]] && return
 
 if [ -d "$HOME"/.oh-my-bash ] && [ -f "$RC_public"/oh-my-bash.rc ]
 then
