@@ -1,5 +1,6 @@
 #!bash
 # vim:set ft=sh tabstop=2 softtabstop=2 shiftwidth=2 expandtab autoindent copyindent :
+#!zsh
 
 function pathAdd ()
 {
@@ -10,7 +11,7 @@ function pathAdd ()
   local x
   for x in "$@"
   do
-    if [ -d "$x" ]
+    if [ -d "$x"/ ]
     then
       export PATH="$x:$PATH"
     fi
