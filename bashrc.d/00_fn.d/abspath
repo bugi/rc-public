@@ -15,10 +15,14 @@
 #   ja -> /foo/bar/baz
 #   jb -> jj
 
-function _abspath_zsh ()
-{
-    echo "${1:P}"
-}
+if [[ -n $ZSH_VERSION ]]
+then
+  function abspath ()
+  {
+      echo "${1:P}"
+  }
+  return
+fi
 
 function _abspath2 ()
 {
@@ -212,17 +216,9 @@ function abspath ()
 
   case "$_abspath_mechanism" in
   (/*) "$_abspath_mechanism" -f "$1" ; return ;;
-  (zsh) _abspath_zsh "$1" ; return ;;
   (_abspath2) _abspath2 "$1" ; return ;;
   (_abspath) _abspath "$1" ; return ;;
   esac
-
-  if [[ -n $ZSH_VERSION ]]
-  then
-    _abspath_mechanism=zsh
-    _abspath_zsh "$1"
-    return
-  fi
 
   local bin
 
