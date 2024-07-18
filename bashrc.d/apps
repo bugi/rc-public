@@ -67,7 +67,7 @@ done
 if type -P ispell >/dev/null 2>&1
 then
   export ISPELL="$(type -P ispell)"
-elif [ -x "$HOMEBREW_PREFIX"/bin/ispell ]
+elif [ -n "$HOMEBREW_PREFIX" ] && [ -x "$HOMEBREW_PREFIX"/bin/ispell ]
 then
   export ISPELL="$HOMEBREW_PREFIX"/bin/ispell
 elif [ -x /usr/local/bin/ispell ]
