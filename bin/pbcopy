@@ -2,6 +2,11 @@
 # vim: set tabstop=2 softtabstop=2 shiftwidth=2 expandtab autoindent copyindent :
 
 bname="$(basename "$0")"
+if [[ $1 == pbcopy ]] || [[ $1 == pbpaste ]]
+then
+  bname="$1"
+  shift
+fi
 
 die ()
 {
@@ -83,6 +88,28 @@ do_ms ()
   esac
 }
 
+
+if [[ $1 == --x2w ]]
+then
+  "$0" pbpaste --force-x11 | "$0" pbcopy --force-wayland
+  exit
+elif [[ $1 == --w2x ]]
+then
+  "$0" pbpaste --force-wayland | "$0" pbcopy --force-x11
+  exit
+elif [[ $1 == --force-x11 ]]
+then
+  shift
+  do_x11 "$bname" "$@"
+elif [[ $1 == --force-wayland ]]
+then
+  shift
+  do_wayland "$bname" "$@"
+elif [[ $1 == --force-ms ]]
+then
+  shift
+  do_ms "$bname" "$@"
+fi
 
 # the wayland way
 if [ -n "$WAYLAND_DISPLAY" ]
