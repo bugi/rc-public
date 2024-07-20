@@ -1,5 +1,6 @@
 #!bash
 # vim: set tabstop=2 softtabstop=2 shiftwidth=2 expandtab autoindent copyindent :
+#!zsh works in zsh, but should be rewritten to use zsh native tools
 
 # This makes it easy to make specialized 'cd' commands
 # that tab-complete based on their context.
@@ -43,6 +44,6 @@ function _supercd_complete ()
 
 # function home () { cd ~/"$1" ; }
 # function _supercd_home_complete () { _supercd_complete ~/ ; }
-# shopt -s progcomp
+# [[ -n $ZSH_VERSION ]] || shopt -s progcomp
 # complete -o nospace -F _supercd_home_complete home
 

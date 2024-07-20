@@ -1,5 +1,9 @@
 #!bash
 # vim:set ft=sh tabstop=2 softtabstop=2 shiftwidth=2 expandtab autoindent copyindent :
+#!zsh skip if zsh
+
+[[ -n $ZSH_VERSION ]] && return
+
 
 # initialize PROMPT_COMMAND and set expectations for its use as an array
 # http://www.gnu.org/savannah-checkouts/gnu/bash/manual/bash.html

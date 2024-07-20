@@ -1,10 +1,19 @@
 #!bash
 # vim:set ft=sh tabstop=2 softtabstop=2 shiftwidth=2 expandtab autoindent copyindent :
+#!zsh
 
 fn_exists ()
 { # Does $1 exist as a function?
+  if [[ -n $ZSH_VERSION ]]
+  then
+    local p=$(LC_ALL=C whence -w "$1")
+    if [[ ${p##*: } = function ]]
+    then return 0 # 0=true
+    else return 1
+    fi
+  fi
   if [ "$(LC_ALL=C type -t "$1")" = function ]
-  then return 0
+  then return 0 # 0=true
   else return 1
   fi
 }
