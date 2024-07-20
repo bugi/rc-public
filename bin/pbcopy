@@ -93,21 +93,21 @@ do_ms ()
 
 if [[ $1 == --x2w ]]
 then
-  "$0" paste --force-x11 | "$0" copy --force-wayland
+  "$0" paste --x11 | "$0" copy --wayland
   exit
 elif [[ $1 == --w2x ]]
 then
-  "$0" paste --force-wayland | "$0" copy --force-x11
+  "$0" paste --wayland | "$0" copy --x11
   exit
-elif [[ $1 == --force-x11 ]]
+elif [[ $1 == --x11 ]]
 then
   shift
   do_x11 "$bname" "$@"
-elif [[ $1 == --force-wayland ]]
+elif [[ $1 == --wayland ]]
 then
   shift
   do_wayland "$bname" "$@"
-elif [[ $1 == --force-ms ]]
+elif [[ $1 == --ms ]]
 then
   shift
   do_ms "$bname" "$@"
