@@ -3,5 +3,6 @@
 
 # stty erase ^h
 
-alias pbcopy='xclip -selection clipboard'
-alias pbpaste='xclip -selection clipboard -o'
+# Use the shell script instead of these aliases.  It handles x11, wayland, WSL, and macos.
+# alias pbcopy='xclip -selection clipboard'
+# alias pbpaste='xclip -selection clipboard -o'
