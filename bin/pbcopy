@@ -2,10 +2,12 @@
 # vim: set tabstop=2 softtabstop=2 shiftwidth=2 expandtab autoindent copyindent :
 
 bname="$(basename "$0")"
-if [[ $1 == pbcopy ]] || [[ $1 == pbpaste ]]
+if [[ $1 == copy ]] || [[ $1 == paste ]]
 then
   bname="$1"
   shift
+else
+  bname="${bname#pb}"
 fi
 
 die ()
@@ -21,7 +23,7 @@ die ()
 
 do_darwin ()
 {
-  local mode="$1" ; shift
+  local mode=pb"$1" ; shift
   local exe=()
   read -r -d'\n' -a exe < <(type -apf "$mode" )
   local EXE="${exe[-1]}"
@@ -32,13 +34,13 @@ do_wayland ()
 {
   local mode="$1" ; shift
   case "$mode" in
-    (pbcopy)
+    (copy)
       if type -f wl-copy >/dev/null 2>&1
       then
         exec wl-copy "$@"
       fi
       ;;
-    (pbpaste)
+    (paste)
       if type -f wl-paste >/dev/null 2>&1
       then
         exec wl-paste "$@"
@@ -52,7 +54,7 @@ do_x11 ()
 {
   local mode="$1" ; shift
   case "$mode" in
-    (pbcopy)
+    (copy)
       if type -f xsel >/dev/null 2>&1
       then
         exec xsel --clipboard --input "$@"
@@ -61,7 +63,7 @@ do_x11 ()
         exec xclip -selection clipboard "$@"
       fi
       ;;
-    (pbpaste)
+    (paste)
       if type -f xclip >/dev/null 2>&1
       then
         exec xclip -selection clipboard -o "$@"
@@ -78,10 +80,10 @@ do_ms ()
 {
   local mode="$1" ; shift
   case "$mode" in
-    (pbcopy)
+    (copy)
       exec clip.exe "$@"
       ;;
-    (pbpaste)
+    (paste)
       exec powershell.exe -command "Get-Clipboard" "$@"
       ;;
     (*) die "unknown mode '$mode' for ms" ;;
@@ -91,11 +93,11 @@ do_ms ()
 
 if [[ $1 == --x2w ]]
 then
-  "$0" pbpaste --force-x11 | "$0" pbcopy --force-wayland
+  "$0" paste --force-x11 | "$0" copy --force-wayland
   exit
 elif [[ $1 == --w2x ]]
 then
-  "$0" pbpaste --force-wayland | "$0" pbcopy --force-x11
+  "$0" paste --force-wayland | "$0" copy --force-x11
   exit
 elif [[ $1 == --force-x11 ]]
 then
