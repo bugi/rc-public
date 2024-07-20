@@ -19,7 +19,10 @@ export PGPPATH="$HOME"/mail/.pgppath
 
 
 # make less more friendly for non-text input files, see lesspipe(1)
-[ -x /usr/bin/lesspipe ] && eval "$(SHELL=/bin/sh lesspipe)"
+if type -P lesspipe >/dev/null 2>&1
+then
+  eval "$(SHELL=/bin/sh lesspipe)"
+fi
 
 for f in $( find "$HOME"/usr/bin/ -name '*.completion' )
 do
@@ -61,21 +64,25 @@ done
 
 
 
-
-if [ -x /usr/bin/ispell ]
+if type -P ispell >/dev/null 2>&1
 then
-  export ISPELL=/usr/bin/ispell
-elif [ -x /opt/homebrew/bin/ispell ]
+  export ISPELL="$(type -P ispell)"
+elif [ -n "$HOMEBREW_PREFIX" ] && [ -x "$HOMEBREW_PREFIX"/bin/ispell ]
 then
-  export ISPELL=/usr/local/bin/ispell
+  export ISPELL="$HOMEBREW_PREFIX"/bin/ispell
 elif [ -x /usr/local/bin/ispell ]
 then
   export ISPELL=/usr/local/bin/ispell
+elif [ -x /usr/bin/ispell ]
+then
+  export ISPELL=/usr/bin/ispell
 fi
 
 
 # grep: warning: GREP_OPTIONS is deprecated; please use an alias or script
 export GREP_OPTIONS='--exclude-dir=.git --exclude-dir=.hg --exclude-dir=.svn'
-GREP="$(type -P grep)"
-alias grep="$GREP $GREP_OPTIONS"
-unset GREP GREP_OPTIONS
+# GREP="$(type -P grep)"
+# alias grep="$GREP $GREP_OPTIONS"
+# unset GREP
+alias grep="\\grep $GREP_OPTIONS"
+unset GREP_OPTIONS

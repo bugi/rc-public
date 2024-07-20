@@ -1,5 +1,6 @@
 #!bash
 # vim:set ft=sh tabstop=2 softtabstop=2 shiftwidth=2 expandtab autoindent copyindent :
+#!zsh
 
 function dedupPath ()
 {
@@ -35,7 +36,7 @@ function dedupPath ()
     fi
     if [ -z "${paths[$f]}" ]
     then
-      paths["$f"]=true
+      paths[$f]=true
       if [ -n "$NP" ]
       then
         NP="${NP}:${f}"

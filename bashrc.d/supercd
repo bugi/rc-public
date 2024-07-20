@@ -1,13 +1,14 @@
 #!bash
 # vim: set tabstop=2 softtabstop=2 shiftwidth=2 expandtab autoindent copyindent :
+#!zsh but should revisit after rewriting _supercd_complete()
 
 function bin () { cd ~/usr/bin/"$1" ; }
 function _supercd_bin_complete () { _supercd_complete ~/usr/bin/ ; }
-shopt -s progcomp
+[[ -n $ZSH_VERSION ]] || shopt -s progcomp
 complete -o nospace -F _supercd_bin_complete bin
 
 function rc-public () { cd ~/.rc-public/"$1" ; }
 function _supercd_rc_public_complete () { _supercd_complete ~/.rc-public/ ; }
-shopt -s progcomp
+[[ -n $ZSH_VERSION ]] || shopt -s progcomp
 complete -o nospace -F _supercd_rc_public_complete rc-public
 

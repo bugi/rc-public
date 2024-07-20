@@ -1,13 +1,98 @@
 #!bash
 # vim:set ft=sh tabstop=2 softtabstop=2 shiftwidth=2 expandtab autoindent copyindent :
+#!zsh
 
+# tests
+#   j -> abspath
+#   jj -> /dev/null
+#   jjj -> ../tmux.d/02.complete
+#   jjjj -> ../tmux.d
+#   j5 -> j6
+#   j6 -> j5
+#   j7 -> jjj
+#   j8 -> j8
+#   j9 -> ./jdne
+#   ja -> /foo/bar/baz
+#   jb -> jj
+
+if [[ -n $ZSH_VERSION ]]
+then
+  function abspath ()
+  {
+      echo "${1:P}"
+  }
+  return
+fi
+
+function _abspath2 ()
+{
+  local P="$1"
+  local -A LL=() # record of readlink transitions for loop detection
+  local maxi=128
+  local cur_dir dn i p
+  if [ -d "$P" ]
+  then
+    ( cd "$P" && pwd -P )
+    true
+    return
+  else
+    i=0
+    while p="$( readlink "$P" )"
+    do
+      let i=i+1
+      if [[ $i -gt $maxi ]]
+      then
+        echo "$i is too many levels of symbolic links." 1>&2
+        false
+        return
+      fi
+      if [[ -v LL["$P"] ]]
+      then
+        echo "symlink loop detected at iteration i=$i" 1>&2
+        false
+        return
+      fi
+      LL["$P"]=
+      P="$p"
+    done
+    dn="$(dirname "$P")"
+    if ! [ -d "$dn" ]
+    then
+      false
+      return
+    fi
+    cur_dir="$( cd "$dn" && pwd -P )"
+    if [ -z "$cur_dir" ]
+    then
+      false
+      return
+    elif [ "$cur_dir" = / ]
+    then
+      echo "$cur_dir$(basename "$P")"
+      true
+      return
+    else
+      echo "$cur_dir/$(basename "$P")"
+      true
+      return
+    fi
+  fi
+  false
+}
+
+_abspath_the_hard_way_debug_=false
+function _abspath_the_hard_way_debug ()
+{
+  $_abspath_the_hard_way_debug_ || return 0
+  printf '%s (1=%s) (bn=%s) -> (%s)\n' "$1" "$2" "$3" "$4" 1>&2
+}
 function _abspath_the_hard_way ()
 { # See _abspath() for the rest of an implementation of something like GNU's `readlink -f`.
   # assumes running under bash
   # $1     : absolute or relative filename
   # return : absolute path, sort of
 
-  local bn
+  local bn ret R
   bn="$(readlink "$1")"
   if [ $? -ne 0 ] # if is not a symlink
   then
@@ -15,34 +100,72 @@ function _abspath_the_hard_way ()
   else
     if [ -z "${bn%%/*}" ] # if linked-to starts with a /
     then
+      _abspath_the_hard_way_debug "->/..." "$1" "$bn" "$bn"
       echo "$bn"
       return
     fi
   fi
 
-  if [ -d "$1" ]
+  if [ -d "$1"/ ]
   then
-    (cd "$1" && pwd -P )
-    return
+    ret="$(cd "$1" && pwd -P )"
+    R=$?
+    _abspath_the_hard_way_debug "is a directory" "$1" "$bn" "$ret"
+    echo "$ret"
+    return $R
   elif [[ $1 == /*/* ]]
   then
-    echo "$(cd "${1%/*}" && pwd -P)/${bn}"
-    return
+    # is multilevel path starting at /
+    # resolve dirname($1) absolutely; we known that $bn is not a symlink so can use it
+    if ! [[ -d "${1%/*}" ]]
+    then
+      _abspath_the_hard_way_debug "1.dir-not-exist" "$1" "$bn" ---
+      return 1
+    fi
+    ret="$(cd "${1%/*}" && pwd -P)/${bn}"
+    R=$?
+    _abspath_the_hard_way_debug "1" "$1" "$bn" "$ret"
+    echo "$ret"
+    return $R
   elif [[ $1 == /* ]]
   then
-    echo "/$bn"
-    return
+    # is a direct descendant of /
+    # we known that $bn is not a symlink so can use it
+    ret="/$bn"
+    R=$?
+    _abspath_the_hard_way_debug "2" "$1" "$bn" "$ret"
+    echo "$ret"
+    return $R
   elif [[ $1 == ./* ]]
   then
-    echo "$(pwd -P)/$bn"
-    return
+    # is anchored at .
+    # resolve . absolutely; we known that $bn is not a symlink so can use it
+    ret="$(pwd -P)/$bn"
+    R=$?
+    _abspath_the_hard_way_debug "3" "$1" "$bn" "$ret"
+    echo "$ret"
+    return $R
   elif [[ $1 == */* ]]
   then
-    echo "$(cd "${1%/*}" && pwd -P)/$bn"
-    return
+    # is a relative path
+    # resolve dirname($1) absolutely; we known that $bn is not a symlink so can use it
+    ret="$(cd "${1%/*}" && pwd -P)/$bn"
+    R=$?
+    _abspath_the_hard_way_debug "4" "$1" "$bn" "$ret"
+    echo "$ret"
+    return $R
+  elif [[ "$(dirname "$1")" = . ]]
+  then
+    # otherwise it must be a bare file in .
+    ret="$(pwd -P)/$bn"
+    R=$?
+    _abspath_the_hard_way_debug "5" "$1" "$bn" "$ret"
+    echo "$ret"
+    return $R
   else
-    echo "$(pwd -P)/$bn"
-    return
+    _abspath_the_hard_way_debug "can't happen" "$1" "$bn" FAIL
+    echo "can't happen; please fix" 1>&2
+    return 1
   fi
 
   false
@@ -50,13 +173,34 @@ function _abspath_the_hard_way ()
 
 function _abspath ()
 {
-  local x="$(sed -r 's,//+,/,g ; s,/[.]/,/,g' <<<"$1" )"
-  local y="$(_abspath_the_hard_way "$x" | sed -r 's,//+,/,g ; s,/[.]/,/,g' )"
+  # The sed flattens "//" and "/./" to "/".
+  local R x y
+  x="$(sed -r 's,//+,/,g ; s,/[.]/,/,g' <<<"$1" )"
+  y="$(_abspath_the_hard_way "$x")"
+  R=$?
+  [ $R -eq 0 ] || return $R
+  y="$(sed -r 's,//+,/,g ; s,/[.]/,/,g' <<<"$y" )"
+
+  local i=0
+
   while [ "$x" != "$y" ]
   do
+    let i=i+1
+    if [[ $i -gt 128 ]]
+    then
+      echo "$i is too many levels of symbolic links." 1>&2
+      return 1
+    fi
     x="$(sed -r 's,//+,/,g ; s,/[.]/,/,g' <<<"$y" )"
     y="$(_abspath_the_hard_way "$x")"
+    R=$?
+    [ $R -eq 0 ] || return $R
   done
+  if [ -L "$y" ]
+  then
+    # must be a link to itself
+    return 1
+  fi
   echo "$y"
 }
 
@@ -71,34 +215,32 @@ function abspath ()
   #   It can return an empty string along with false.
 
   case "$_abspath_mechanism" in
-  (readlink_f) readlink -f "$1" ; return ;;
-  (greadlink_f) greadlink -f "$1" ; return ;;
+  (/*) "$_abspath_mechanism" -f "$1" ; return ;;
+  (_abspath2) _abspath2 "$1" ; return ;;
   (_abspath) _abspath "$1" ; return ;;
   esac
 
-  # Best is to simply call GNU's `readlink -f` if it's available.
-  if [ "$(uname -s)" = Linux ]
+  local bin
+
+  bin="$(type -p readlink)"
+  if "$bin" --version 2>/dev/null |grep -q GNU
   then
-    _abspath_mechanism=readlink_f
-    readlink -f "$1"
-    return
-  elif type greadlink >/dev/null 2>&1
-  then
-    # This is for if you're running OSX and have installed coreutils utilities via homebrew.
-    _abspath_mechanism=greadlink_f
-    greadlink -f "$1"
-    return
-  elif readlink -f / >/dev/null 2>&1
-  then
-    # Maybe you're running a non-Linux system that has a GNU readlink?
-    _abspath_mechanism=readlink_f
-    readlink -f "$1"
-    return
-  else
-    _abspath_mechanism=_abspath
-    _abspath "$1"
+    _abspath_mechanism="$bin"
+    "$bin" -f "$1"
     return
   fi
 
-}
+  # Maybe you've installed coreutils utilities via homebrew.
+  bin="$(type -p greadlink)"
+  if "$bin" --version 2>/dev/null |grep -q GNU
+  then
+    _abspath_mechanism="$bin"
+    "$bin" -f "$1"
+    return
+  fi
 
+  _abspath_mechanism=_abspath
+  _abspath_mechanism=_abspath2
+  "$_abspath_mechanism" "$1"
+  return
+}
