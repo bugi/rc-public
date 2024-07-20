@@ -21,7 +21,7 @@ die ()
   exit 1
 }
 
-do_darwin ()
+do_macos ()
 {
   local mode=pb"$1" ; shift
   local exe=()
@@ -107,6 +107,10 @@ elif [[ $1 == --wayland ]]
 then
   shift
   do_wayland "$bname" "$@"
+elif [[ $1 == --macos ]]
+then
+  shift
+  do_macos "$bname" "$@"
 elif [[ $1 == --ms ]]
 then
   shift
@@ -156,7 +160,7 @@ case "$OSTYPE" in
 (darwin*) # Mac OSX
   # We don't check for macos first, because there are x11 servers for macos.
   # If x11 or wayland are detected but fail, this will block will still run.
-  do_darwin "$bname" "$@"
+  do_macos "$bname" "$@"
   ;;
 (linux-gnu*)
   if ! grep -q Microsoft /proc/version
