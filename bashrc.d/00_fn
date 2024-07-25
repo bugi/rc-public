@@ -3,7 +3,7 @@
 
 # read all files in 00_fn.d/
 declare fndotd_filenames=()
-mapfile -d $'\0' fndotd_filenames < <( find "${BASH_SOURCE[0]}.d/" -maxdepth 1 -type f -name \*.sw? ! -name \*.README ! -name \*.md ! -name README ! -name .\*       -print0 | LC_ALL=C sort -z )
+mapfile -d $'\0' fndotd_filenames < <( find "${BASH_SOURCE[0]}.d/" -maxdepth 1 -type f ! -name \*.sw? ! -name \*.README ! -name \*.md ! -name README ! -name .\*       -print0 | LC_ALL=C sort -z )
 for fndotd_filename in "${fndotd_filenames[@]}"
 do
   if [ -r "$fndotd_filename" ] ; then . "$fndotd_filename" ; fi
