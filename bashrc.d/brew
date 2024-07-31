@@ -52,6 +52,7 @@ gnubin_whitelist+=( gnu-tar )
 gnubin_whitelist+=( gnu-which )
 gnubin_whitelist+=( grep )
 gnubin_whitelist+=( gsed )
+gnubin_whitelist+=( man-db )
 # gnubin_whitelist+=( libtool )
 # gnubin_whitelist+=( make )
 
@@ -63,7 +64,17 @@ do
   then
     export PATH="$g:$PATH"
   fi
+  g="$p/libexec/bin"
+  if [ -e "$g" ]
+  then
+    export PATH="$g:$PATH"
+  fi
   g="$p/libexec/gnuman"
+  if [ -e "$g" ]
+  then
+    export MANPATH="$g:${MANPATH+:$MANPATH}"
+  fi
+  g="$p/libexec/man"
   if [ -e "$g" ]
   then
     export MANPATH="$g:${MANPATH+:$MANPATH}"
