@@ -31,6 +31,9 @@ alias egrep='egrep --color=auto'
 # colorize other things
 alias bdiff='diff -burNd --color=always'
 
+#
+alias cerl='curl --no-progress-meter'
+
 
 #----------- ls BASED -----------
 alias ll='LC_COLLATE=C /bin/ls -lh'
