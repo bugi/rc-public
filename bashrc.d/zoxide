@@ -1,0 +1,7 @@
+#!bash
+# vim: set tabstop=2 softtabstop=2 shiftwidth=2 expandtab autoindent copyindent :
+
+if ! type -P zoxide >/dev/null
+then
+  eval "$(zoxide init bash)"
+fi
