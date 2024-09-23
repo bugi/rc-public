@@ -19,8 +19,14 @@ function D ()
 }
 
 function DD ()
-{ # like dirs, but mostly escaped
-  builtin dirs -p |sed -E 's,^,'"'"', ; s,$,'"'"', ; s,'"'"'[~]/,~/'"'"',' | tr '\n' ' '
+{ # like dirs, but escaped
+  local f fnarray=()
+  readarray -t fnarray < <(dirs -p)
+  for f in "${fnarray[@]}"
+  do
+    printf '%q\n' "$f"
+  done | sed -E 's,^\\[~]$,~, ; s,^\\[~]/,~/,' | tr '\n' ' '
+  # the sed unescapes the ~ (homedir)
   echo
 }
 
