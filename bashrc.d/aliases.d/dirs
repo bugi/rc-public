@@ -18,6 +18,20 @@ function D ()
   # be implemented as a native bash function anyway.
 }
 
+function DD ()
+{ # like dirs, but mostly escaped
+  builtin dirs -p |sed -E 's,^,'"'"', ; s,$,'"'"', ; s,'"'"'[~]/,~/'"'"',' | tr '\n' ' '
+  echo
+}
+
+function Dpd ()
+{ # like D(), but suitable to save&restore a directory stack
+  echo # to visually separate from prompt, which likely also includes the current path
+  echo -n 'pd '
+  DD
+  echo # to visually separate from prompt, which likely also includes the current path
+}
+
 function d_git ()
 { # format input in git-aware form
   # returns false if it disclaims as in a git directory
@@ -126,6 +140,7 @@ function d ()
 
 function pd ()
 { # like builtin pushd, but smarter
+  # The Dpd() function produces a pd command suitable for a save&restore of the directory stack.
   if [ $# -eq 0 ]
   then
     builtin pushd >/dev/null || return
