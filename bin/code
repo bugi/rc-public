@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+# vim: set tabstop=2 softtabstop=2 shiftwidth=2 expandtab autoindent copyindent :
+
+# Make working with vscodium have the same cli as vscode.
+
+umm ()
+{ # Hopefully returns the LAST entry from PATH for $xname + true.
+  # If the return string would be the same as $not_this, returns false.
+  # $not_this should be the full path of this wrapper script.
+  local xname="$1" ; shift
+  local not_this="$1" ; shift
+  local exe=()
+  if [[ -z $not_this ]]
+  then
+    false
+    return
+  fi
+  not_this="$(readlink -f "$not_this")"
+  read -r -d'\n' -a exe < <(type -apf "$xname" )
+  for EXE in "${exe[@]}"
+  do
+    if [[ -n $EXE ]]
+    then
+      EXE="$(readlink -f "$EXE")"
+    else
+      continue
+    fi
+    if [[ $not_this != $EXE ]]
+    then
+      echo "$EXE"
+      true
+      return
+    fi
+  done
+  false
+  return
+}
+
+me="$(readlink -f "$0")"
+
+if exe="$( umm code "$me" )"
+then
+  exec "$exe" "$@"
+fi
+
+if exe="$( umm codium "$me" )"
+then
+  exec "$exe" "$@"
+fi
+
+echo "Neither VSCodium nor Microsoft Visual Studio Code is installed." 1>&2
+exit 1
