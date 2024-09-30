@@ -1,0 +1,20 @@
+#!bash
+# vim:set ft=sh tabstop=2 softtabstop=2 shiftwidth=2 expandtab autoindent copyindent :
+
+function gi ()
+{
+  local one="$1" ; shift
+  case "$one" in
+    (tpush) git push "$@" ;;
+    (tpull) git pull "$@" ;;
+    (tco) git co "$@" ;;
+  esac
+}
+
+function gnew ()
+{ # create a new local+remote branch
+  # Usage: gnew branch_name
+  git checkout -b "$1"
+  git push -u origin "$1"
+}
+
