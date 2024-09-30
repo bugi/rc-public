@@ -48,5 +48,5 @@ then
   exec "$exe" "$@"
 fi
 
-echo "Neither VSCodium nor Microsoft Visual Studio Code is installed." 1>&2
+echo "Neither VSCodium (brew install vscodium OR https://github.com/VSCodium/vscodium) nor Microsoft Visual Studio Code (brew install visual-studio-code OR https://code.visualstudio.com/) is installed." 1>&2
 exit 1
