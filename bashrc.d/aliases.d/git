@@ -14,7 +14,12 @@ function gi ()
 function gnew ()
 { # create a new local+remote branch
   # Usage: gnew branch_name
-  git checkout -b "$1"
-  git push -u origin "$1"
+  local name="$1"
+  # To please github, name will have colons and whitespace replaced with hyphen.
+  # For other special characters and restrictions, you're on your own and good luck.
+  # https://docs.github.com/en/get-started/using-git/dealing-with-special-characters-in-branch-and-tag-names
+  name="$(sed -E 's,[:[:space:]]+,-,g' <<<"$name")"
+  git checkout -b "$name"
+  git push -u origin "$name"
 }
 
