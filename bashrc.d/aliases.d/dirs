@@ -33,7 +33,7 @@ function DD ()
 function Dpd ()
 { # like D(), but suitable to save&restore a directory stack
   echo # to visually separate from prompt, which likely also includes the current path
-  echo -n 'pd '
+  echo -n 'cd;dirs -c; pd '
   DD
   echo # to visually separate from prompt, which likely also includes the current path
 }
