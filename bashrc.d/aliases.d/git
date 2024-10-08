@@ -16,10 +16,16 @@ function gnew ()
   # Usage: gnew branch_name
   local name="$*"
   # There's only one valid argument, so combine all args.
-  # To please github, name will have colons and whitespace replaced with hyphen.
-  # For other special characters and restrictions, you're on your own and good luck.
-  # https://docs.github.com/en/get-started/using-git/dealing-with-special-characters-in-branch-and-tag-names
-  name="$(sed -E 's,[:[:space:]]+,-,g' <<<"$name")"
+  # To please github, name will have "non-safe" characters replaced with hyphen.
+  # For other restrictions or to use other characters that are safe but discouraged by github, please contribute.
+  # https://docs.github.com/en/get-started/using-git/dealing-with-special-characters-in-branch-and-tag-names#naming-branches-and-tags
+  name="$(sed -E 's,[^a-zA-Z0-9._/-]+,-,g' <<<"$name")"
+  if [[ $name =~ ^[^a-zA-Z] ]]
+  then
+    echo "It would be better to start your new branch name with an ascii letter." 1>&2
+    false
+    return
+  fi
   git checkout -b "$name"
   git push -u origin "$name"
 }
