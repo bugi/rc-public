@@ -7,7 +7,7 @@ function gi ()
   case "$one" in
     (tpush) git push "$@" ;;
     (tpull) git pull "$@" ;;
-    (tco) git co "$@" ;;
+    (tco) git checkout "$@" ;;
   esac
 }
 
