@@ -8,8 +8,10 @@ function gi ()
     (tpush) git push "$@" ;;
     (tpull) git pull "$@" ;;
     (tco) git checkout "$@" ;;
+    (gitpull) git pull "$@" ;;
   esac
 }
+function gitpull () { gi gitpull "$@" ; }
 
 function gnew ()
 { # create a new local+remote branch
