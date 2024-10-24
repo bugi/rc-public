@@ -24,9 +24,27 @@ die ()
 do_macos ()
 {
   local mode=pb"$1" ; shift
+  if true
+  then
+    exec "/usr/bin/$mode" "$@"
+    exit # in case execfail is set
+  fi
+  # The rest of this function is in case you want users
+  # to be able to override the main pb$mode via PATH.
+  # Set the "if true" above to "if false" to enable the below.
   local exe=()
   read -r -d'\n' -a exe < <(type -apf "$mode" )
-  local EXE="${exe[-1]}"
+  # Macos limits its native bash to too low of a version for ${exe[-1]} to work,
+  # so finding the last array entry the old way.
+  local n="${#exe[@]}"
+  local EXE=false
+  if [ $n -gt 0 ]
+  then
+    EXE="${exe[$(( n - 1 ))]}"
+  elif [ -x "/usr/bin/$mode" ]
+  then
+    EXE="/usr/bin/$mode"
+  fi
   exec "$EXE" "$@"
 }
 
