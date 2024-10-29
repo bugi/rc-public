@@ -38,11 +38,14 @@ then
   # on macos, even this doesn't really work;
   # will need to try this again once homebrew is configured
   JAVA_HOME="$( "$(type -P java)" -XshowSettings:properties -version 2>&1 > /dev/null | grep 'java[.]home' |sed 's/^ *java[.]home *= *//' )"
-  export JAVA_HOME
-  JDK_HOME="${JAVA_HOME}"
-  export JDK_HOME
-  PATH="${JAVA_HOME}/bin:${PATH}"
-  export PATH
+  if [[ -n $JAVA_HOME ]]
+  then
+    export JAVA_HOME
+    JDK_HOME="${JAVA_HOME}"
+    export JDK_HOME
+    PATH="${JAVA_HOME}/bin:${PATH}"
+    export PATH
+  fi
 elif [ -z "$JAVA_HOME" ] && [ -d /usr/lib/jvm/java-6-sun ]
 then
   # fallback to ancient java :(
