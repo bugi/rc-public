@@ -149,8 +149,13 @@ case "$TERM" in
 esac
 
 
-
-export HOME="$(pwd)" # so dirs shows ~s even through symlinks
+# re-set HOME to resolve symlinks so dirs shows ~s even through symlinks
+xHOME="$(cd ; pwd -P)"
+if [[ -n $xHOME ]]
+then
+  export HOME="$xHOME"
+fi
+unset xHOME
 
 
 if aws_completer_path="$( type -P aws_completer )"
