@@ -16,7 +16,10 @@ for f in \
   then
     for g in $( find "$f" -type f -o -type l )
     do
-      . "$g"
+      case "$g" in
+        (/etc/bash_completion.d/000_bash_completion_compat.bash) ;;
+        (*) . "$g" ;;
+      esac
     done
   fi
 done
