@@ -230,3 +230,34 @@ function DOWN ()
   PUSHD -$n
 }
 alias Down=DOWN
+
+function rotd ()
+{
+  if [ $# -eq 0 ]
+  then
+    PUSHD +1
+    return
+  fi
+  local f
+  for f in "$@"
+  do
+    if [[ $f == - ]]
+    then
+      PUSHD -0
+    elif [[ $f == + ]]
+    then
+      PUSHD +1
+    elif [[ $f == 0 ]]
+    then
+      PUSHD -0
+    elif [[ $f == . ]]
+    then
+      :
+    elif [[ $f == [+-]* ]]
+    then
+      PUSHD "$f"
+    else
+      PUSHD "+$f"
+    fi
+  done
+}
