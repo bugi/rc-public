@@ -252,7 +252,7 @@ function rotd ()
       PUSHD -0
     elif [[ $f == . ]]
     then
-      :
+      d
     elif [[ $f == [+-]* ]]
     then
       PUSHD "$f"
