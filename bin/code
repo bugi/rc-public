@@ -38,6 +38,11 @@ umm ()
 
 me="$(readlink -f "$0")"
 
+if exe="$( umm zed "$me" )"
+then
+  exec "$exe" "$@"
+fi
+
 if exe="$( umm code "$me" )"
 then
   exec "$exe" "$@"
@@ -48,5 +53,5 @@ then
   exec "$exe" "$@"
 fi
 
-echo "Neither VSCodium (brew install vscodium OR https://github.com/VSCodium/vscodium) nor Microsoft Visual Studio Code (brew install visual-studio-code OR https://code.visualstudio.com/) is installed." 1>&2
+echo "None of Zed (flatpak install dev.zed.Zed / https://zed.dev/)  OR  VSCodium (brew install vscodium / https://github.com/VSCodium/vscodium)  OR  Microsoft Visual Studio Code (brew install visual-studio-code / https://code.visualstudio.com/) is installed." 1>&2
 exit 1
