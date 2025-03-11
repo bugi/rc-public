@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+# vim: set tabstop=2 softtabstop=2 shiftwidth=2 expandtab autoindent copyindent :
+
+die ()
+{
+  local f
+  for f in "$@"
+  do
+    printf '%s' "$f" 1>&2
+    echo
+  done
+  exit 1
+}
+
+
+# detect systemd
+if type -f loginctl >/dev/null 2>&1
+then
+  exec xdg-open "$@"
+fi
+
+
+case "$OSTYPE" in
+(darwin*) # Mac OSX
+  exec /usr/bin/open "$@"
+  ;;
+(linux-gnu*)
+  exec xdg-open "$@"
+  ;;
+(cygwin*|msys*|win32*)
+  # Possible options:
+  #   * cygwin: POSIX compatibility layer and Linux environment emulation for Windows
+  #   * msys: Lightweight shell and GNU utilities compiled for Windows (part of MinGW)
+  #   * win32: Maybe use powershell Invoke-Item or cmd.exe /c start?
+  ;;
+esac
+
+
+die "ERROR: unsupported configuration ($OSTYPE).  Please fix this wrapper script."
