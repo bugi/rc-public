@@ -10,7 +10,7 @@ alias mv='mv -i'
 # then sanity
 alias ls='LC_COLLATE=C /bin/ls -CF'
 alias r='fc -s'
-alias z=suspend
+# alias z=suspend
 
 
 
