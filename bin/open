@@ -25,7 +25,9 @@ case "$(uname 2>/dev/null)" in
 esac
 
 # This is to let the user trick xdg-open into doing the right thing.
-# One example is when you have flatpak org.libreoffice.LibreOffice installed but no native libreoffice.
+# It relies on knowing implementation details of xdg-open.
+# One example is when you have flatpak org.libreoffice.LibreOffice installed
+#   but no native libreoffice, and say kde-open fails to do the right thing.
 do_clear_desktop_type=false
 de_specified=false
 if [[ -n $one ]]
