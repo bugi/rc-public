@@ -13,6 +13,95 @@ die ()
 }
 
 
+# short circuit some common-ish cases
+case "$(uname 2>/dev/null)" in
+  (CYGWIN*) one=cygwin; ;;
+  (Darwin) exec /usr/bin/open "$@" ;;
+  (Linux)
+    grep -q microsoft /proc/version > /dev/null 2>&1 && \
+    command -v explorer.exe > /dev/null 2>&1 && \
+    one=wsl;
+    ;;
+esac
+
+# This is to let the user trick xdg-open into doing the right thing.
+# One example is when you have flatpak org.libreoffice.LibreOffice installed but no native libreoffice.
+do_clear_desktop_type=false
+de_specified=false
+if [[ -n $one ]]
+then
+  case "$one" in
+    (cygwin|wsl)
+      do_clear_desktop_type=true
+      export DE="$one"
+      ;;
+    (*)
+      die "ERROR: unsupported configuration (one=«$one»).  Please fix this wrapper script."
+      ;;
+  esac
+else
+  if ! [[ -f $1 ]]
+  then
+    one="$1"
+    one_lc="${one,,}"
+    de_specified=true
+    case "$one_lc" in
+      (darwin) shift ; exec /usr/bin/open "$@" ;;
+      (grr|generic) shift ; export XDG_CURRENT_DESKTOP=X-Generic ;;
+      (cinnamon) shift ; export XDG_CURRENT_DESKTOP="${one_lc^}" ;;
+      (gnome|enlightenment|kde|deepin|lxde|mate|xfce) shift ; export XDG_CURRENT_DESKTOP="${one^^}" ;;
+      (lxqt) shift ; export XDG_CURRENT_DESKTOP=LXQt ;;
+      (flatpak|cygwin|wsl)
+        shift
+        do_clear_desktop_type=true
+        export DE="$one_lc"
+        ;;
+      (de=|de) shift ; export XDG_CURRENT_DESKTOP=X-Generic ;;
+      (de=*)
+        # force setting DE instead of XDG_CURRENT_DESKTOP
+        # eg. DE=generic instead of XDG_CURRENT_DESKTOP=X-Generic
+        shift
+        do_clear_desktop_type=true
+        export DE="${one#*=}"
+        ;;
+      (*) de_specified=false ;;
+    esac
+  fi
+fi
+
+# handle specific pain points
+# Why is this necessary?!
+if ! [[ $de_specified = true ]]
+then
+  case "$( xdg-mime query filetype "$1" )" in
+    (application/vnd.oasis.opendocument.*)
+      if [[ $XDG_CURRENT_DESKTOP = KDE ]]  # Is it specific to kde-open?
+      then
+        if ! type -f libreoffice >/dev/null 2>&1
+        then
+          if type -f flatpak >/dev/null 2>&1
+          then
+            # flatpak info succeeds iff package is installed, not if it just exists (cf `brew info`)
+            if flatpak info org.libreoffice.LibreOffice >/dev/null 2>&1
+            then
+              de_specified=true
+              export XDG_CURRENT_DESKTOP=X-Generic
+            fi
+          fi
+        fi
+      fi
+      ;;
+  esac
+fi
+
+
+if $do_clear_desktop_type
+then
+  # Clears all the ways xdg-open figures out the desktop, so that setting DE will rule.
+  export XDG_CURRENT_DESKTOP=NA KDE_FULL_SESSION= GNOME_DESKTOP_SESSION_ID= MATE_DESKTOP_SESSION_ID= DESKTOP_SESSION=
+fi
+
+
 # detect systemd
 if type -f loginctl >/dev/null 2>&1
 then
