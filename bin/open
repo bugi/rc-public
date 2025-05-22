@@ -16,7 +16,10 @@ die ()
 # detect systemd
 if type -f loginctl >/dev/null 2>&1
 then
-  exec xdg-open "$@"
+  if type -f xdg-open >/dev/null 2>&1
+  then
+    exec xdg-open "$@"
+  fi
 fi
 
 
@@ -25,7 +28,12 @@ case "$OSTYPE" in
   exec /usr/bin/open "$@"
   ;;
 (linux-gnu*)
-  exec xdg-open "$@"
+  if type -f xdg-open >/dev/null 2>&1
+  then
+    exec xdg-open "$@"
+  else
+    die "ERROR: unsupported configuration ($OSTYPE + xdg-open).  Please fix this wrapper script."
+  fi
   ;;
 (cygwin*|msys*|win32*)
   # Possible options:
