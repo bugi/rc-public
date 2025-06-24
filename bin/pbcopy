@@ -2,12 +2,22 @@
 # vim: set tabstop=2 softtabstop=2 shiftwidth=2 expandtab autoindent copyindent :
 
 bname="$(basename "$0")"
+
 case "$1" in
 (copy|paste|x2w|w2x)
   bname="$1"
   shift
   ;;
-(pb*)
+(pbcopy|pbpaste)
+  bname="${1#pb}"
+  shift
+  ;;
+esac
+
+case "$bname" in
+(copy|paste|x2w|w2x)
+  ;;
+(pbcopy|pbpaste)
   bname="${bname#pb}"
   ;;
 (*)
@@ -117,11 +127,13 @@ do_ms ()
 
 if [[ $1 == --x2w ]] || [[ $bname == x2w ]]
 then
-  "$0" paste --x11 | "$0" copy --wayland
+  do_x11 paste | do_wayland copy
+  # "$0" paste --x11 | "$0" copy --wayland
   exit
 elif [[ $1 == --w2x ]] || [[ $bname == w2x ]]
 then
-  "$0" paste --wayland | "$0" copy --x11
+  do_wayland paste | do_x11 copy
+  # "$0" paste --wayland | "$0" copy --x11
   exit
 elif [[ $1 == --x11 ]]
 then
