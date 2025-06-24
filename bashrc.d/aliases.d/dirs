@@ -30,12 +30,25 @@ function DD ()
   echo
 }
 
+function _Dpd ()
+{ # minimal Dpd
+  echo -n 'cd;dirs -c; pd '
+  DD
+}
+
 function Dpd ()
 { # like D(), but suitable to save&restore a directory stack
   echo # to visually separate from prompt, which likely also includes the current path
-  echo -n 'cd;dirs -c; pd '
-  DD
+  _Dpd
   echo # to visually separate from prompt, which likely also includes the current path
+}
+
+function Dpdj ()
+{ # like Dpd(), but also names jobs so human can manually restore that part
+  echo '{'
+  _Dpd | sed 's/^/  /'
+  jobs | sed 's/^/  /'
+  echo '}'
 }
 
 function d_git ()
