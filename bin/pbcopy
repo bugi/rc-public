@@ -82,12 +82,12 @@ do_x11 ()
       fi
       ;;
     (paste)
-      if type -f xclip >/dev/null 2>&1
-      then
-        exec xclip -selection clipboard -o "$@"
-      elif type -f xsel >/dev/null 2>&1
+      if type -f xsel >/dev/null 2>&1
       then
         exec xsel --clipboard --output "$@"
+      elif type -f xclip >/dev/null 2>&1
+      then
+        exec xclip -selection clipboard -o "$@"
       fi
       ;;
     (*) die "unknown mode '$mode' for x11" ;;
