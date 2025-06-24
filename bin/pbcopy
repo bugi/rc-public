@@ -61,7 +61,7 @@ do_wayland ()
     (paste)
       if type -f wl-paste >/dev/null 2>&1
       then
-        exec wl-paste "$@"
+        exec wl-paste -n "$@"
       fi
       ;;
     (*) die "unknown mode '$mode' for wayland" ;;
