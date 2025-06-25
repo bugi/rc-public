@@ -53,5 +53,5 @@ then
   exec "$exe" "$@"
 fi
 
-echo "None of Zed (flatpak install dev.zed.Zed / https://zed.dev/)  OR  VSCodium (brew install vscodium / https://github.com/VSCodium/vscodium)  OR  Microsoft Visual Studio Code (brew install visual-studio-code / https://code.visualstudio.com/) is installed." 1>&2
+echo "None of Zed (flatpak install dev.zed.Zed | https://zed.dev/)  OR  VSCodium (brew install vscodium | https://github.com/VSCodium/vscodium)  OR  Microsoft Visual Studio Code (brew install visual-studio-code | https://code.visualstudio.com/) is installed." 1>&2
 exit 1
