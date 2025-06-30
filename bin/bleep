@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+speaker-test -t sine -f 1000 -l 1 & sleep .2 && kill -9 $!
