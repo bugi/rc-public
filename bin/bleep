@@ -1,2 +1,7 @@
 #!/usr/bin/env bash
-speaker-test -t sine -f 1000 -l 1 & sleep .2 && kill -9 $!
+x=/dev/null
+if [[ $1 = out ]]
+then
+  x=/dev/stdout
+fi
+speaker-test -t sine -f 1000 -l 1 >"$x" & sleep .2 && kill -9 $!
