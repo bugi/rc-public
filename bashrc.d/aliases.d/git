@@ -9,6 +9,7 @@ function gi ()
     (tpull) git pull "$@" ;;
     (tco) git checkout "$@" ;;
     (gitpull) git pull "$@" ;;
+    (*) curl -sL "https://www.toptal.com/developers/gitignore/api/$one" ;;
   esac
 }
 function gitpull () { gi gitpull "$@" ; }
