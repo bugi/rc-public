@@ -1,7 +1,57 @@
 #!/usr/bin/env bash
+
+# My use of this is to wake my audio interface from powersave mode by briefly
+# playing a tone at the current volume.  That's with no arguments.
+#
+# Alternately, with an integer argument it makes the tone quickly that many times.
+#
+# With the argument "inf" the tone is make every few seconds until ^c, to prevent
+# the audio from entering powersave mode.
+
 x=/dev/null
 if [[ $1 = out ]]
 then
   x=/dev/stdout
+  shift
 fi
-speaker-test -t st2095 -f 1000 -l 1 >"$x" & sleep .2 && kill -9 $!
+
+N="$1"
+if [[ -z $N ]]
+then
+  N=1
+elif [[ $N == inf ]]
+then
+  :
+elif [[ $N =~ ^[0-9]+$ ]]
+then
+  :
+else
+  echo bad arg
+  exit 1
+fi
+
+if [[ $N == 1 ]]
+then
+  delay=.2s
+elif [[ $N == inf ]]
+then
+  delay=.1s
+else
+  delay=.11s
+fi
+
+while [[ $N != 0 ]]
+do
+  if [[ $N != inf ]]
+  then
+    N=$(( N - 1 ))
+  fi
+  if [[ $N == inf ]]
+  then
+    echo inf
+    ( speaker-test -t st2095 -f 1000 -l 1 >"$x" & sleep $delay && kill -9 $! )
+    sleep 30
+  else
+    ( speaker-test -t st2095 -f 1000 -l 1 >"$x" & sleep $delay && kill -9 $! )
+  fi
+done
