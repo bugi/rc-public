@@ -4,4 +4,4 @@ if [[ $1 = out ]]
 then
   x=/dev/stdout
 fi
-speaker-test -t sine -f 1000 -l 1 >"$x" & sleep .2 && kill -9 $!
+speaker-test -t st2095 -f 1000 -l 1 >"$x" & sleep .2 && kill -9 $!
