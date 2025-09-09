@@ -48,7 +48,6 @@ do
   fi
   if [[ $N == inf ]]
   then
-    echo inf
     ( speaker-test -t st2095 -f 1000 -l 1 >"$x" & sleep $delay && kill -9 $! )
     sleep 30
   else
