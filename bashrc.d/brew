@@ -10,7 +10,8 @@
 # https://gist.github.com/willgarcia/7347306870779bfa664e
 
 
-type -P brew >/dev/null && return   # don't bother if brew is already set up
+# the [[ -n ]] is to get around "helpful" entries in /etc/paths.d/
+type -P brew >/dev/null && [[ -n $HOMEBREW_PREFIX ]] && return   # don't bother if brew is already set up
 
 known_breweries=()
 known_breweries+=( "${HOME}"/.linuxbrew/bin/brew )
