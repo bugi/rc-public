@@ -1,0 +1,21 @@
+The iterm2 state uses:
+  - extra colors and profiles that match my taste
+  - font-intel-one-mono
+  - default font bash from homebrew (for now; I'm slowly porting my brain to zsh)
+
+The iterm2 keymap binds:
+  - ^PageUp -> previous tab
+  - ^PageDown -> next tab
+  - ^] -> next pane.
+  - ^[ -> previous pane:
+    Yes that can impact screen, tmux, and telnet.
+    You can remove this binding and just use ^].  Next pane cycles through.
+    I bind tmux escape prefix to ^o, so this binding of ^[ works will for me.
+    You shouldn't be using telnet.
+    Screen is very useful, so I'm sure you'll find a way.
+
+My window and tab placement is a bit esoteric.  Look on desktops 1 and 4.
+
+```
+brew install bash iterm2 font-intel-one-mono font-inconsolata-nerd-font
+```
