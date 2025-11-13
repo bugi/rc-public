@@ -2,6 +2,7 @@
 
 key bindings:
   - https://pqrs.org/osx/karabiner/
+  - brew install karabiner-elements
 
 Fix key repeat speed: |
   # The new repeat values won't go into effect until
