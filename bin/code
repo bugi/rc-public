@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # vim: set tabstop=2 softtabstop=2 shiftwidth=2 expandtab autoindent copyindent :
 
-# Make working with vscodium have the same cli as vscode.
+# Make working with vscodium and zed have the same(ish) cli as vscode.
 
 umm ()
 { # Hopefully returns the LAST entry from PATH for $xname + true.
@@ -38,20 +38,22 @@ umm ()
 
 me="$(readlink -f "$0")"
 
-if exe="$( umm zed "$me" )"
-then
-  exec "$exe" "$@"
-fi
+for coder in ${CODE_preference} zed code codium
+do
+  if exe="$( umm "$coder" "$me" )"
+  then
+    if [[ $1 == =which ]]
+    then
+      case "$coder" in
+        (zed) $coder =which ;;
+        (*) echo "$exe" ;;
+      esac
+      exit
+    else
+      exec "$exe" "$@"
+    fi
+  fi
+done
 
-if exe="$( umm code "$me" )"
-then
-  exec "$exe" "$@"
-fi
-
-if exe="$( umm codium "$me" )"
-then
-  exec "$exe" "$@"
-fi
-
-echo "None of Zed (flatpak install dev.zed.Zed | https://zed.dev/)  OR  VSCodium (brew install vscodium | https://github.com/VSCodium/vscodium)  OR  Microsoft Visual Studio Code (brew install visual-studio-code | https://code.visualstudio.com/) is installed." 1>&2
+echo "None of Zed (brew install zed | https://zed.dev/ | flatpak install dev.zed.Zed)  OR  VSCodium (brew install vscodium | https://github.com/VSCodium/vscodium)  OR  Microsoft Visual Studio Code (brew install visual-studio-code | https://code.visualstudio.com/) is installed." 1>&2
 exit 1
