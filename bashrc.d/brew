@@ -97,6 +97,7 @@ unset gnubin_whitelist
 # mysql-client vs mysql.
 keg_whitelist=()
 keg_whitelist+=( mysql-client )
+keg_whitelist+=( bc ) # for dc
 
 for f in "${keg_whitelist[@]}"
 do
