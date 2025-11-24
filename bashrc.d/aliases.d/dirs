@@ -25,7 +25,7 @@ function DD ()
   for f in "${fnarray[@]}"
   do
     printf '%q\n' "$f"
-  done | sed -E 's,^\\[~]$,~, ; s,^\\[~]/,~/,' | tr '\n' ' '
+  done | sed -E 's,^\\[~]$,~, ; s,^\\[~]/,~/,' | tr '\n' ' ' | sed 's/ *$//'
   # the sed unescapes the ~ (homedir)
   echo
 }
