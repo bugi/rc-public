@@ -3,7 +3,7 @@
 
 # usage:
 #   declare grr_d=()
-#   source_files_in_dir grr_d grr.d/
+#   gather_files_in_dir grr_d grr.d/
 #   for fn in "${grr_d[@]}"
 #   do
 #     if [ -r "$fn" ] ; then . "$fn" ; fi
