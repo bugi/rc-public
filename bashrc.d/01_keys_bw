@@ -1,0 +1,176 @@
+#!sh
+# This sets up so user can import keys from bitwarden when they decide to.
+# https://bitwarden.com/help/cli/
+
+#
+# To use this tool, you will need to set several variables.
+# See the examples below.
+#
+# Once you have the variables set up and have sourced this file,
+# call the bwpw_import function from your cli.
+#
+# Subsequent calls to bwpw_import will reuse your existing login and lock if you have them.
+#
+#
+# It is assumed you will use the BW_SESSION env var mechanism for the session key.
+# Multi-user is not presently supported.  Please send a pull request if you implement it.
+#
+# BW_LOGIN_ARGS specified what args to bw login.
+# See `bw login --help` for details.
+# export BW_LOGIN_ARGS=( --sso my_org_gave_me_this_string )
+#
+# BW_UNLOCK_ARGS specified what args to bw unlock.
+# See `bw unlock --help` for details.
+# --passwordenv and --passwordfile are especially useful for BW_UNLOCK_ARGS.
+# But PLEASE don't put your password here, even though it's valid syntax.
+# export BW_MUMBLE_PW=alsdjfasddljf   # this is for the --passwordenv example on the next line
+# export BW_UNLOCK_ARGS=( --passwordenv BW_MUMBLE_PW )
+#
+# You don't have to set BW_SESSION_FN, but if you don't then
+# this tool will manage only one terminal.  Using BW_SESSION_FN will
+# allow separate terminals to share one session.
+# Effort is made to guard the content of this file from prying eyes.
+# export BW_SESSION_FN="$HOME/.bw-session"
+#
+# The bwpw associative bash array is where you specify what data to put where.
+# This example will pull the password record and put it in the BW_PG_USERNAME environment variable.
+#   bwpw[BW_PG_USERNAME]='44f80a8e-b8f1-4437-8fd9-6d69f75a5194/.login.password'
+# The uuid is the object id of the Bitwarden record.  The .login.password is the json path
+# to the data in the record.
+# You can get the uuid from the cli using `bw list`.  As of this writing it's not available via GUI.
+#
+
+
+
+declare -A bwpw=()
+
+_bwpw_exists ()
+{
+  if ! type -apf bw >/dev/null 2>&1
+  then
+    echo "Sorry, bw doesn't exist.  Install bitwarden-cli then bw --help.  See https://bitwarden.com/help/cli/"
+    false
+    return
+  fi
+}
+
+_bwpw_login ()
+{
+  _bwpw_exists || return
+  bw --quiet login --check && return
+  echo "You must login before proceeding."
+  local login_args=()
+  if declare -pa BW_LOGIN_ARGS >/dev/null 2>&1
+  then
+    login_args=( "${BW_LOGIN_ARGS[@]}" )
+  else
+    echo "You should set BW_LOGIN_ARGS[], even to empty, so I can know how to log you in.  Winging it."
+    login_args=()
+  fi
+  echo "Triggering login for you."
+  bw login "${login_args[@]}"
+  local R=$?
+  if [[ $R -ne 0 ]]
+  then
+    echo "Login failed." 1>&2
+    return $R
+  fi
+  true
+  return
+}
+
+_bwpw_unlocked ()
+{
+  bw --quiet unlock --check && return
+  false
+}
+
+_bwpw_unlocked_or_restored ()
+{
+  _bwpw_unlocked && return
+  unset BW_SESSION
+  if [[ -z $BW_SESSION_FN ]]
+  then
+    false
+    return
+  fi
+  if ! [[ -r $BW_SESSION_FN ]]
+  then
+    false
+    return
+  fi
+  local R
+  if BW_SESSION="$(cat "$BW_SESSION_FN")" bw --quiet unlock --check
+  then
+    export BW_SESSION="$(cat "$BW_SESSION_FN")"
+    bw unlock --check && return
+    R=$?
+    unset BW_SESSION
+    return $R
+  fi
+}
+
+_bwpw_unlock ()
+{
+  _bwpw_exists || return
+  bw --quiet unlock --check && return  # fast path
+  _bwpw_login || return
+  _bwpw_unlocked_or_restored && return
+  unset BW_SESSION
+  #
+  echo "You must unlock the vault before proceeding."
+  local unlock_args=()
+  if declare -pa BW_UNLOCK_ARGS >/dev/null 1>&1
+  then
+    unlock_args=( "${BW_UNLOCK_ARGS[@]}" )
+  else
+    echo "You should set BW_UNLOCK_ARGS[], even to empty, so I can know how to unlock you.  Winging it."
+    unlock_args=()
+  fi
+  echo "Triggering unlock for you."
+  if [[ -n $BW_SESSION_FN ]]
+  then
+    touch "$BW_SESSION_FN"
+    chmod 600 "$BW_SESSION_FN"
+    bw unlock "${unlock_args[@]}" --raw >| "$BW_SESSION_FN"
+    export BW_SESSION="$(cat "$BW_SESSION_FN")"
+  else
+    export BW_SESSION="$( bw unlock "${unlock_args[@]}" )"
+  fi
+  bw unlock --check && return
+  local R=$?
+  unset BW_SESSION
+  return $R
+}
+
+_bwpw_lock ()
+{
+  if [[ -n $BW_SESSION_FN ]] && [[ -e $BW_SESSION_FN ]]
+  then
+    rm -f "$BW_SESSION_FN"
+  fi
+  _bwpw_exists || return
+  bw lock
+}
+
+_bwpw_import ()
+{
+  # https://bitwarden.com/help/cli/
+  local k v guid path c
+  for k in "${!bwpw[@]}"
+  do
+    echo "importing $k"
+    v="${bwpw[$k]}"
+    guid="${v%%/*}"
+    path="${v#*/}"
+    # echo "guid($guid) path($path)"
+    c="$(bw get item "$guid" | jq "$path" )"
+    export "$k"="$c"
+  done
+}
+
+bwpw_import ()
+{
+  _bwpw_unlock || return
+  _bwpw_import
+}
