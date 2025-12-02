@@ -1,0 +1,69 @@
+#!sh
+# This sets up so user can import keys from 1password when they decide to.
+# For a more general approach, see
+#   `op inject -h`  and  https://developer.1password.com/docs/cli/secrets-config-files/
+
+declare -A onepw=()
+
+function _onepw_exists ()
+{
+  if ! type -apf op >/dev/null 2>&1
+  then
+    echo "Sorry, op doesn't exist.  See https://developer.1password.com/docs/cli/get-started/"
+    false
+    return
+  fi
+}
+
+function _onepw_login ()
+{
+  _onepw_exists || return
+  local R
+  op whoami >/dev/null 2>&1
+  R=$?
+  if [[ $R -eq 0 ]]
+  then
+    return $R
+  fi
+  echo "You must login before proceeding."
+  local login_args=()
+  if declare -pa OP_LOGIN_ARGS >/dev/null 2>&1
+  then
+    login_args=( "${OP_LOGIN_ARGS[@]}" )
+  else
+    login_args=()
+  fi
+  echo "You should set OP_LOGIN_ARGS[], even to empty, so I can know how to log you in.  Winging it."
+  echo "Triggering login for you."
+  op signin "${login_args[@]}"
+  R=$?
+  if [[ $R -ne 0 ]]
+  then
+    echo "Login failed." 1>&2
+    return $R
+  fi
+  true
+  return
+}
+
+function _onepw_import ()
+{
+  # for a primer on using op to set env vars:
+  #   https://developer.1password.com/docs/cli/secrets-config-files/
+  #   https://samedwardes.com/blog/2023-11-03-1password-for-secret-dotfiles/
+  #   https://samedwardes.com/blog/2023-11-28-1password-for-secret-dotfiles-update/
+  local k v c
+  for k in "${!onepw[@]}"
+  do
+    echo "importing $k"
+    v="${onepw[$k]}"
+    c="$(op read "$v")"
+    export "$k"="$c"
+  done
+}
+
+onepw_import ()
+{
+  _onepw_login || return
+  _onepw_import
+}
