@@ -1,0 +1,47 @@
+#!bash
+# vim:set ft=sh tabstop=2 softtabstop=2 shiftwidth=2 expandtab autoindent copyindent :
+
+# lazy load startup-heavy utilities - defers initialization until first use
+# idea from https://dev.to/nickytonline/how-i-used-claude-code-to-speed-up-my-shell-startup-by-95-m0f
+
+# nvm is used to manage which version of node/npm to use
+# https://github.com/nvm-sh/nvm
+
+nvm_loader()
+{
+  local __nvm_loader_nvm_prefix
+  if [[ -d $HOME/.nvm ]]
+  then
+    __nvm_loader_nvm_prefix="$HOME/.nvm"
+    export NVM_DIR="$__nvm_loader_nvm_prefix"
+  elif [[ -n $HOMEBREW_PREFIX ]] && [[ -d $HOMEBREW_PREFIX/opt/nvm ]]
+  then
+    __nvm_loader_nvm_prefix="$HOMEBREW_PREFIX/opt/nvm"
+  fi
+  if [[ -n $__nvm_loader_nvm_prefix ]]
+  then
+    [[ -r $__nvm_loader_nvm_prefix/nvm.sh ]] && \. "$__nvm_loader_nvm_prefix/nvm.sh"
+    if [ "${-/i/}" != "$-" ]
+    then
+      if [[ -r $__nvm_loader_nvm_prefix/bash_completion ]]
+      then
+        . "$__nvm_loader_nvm_prefix/bash_completion"
+      elif [[ -r $__nvm_loader_nvm_prefix/etc/bash_completion.d/nvm ]]
+        . "$__nvm_loader_nvm_prefix/etc/bash_completion.d/nvm"
+      fi
+    fi
+  fi
+}
+
+
+__nvmgo ()
+{
+  unset -f nvm node npm npx
+  nvm_loader
+  unset -f __nvmgo
+  "$@"
+}
+nvm() { __nvmgo "${FUNCNAME[0]}" "$@" ; }
+node() { __nvmgo "${FUNCNAME[0]}" "$@" ; }
+npm() { __nvmgo "${FUNCNAME[0]}" "$@" ; }
+npx() { __nvmgo "${FUNCNAME[0]}" "$@" ; }

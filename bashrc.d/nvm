@@ -3,6 +3,13 @@
 
 # nvm is used to manage which version of node/npm to use
 # https://github.com/nvm-sh/nvm
+
+if [[ $(type -t nvm) == function ]]
+then
+  # is being lazy loaded, so don't load nvm environment here
+  return
+fi
+
 if [ -d "$HOME/.nvm" ]
 then
   export NVM_DIR="$HOME/.nvm"
