@@ -1,0 +1,17 @@
+#!bash
+# vim:set ft=sh tabstop=2 softtabstop=2 shiftwidth=2 expandtab autoindent copyindent :
+
+# lazy load startup-heavy utilities - defers initialization until first use
+# idea from https://dev.to/nickytonline/how-i-used-claude-code-to-speed-up-my-shell-startup-by-95-m0f
+
+__rustgo()
+{
+  unset -f cargo rustc rustup
+  [[ -r $HOME/.cargo/env ]] && . "$HOME"/.cargo/env
+  unset -f __rustgo
+  "$@"
+}
+cargo() { __rustgo "${FUNCNAME[0]}" "$@" ; }
+rustc() { __rustgo "${FUNCNAME[0]}" "$@" ; }
+rustup() { __rustgo "${FUNCNAME[0]}" "$@" ; }
+
