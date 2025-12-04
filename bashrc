@@ -175,6 +175,24 @@ export is_interactive
 
 $is_interactive || return    # non-interactive, so we're done here
 
+abspath_simple ()
+{ # we can't trust `readlink -f` at this point
+  local f="$1"
+  if [[ -d "$f" ]]
+  then
+    ( cd "$f" ; dirs -l +0 )
+    return
+  fi
+  local bn="$(basename "$f")"
+  local d="$(dirname "$f")"
+  d="$( cd "$d" ; dirs -l +0 )"
+  if [[ $d == / ]]
+  then
+    echo "/$bn"
+    return
+  fi
+  echo "$d/$bn"
+}
 
 f="$( readlink "${BASH_SOURCE[0]}" )"
 if [ $? -ne 0 ]
