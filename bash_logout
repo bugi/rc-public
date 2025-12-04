@@ -12,7 +12,7 @@ elif [ -x /usr/local/bin/fortune ]
 then
 	alias fortune="/usr/local/bin/fortune"
 else
-	: alias fortune='telnet cookie.icce.rug.nl 4002'
+	# alias fortune='telnet cookie.icce.rug.nl 4002'
 	alias fortune='echo "fortune: Command not found."'
 fi
 
