@@ -12,6 +12,10 @@ alias scp_='scp    -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
 alias _ssh=SSH
 alias _scp=SCP
 
+rsync_ ()
+{
+  rsync -e 'ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null' --progress --partial "$@"
+}
 
 # For those cases where you must manually load a set of ssh keys
 # after each login.  You are responsible for setting SSH_ASKPASS
