@@ -14,7 +14,7 @@ alias _scp=SCP
 
 rsyncp ()
 {
-  rsync -e 'ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null' --progress --partial "$@"
+  command rsync -e 'ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null' --progress --partial "$@"
 }
 
 # For those cases where you must manually load a set of ssh keys
