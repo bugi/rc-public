@@ -27,6 +27,7 @@ nvm_loader()
       then
         . "$__nvm_loader_nvm_prefix/bash_completion"
       elif [[ -r $__nvm_loader_nvm_prefix/etc/bash_completion.d/nvm ]]
+      then
         . "$__nvm_loader_nvm_prefix/etc/bash_completion.d/nvm"
       fi
     fi
