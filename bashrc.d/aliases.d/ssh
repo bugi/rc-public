@@ -12,7 +12,7 @@ alias scp_='scp    -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
 alias _ssh=SSH
 alias _scp=SCP
 
-rsync_ ()
+rsyncp ()
 {
   rsync -e 'ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null' --progress --partial "$@"
 }
