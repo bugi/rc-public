@@ -176,16 +176,35 @@ export is_interactive
 $is_interactive || return    # non-interactive, so we're done here
 
 abspath_simple ()
-{ # we can't trust `readlink -f` at this point
+{ # we can't trust `realpath` or `readlink -f` at this point
+  # we do need to follow symlinks because we want to read sibling files in the real directory
+  if type realpath >/dev/null 2>&1
+  then
+    # realpath exists on linux and macos, so probably everywhere ;-)
+    realpath "$1"
+    return
+  fi
+  # since realpath will almost certainly exist, we don't try as hard below as we could
   local f="$1"
   if [[ -d "$f" ]]
   then
-    ( cd "$f" ; dirs -l +0 )
+    ( cd "$f" ; pwd -P )
     return
   fi
-  local bn="$(basename "$f")"
-  local d="$(dirname "$f")"
-  d="$( cd "$d" ; dirs -l +0 )"
+  local d bn
+  # { should loop here to defeat chained symlinks (but with guard to avoid loops)
+  d="$(dirname "$f")"
+  if [[ -L "$f" ]]
+  then
+    if bn="$(readlink "$f")"
+    then
+      f="$d/$bn"
+    fi
+  fi
+  d="$(dirname "$f")"
+  bn="$(basename "$f")"
+  d="$( cd "$d" ; pwd -P )"
+  # } end unimplemented loop
   if [[ $d == / ]]
   then
     echo "/$bn"
@@ -194,10 +213,10 @@ abspath_simple ()
   echo "$d/$bn"
 }
 
-f="$( readlink "${BASH_SOURCE[0]}" )"
+f="$( abspath_simple "${BASH_SOURCE[0]}" )"
 if [ $? -ne 0 ]
 then
-  echo "readlink/greadlink -f doesn't work properly." 1>&2
+  echo "realpath/readlink/abspath doesn't work properly." 1>&2
   return
 fi
 this_bashdir="$(dirname "$f" )"
@@ -211,6 +230,6 @@ fi
 # https://github.com/junegunn/fzf
 # Read fzf config here instead of in a separate file because
 # fzf's install really wants it in this file.
-[ -f ~/.fzf.bash ] && source ~/.fzf.bash
+[ -r ~/.fzf.bash ] && source ~/.fzf.bash
 
 . "$f"
