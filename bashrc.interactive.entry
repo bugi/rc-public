@@ -1,0 +1,55 @@
+#!bash
+# vim:set ft=sh tabstop=2 softtabstop=2 shiftwidth=2 expandtab autoindent copyindent :
+
+
+. "$this_bashdir"/gather_files_in_dir.sh
+
+
+OTHER_RC_DIRS=( "$this_bashdir" )
+
+if [ -r "$this_bashdir"/bashrc.other_rc_directories ]
+then
+  # Lines in this file should look like:
+  #   OTHER_RC_DIRS+=( "$HOME/.rc-private" )
+  . "$this_bashdir"/bashrc.other_rc_directories
+fi
+
+# Append to OTHER_RC_DIRS any symlinked directories found in bashrc.other_rc_directories.d.
+declare other_rc_dirs=()
+gather_files_in_dir other_rc_dirs "${this_bashdir}"/bashrc.other_rc_directories.d/ === -type l
+for other_rc_dir in "${other_rc_dirs[@]}"
+do
+  if [ -d "$other_rc_dir" ]
+  then
+    OTHER_RC_DIRS+=( "$(abspath_simple "$other_rc_dir")" )
+  fi
+done
+unset other_rc_dirs other_rc_dirs
+
+
+# Call any bashrc.interactive files from OTHER_RC_DIRS.
+declare -A rcdir_used # used to avoid calling a file more than once
+rcdir_used["$(abspath_simple "${BASH_SOURCE[0]}")"]=1
+for other_rc_dir in "${OTHER_RC_DIRS[@]}"
+do
+  other_rc_dir_abs="$other_rc_dir/bashrc.interactive"
+  # echo "candidate($other_rc_dir_abs)" 1>&2
+  if [ -n "${rcdir_used[$other_rc_dir_abs]}" ]
+  then
+    # echo "  duplicate" 1>&2
+    continue
+  fi
+  rcdir_used["$other_rc_dir_abs"]=1
+  if [ -r "${other_rc_dir_abs}" ]
+  then
+    # echo "  reading" 1>&2
+    pushd "$other_rc_dir" >/dev/null
+    . "${other_rc_dir_abs}"
+    popd >/dev/null
+  else
+    :
+    # echo "  unreadable" 1>&2
+  fi
+done
+unset rcdir_used other_rc_dir
+
