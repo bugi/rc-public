@@ -3,3 +3,7 @@ you want me to look in for other bash related files.
 
 Don't check in the symlinks.  No sense exposing your
 other rc directories.
+
+You are responsible for arranging them in order.  They will
+be sorted in the C locale before use.  Try prefixing with
+"00_", "01_", etc for good results.
