@@ -220,7 +220,7 @@ then
   return
 fi
 this_bashdir="$(dirname "$f" )"
-f="$f".interactive
+f="$f".interactive.entry
 if ! [ -r "$f" ]
 then
   echo "The file '$f' does not exist." 1>&2
