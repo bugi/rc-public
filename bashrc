@@ -233,3 +233,5 @@ fi
 [ -r ~/.fzf.bash ] && source ~/.fzf.bash
 
 . "$f"
+
+unset -f abspath_simple
