@@ -215,12 +215,30 @@ function abspath ()
   #   It can return an empty string along with false.
 
   case "$_abspath_mechanism" in
-  (/*) "$_abspath_mechanism" -f "$1" ; return ;;
+  (*/realpath) "$_abspath_mechanism" "$@" ; return ;;
+  (*/grealpath) "$_abspath_mechanism" "$@" ; return ;;
+  (*/readlink) "$_abspath_mechanism" -f "$1" ; return ;;
+  (*/greadlink) "$_abspath_mechanism" -f "$1" ; return ;;
   (_abspath2) _abspath2 "$1" ; return ;;
   (_abspath) _abspath "$1" ; return ;;
+  (/*) "$_abspath_mechanism" "$@" ; return ;;
   esac
 
   local bin
+
+  if bin="$(type -p grealpath)"
+  then
+    _abspath_mechanism="$bin"
+    "$bin" "$@"
+    return
+  fi
+
+  if bin="$(type -p realpath)"
+  then
+    _abspath_mechanism="$bin"
+    "$bin" "$@"
+    return
+  fi
 
   bin="$(type -p readlink)"
   if "$bin" --version 2>/dev/null |grep -q GNU
