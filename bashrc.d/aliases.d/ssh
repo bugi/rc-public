@@ -1,9 +1,6 @@
 #!bash
 # vim:set ft=sh tabstop=2 softtabstop=2 shiftwidth=2 expandtab autoindent copyindent :
 
-
-
-
 # for use when a machine is repurposed behind our back
 alias  SSH='ssh -q -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
 alias  SCP='scp -q -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
@@ -17,13 +14,3 @@ rsyncp ()
   command rsync -e 'ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null' --progress --partial "$@"
 }
 
-# For those cases where you must manually load a set of ssh keys
-# after each login.  You are responsible for setting SSH_ASKPASS
-# and friends if applicable before calling this function.
-#
-# Your private rc's from bashrc.other_rc_directories.d/ should append to SSH_KEYS_FILES[].
-SSH_KEYS_FILES=()
-init_ssh_add ()
-{
-  ssh-add "${SSH_KEYS_FILES[@]}"
-}
