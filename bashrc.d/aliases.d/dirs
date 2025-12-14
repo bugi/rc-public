@@ -47,7 +47,7 @@ function Dpdj ()
 { # like Dpd(), but also names jobs so human can manually restore that part
   echo '{'
   _Dpd | sed 's/^/  /'
-  jobs | sed 's/^/  /;s/ *$//'
+  jobs |grep -v Done | sed 's/^/  /;s/ *$//'
   echo '}'
 }
 
