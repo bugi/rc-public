@@ -16,7 +16,7 @@ alias z=suspend
 
 #----------- GENERAL -----------
 alias xvm='xv -maxpect -geometry +0+0'
-alias mroe='more'
+alias mroe='less -FRXi'
 alias jbos=jobs
 alias R='more [Rr][Ee][Aa][Dd]{,_,.}[Mm][Ee]*'
 spel () {
@@ -28,8 +28,16 @@ alias grep='grep --color=auto'
 alias fgrep='fgrep --color=auto'
 alias egrep='egrep --color=auto'
 
-# you should pipe bdiff to `less -FRXi`
-alias bdiff='diff -burNd --color=always'
+# fancy diff
+bdiff ()
+{
+  if [[ -t 1 ]]
+  then
+    command diff -burNd --color=always "$@" | less -FRXi
+  else
+    command diff -burNd --color=always "$@"
+  fi
+}
 
 #
 alias cerl='curl --no-progress-meter'
