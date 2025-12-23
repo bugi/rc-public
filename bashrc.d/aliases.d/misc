@@ -28,7 +28,7 @@ alias grep='grep --color=auto'
 alias fgrep='fgrep --color=auto'
 alias egrep='egrep --color=auto'
 
-# you should pipe bdiff to `less -RFi`
+# you should pipe bdiff to `less -FRXi`
 alias bdiff='diff -burNd --color=always'
 
 #
