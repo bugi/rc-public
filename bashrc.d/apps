@@ -8,7 +8,7 @@
 export VISUAL=vi
 export EDITOR="$VISUAL"
 
-export PAGER='less -R'
+export PAGER='less -RFi'
 export BAT_PAGER='less -RFi'
 
 export PGPPATH="$HOME"/mail/.pgppath
