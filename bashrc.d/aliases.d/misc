@@ -29,7 +29,7 @@ alias fgrep='fgrep --color=auto'
 alias egrep='egrep --color=auto'
 
 # fancy diff
-bdiff ()
+function bdiff ()
 {
   if [[ -t 1 ]]
   then
