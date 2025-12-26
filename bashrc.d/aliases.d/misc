@@ -45,7 +45,8 @@ alias cerl='curl --no-progress-meter'
 
 #----------- ls BASED -----------
 alias ll='LC_COLLATE=C /bin/ls -lh'
-lsd () {
+function lsd ()
+{
   local d
   if [ $# -eq 0 ]
   then
@@ -53,17 +54,8 @@ lsd () {
   else
     d="$*"
   fi
-  if [ $# -eq 1 ]
-  then
-    pushd $d > /dev/null
-    d=.
-  fi
-  LC_COLLATE=C /bin/ls -Cd $( find $d -type d -maxdepth 1 | sed 's:^\./::' )
-  if [ $# -eq 1 ]
-  then
-    popd > /dev/null
-  fi
-  }
+  (cd "$d" && find . -maxdepth 1 -type d | sed 's:^\./::' | grep -vE '^([.]|[.][.])$' | LC_COLLATE=C sort)
+}
 
 
 
