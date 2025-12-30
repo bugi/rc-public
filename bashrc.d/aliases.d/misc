@@ -35,7 +35,7 @@ function bdiff ()
   then
     command diff -burNd --color=always "$@" | less -FRXi
   else
-    command diff -burNd --color=always "$@"
+    command diff -burNd                "$@"
   fi
 }
 
