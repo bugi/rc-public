@@ -8,7 +8,7 @@ alias rm='rm -i'
 alias mv='mv -i'
 
 # then sanity
-alias ls='LC_COLLATE=C /bin/ls -CF'
+alias ls='LC_COLLATE=C command ls -CF'
 alias r='fc -s'
 alias z=suspend
 
@@ -44,7 +44,7 @@ alias cerl='curl --no-progress-meter'
 
 
 #----------- ls BASED -----------
-alias ll='LC_COLLATE=C /bin/ls -lh'
+alias ll='LC_COLLATE=C command ls -lh'
 function lsd ()
 {
   local d
