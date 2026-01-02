@@ -23,6 +23,7 @@ export PGPPATH="$HOME"/mail/.pgppath
 if type -P lesspipe >/dev/null 2>&1
 then
   eval "$(SHELL=/bin/sh lesspipe)"
+  # export LESSOPEN="|/.../lesspipe.sh %s"
 fi
 
 for f in $( find "$HOME"/usr/bin/ -name '*.completion' )
