@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+# vim: set tabstop=2 softtabstop=2 shiftwidth=2 expandtab autoindent copyindent :
+
+if type shfmt >/dev/null 2>&1 && type beautysh >/dev/null 2>&1
+then
+  :
+else
+  echo "You must have both shfmt and beautysh installed for this to work." 1>&2
+  exit 1
+fi
+
+fn="$1" ; shift
+tmpfile="$(mktemp)"
+
+diff=true
+replace=false
+if [[ $1 == --replace ]]
+then
+  replace=true
+  diff=false
+  shift
+fi
+
+function on_exit ()
+{
+  rm -f "$tmpfile"
+}
+trap on_exit EXIT
+
+cat "$fn" \
+  shfmt --indent 2 --func-next-line \
+  | sed 's/; do$/\ndo/;s/; then$/\nthen/' \
+  | beautysh --indent-size 2 -
+  >| "$tmpfile"
+
+if $diff
+then
+  if [[ -t 1 ]]
+  then
+    diff -burNd --color=always "$fn" "$tmpfile" | less -FRXi
+  else
+    diff -burNd "$fn" "$tmpfile"
+  fi
+fi
+
+if $replace
+then
+  mv "$tmpfile" "$fn"
+fi
