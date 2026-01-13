@@ -28,9 +28,9 @@ function on_exit ()
 trap on_exit EXIT
 
 cat "$fn" \
-  shfmt --indent 2 --func-next-line \
+  | shfmt --indent 2 --func-next-line \
   | sed 's/; do$/\ndo/;s/; then$/\nthen/' \
-  | beautysh --indent-size 2 -
+  | beautysh --indent-size 2 - \
   >| "$tmpfile"
 
 if $diff
