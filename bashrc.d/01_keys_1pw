@@ -3,7 +3,7 @@
 # For a more general approach, see
 #   `op inject -h`  and  https://developer.1password.com/docs/cli/secrets-config-files/
 
-declare -Ag onepw=()
+declare -Ag onepw_targets=()
 
 function _onepw_exists ()
 {
@@ -53,10 +53,10 @@ function _onepw_import ()
   #   https://samedwardes.com/blog/2023-11-03-1password-for-secret-dotfiles/
   #   https://samedwardes.com/blog/2023-11-28-1password-for-secret-dotfiles-update/
   local k v c
-  for k in "${!onepw[@]}"
+  for k in "${!onepw_targets[@]}"
   do
     echo "importing $k"
-    v="${onepw[$k]}"
+    v="${onepw_targets[$k]}"
     c="$(op read "$v")"
     export "$k"="$c"
   done

@@ -32,9 +32,9 @@
 # Effort is made to guard the content of this file from prying eyes.
 # export BW_SESSION_FN="$HOME/.bw-session"
 #
-# The bwpw associative bash array is where you specify what data to put where.
+# The bwpw_targets associative bash array is where you specify what data to put where.
 # This example will pull the password record and put it in the BW_PG_USERNAME environment variable.
-#   bwpw[BW_PG_USERNAME]='44f80a8e-b8f1-4437-8fd9-6d69f75a5194/.login.password'
+#   bwpw_targets[BW_PG_USERNAME]='44f80a8e-b8f1-4437-8fd9-6d69f75a5194/.login.password'
 # The uuid is the object id of the Bitwarden record.  The .login.password is the json path
 # to the data in the record.
 # You can get the uuid from the cli using `bw list`.  As of this writing it's not available via GUI.
@@ -42,7 +42,7 @@
 
 
 
-declare -Ag bwpw=()
+declare -Ag bwpw_targets=()
 
 _bwpw_exists ()
 {
@@ -157,10 +157,10 @@ _bwpw_import ()
 {
   # https://bitwarden.com/help/cli/
   local k v guid path c
-  for k in "${!bwpw[@]}"
+  for k in "${!bwpw_targets[@]}"
   do
     echo "importing $k"
-    v="${bwpw[$k]}"
+    v="${bwpw_targets[$k]}"
     guid="${v%%/*}"
     path="${v#*/}"
     # echo "guid($guid) path($path)"
