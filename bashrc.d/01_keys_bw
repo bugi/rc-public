@@ -17,14 +17,14 @@
 #
 # BW_LOGIN_ARGS specified what args to bw login.
 # See `bw login --help` for details.
-# export BW_LOGIN_ARGS=( --sso my_org_gave_me_this_string )
+# BW_LOGIN_ARGS=( --sso my_org_gave_me_this_string )
 #
 # BW_UNLOCK_ARGS specified what args to bw unlock.
 # See `bw unlock --help` for details.
 # --passwordenv and --passwordfile are especially useful for BW_UNLOCK_ARGS.
 # But PLEASE don't put your password here, even though it's valid syntax.
 # export BW_MUMBLE_PW=alsdjfasddljf   # this is for the --passwordenv example on the next line
-# export BW_UNLOCK_ARGS=( --passwordenv BW_MUMBLE_PW )
+# BW_UNLOCK_ARGS=( --passwordenv BW_MUMBLE_PW )
 #
 # You don't have to set BW_SESSION_FN, but if you don't then
 # this tool will manage only one terminal.  Using BW_SESSION_FN will
@@ -173,4 +173,29 @@ bwpw_import ()
 {
   _bwpw_unlock || return
   _bwpw_import
+}
+
+bwpw ()
+{
+  case "$1" in
+    (import)
+      _bwpw_unlock || return
+      _bwpw_import
+      return
+      ;;
+    (unlock)
+      _bwpw_unlock
+      return
+      ;;
+    (*)
+      echo "unknown cmd '$1'" 1>&2
+      return 1
+      ;;
+  esac
+  return 1
+}
+
+bwpw_import ()
+{ # backward compatibility
+  bwpw import
 }
