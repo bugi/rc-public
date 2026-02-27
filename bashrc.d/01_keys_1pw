@@ -62,8 +62,27 @@ function _onepw_import ()
   done
 }
 
-onepw_import ()
+onepw ()
 {
-  _onepw_login || return
-  _onepw_import
+  case "$1" in
+    (import)
+      _onepw_login || return
+      _onepw_import
+      return
+      ;;
+    (login)
+      _onepw_login || return
+      return
+      ;;
+    (*)
+      op "$@"
+      return
+      ;;
+  esac
+  false
+}
+
+onepw_import ()
+{ # backward compatibility
+  onepw import
 }
