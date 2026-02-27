@@ -183,12 +183,12 @@ bwpw ()
       _bwpw_import
       return
       ;;
-    (unlock)
+    (open)  # "unlock" is already taken
       _bwpw_unlock
       return
       ;;
     (*)
-      echo "unknown cmd '$1'" 1>&2
+      bw "$@"
       return 1
       ;;
   esac
