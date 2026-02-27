@@ -3,7 +3,7 @@
 # For a more general approach, see
 #   `op inject -h`  and  https://developer.1password.com/docs/cli/secrets-config-files/
 
-declare -A onepw=()
+declare -Ag onepw=()
 
 function _onepw_exists ()
 {

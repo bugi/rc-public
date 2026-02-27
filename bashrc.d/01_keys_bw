@@ -42,7 +42,7 @@
 
 
 
-declare -A bwpw=()
+declare -Ag bwpw=()
 
 _bwpw_exists ()
 {
