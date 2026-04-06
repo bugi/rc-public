@@ -1034,6 +1034,14 @@
                             "to": [{ "pointing_button": "button3" }]
                         }
                     ]
+                },
+                {
+                    "identifiers": {
+                        "is_keyboard": true,
+                        "product_id": 3,
+                        "vendor_id": 14248
+                    },
+                    "ignore_vendor_events": true
                 }
             ],
             "fn_function_keys": [
