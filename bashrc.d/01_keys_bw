@@ -164,7 +164,7 @@ _bwpw_import ()
     guid="${v%%/*}"
     path="${v#*/}"
     # echo "guid($guid) path($path)"
-    c="$(bw get item "$guid" | jq "$path" )"
+    c="$(bw get item "$guid" | jq -r "$path" )"
     export "$k"="$c"
   done
 }
