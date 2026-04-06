@@ -9,6 +9,7 @@ function gi ()
     (tpull) git pull "$@" ;;
     (tco) git checkout "$@" ;;
     (gitpull) git pull "$@" ;;
+    (gitpush) git push "$@" ;;
     (gitass) git add "$@" ;;
     (*) curl -sL "https://www.toptal.com/developers/gitignore/api/$one"
       # In this case $one can be a comma-separated list.
@@ -19,6 +20,7 @@ function gi ()
   esac
 }
 function gitpull () { gi gitpull "$@" ; }
+function gitpush () { gi gitpush "$@" ; }
 
 function gnew ()
 { # create a new local+remote branch
