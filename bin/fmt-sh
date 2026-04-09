@@ -5,42 +5,146 @@ if type shfmt >/dev/null 2>&1 && type beautysh >/dev/null 2>&1
 then
   :
 else
-  echo "You must have both shfmt and beautysh installed for this to work." 1>&2
-  exit 1
+  echo "I just passed your input through unchanged because you don't have both shfmt and beautysh installed." 1>&2
+  exec cat
 fi
 
-fn="$1" ; shift
-tmpfile="$(mktemp)"
-
-diff=true
+passthrough=true
+diff=false
 replace=false
-if [[ $1 == --replace ]]
+if [[ ! -t 0 ]] && read -t 0
 then
+  # assume user wants to just format stdin to stdout
+  passthrough=true
+  diff=false
+  replace=false
+else
+  diff=true
+  replace=false
+  passthrough=false
+fi
+
+if [[ $1 == --pipe ]]
+then
+  shift
+  passthrough=true
+  diff=false
+  replace=false
+elif [[ $1 == --diff ]]
+then
+  shift
+  diff=true
+  replace=false
+elif [[ $1 == --replace ]]
+then
+  shift
   replace=true
   diff=false
-  shift
 fi
 
+function _fmt ()
+{
+  shfmt --indent 2 --func-next-line \
+  | sed 's/; do$/\ndo/;s/; then$/\nthen/' \
+  | beautysh --indent-size 2 -
+}
+
+function _diff
+{
+  local f0="$1"
+  local f1="$2"
+  if [[ -t 1 ]]
+  then
+    diff -burNd --color=always "$f0" "$f1" | less -FRXi
+  else
+    diff -burNd "$f0" "$f1"
+  fi
+}
+
+tmpfile=
+tmpfile2=
 function on_exit ()
 {
-  rm -f "$tmpfile"
+  if [[ -n $tmpfile ]] && [[ -f $tmpfile ]]
+  then
+    rm -f "$tmpfile"
+    tmpfile=
+  fi
+  if [[ -n $tmpfile2 ]] && [[ -f $tmpfile2 ]]
+  then
+    rm -f "$tmpfile2"
+    tmpfile2=
+  fi
 }
 trap on_exit EXIT
 
-cat "$fn" \
-  | shfmt --indent 2 --func-next-line \
-  | sed 's/; do$/\ndo/;s/; then$/\nthen/' \
-  | beautysh --indent-size 2 - \
-  >| "$tmpfile"
+fn=
+if [[ $# -gt 0 ]]
+then
+  fn="$1" ; shift
+fi
+
+if $passthrough
+then
+  if $replace
+  then
+    echo "Replace mode makes no sense with input from stdin." 1>&2
+    exit 1
+  fi
+  if [[ $fn = - ]]
+  then
+    if [[ ! -t 0 ]] && read -t 0
+    then
+      # fall through to regular stdin parsing
+      fn=
+    else
+      # treat this case as an empty stdin
+      exit 0
+    fi
+  fi
+  if [[ ! -t 0 ]] && read -t 0
+  then
+    if $diff
+    then
+      tmpfile="$(mktemp)"
+      tmpfile2="$(mktemp)"
+      cat >| "$tmpfile2"
+      cat "$tmpfile2" | _fmt >| "$tmpfile"
+      _diff "$tmpfile2" "$tmpfile"
+      exit
+    else
+      _fmt
+      exit
+    fi
+  fi
+  if [[ -n $fn ]] && [[ -r $fn ]]
+  then
+    # This just mean that we will not replace the file.
+    # ignores args beyond $1
+    if $diff
+    then
+      tmpfile="$(mktemp)"
+      # tmpfile2="$(mktemp)"
+      # cat >| "$tmpfile2"
+      cat "$fn" | _fmt >| "$tmpfile"
+      _diff "$fn" "$tmpfile"
+      exit
+    else
+      cat "$fn" | _fmt
+      exit
+    fi
+  fi
+  # todo: allow for diff based on stdin
+  echo "You want me to format what?  Gimme a filename or something on stdin." 2>&1
+  exit 1
+fi
+
+tmpfile="$(mktemp)"
+cat "$fn" | _fmt >| "$tmpfile"
 
 if $diff
 then
-  if [[ -t 1 ]]
-  then
-    diff -burNd --color=always "$fn" "$tmpfile" | less -FRXi
-  else
-    diff -burNd "$fn" "$tmpfile"
-  fi
+  _diff "$fn" "$tmpfile"
 fi
 
 if $replace
