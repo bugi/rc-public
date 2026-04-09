@@ -12,6 +12,9 @@ fi
 passthrough=true
 diff=false
 replace=false
+shfmt_use=true
+beautysh_use=true
+lint=false
 if [[ ! -t 0 ]] && read -t 0
 then
   # assume user wants to just format stdin to stdout
@@ -24,46 +27,98 @@ else
   passthrough=false
 fi
 
-if [[ $1 == --pipe ]]
-then
-  shift
-  passthrough=true
-  diff=false
-  replace=false
-elif [[ $1 == --diff ]]
-then
-  shift
-  diff=true
-  replace=false
-elif [[ $1 == --replace ]]
-then
-  shift
-  replace=true
-  diff=false
-fi
+while [[ $# -gt 0 ]]
+do
 
-function _fmt ()
+  case "$1" in
+  (--pipe)
+    shift
+    passthrough=true
+    diff=false
+    replace=false
+    ;;
+  (--diff)
+    shift
+    diff=true
+    replace=false
+    ;;
+  (--replace)
+    shift
+    replace=true
+    diff=false
+    ;;
+  (--shfmt|--shfmt=true)
+    shift
+    shfmt_use=true
+    ;;
+  (--shfmt=false)
+    shift
+    shfmt_use=false
+    ;;
+  (--beautysh|--beautysh=true)
+    shift
+    beautysh_use=true
+    ;;
+  (--beautysh=false)
+    shift
+    beautysh_use=false
+    ;;
+  (--lint)
+    shift
+    lint=true
+    beautysh_cmd=( beautysh )
+    beautysh_cmd+=( --indent-size 2 )
+    exec "${beautysh_cmd[@]}" --check "$@"
+    ;;
+  (--*) echo "unknown argument «$1»" 2>&1 ; exit ;;
+  (-) fn="$1" ; shift ; passthrough=true ;;
+  (-*) echo "unknown argument «$1»" 2>&1 ; exit ;;
+  (*) fn="$1" ; shift ;;
+  esac
+
+done
+
+function _fmt()
 {
-  shfmt --indent 2 --func-next-line \
-  | sed 's/; do$/\ndo/;s/; then$/\nthen/' \
-  | beautysh --indent-size 2 -
+  local shfmt_cmd=( shfmt )
+  shfmt_cmd+=( --indent 2 )
+  shfmt_cmd+=( --func-next-line )
+  shfmt_cmd+=( --binary-next-line --space-redirects --keep-padding )
+  shfmt_cmd+=( --case-indent )
+  # shfmt_cmd+=( --language-dialect bash )
+  local beautysh_cmd=( beautysh )
+  beautysh_cmd+=( --indent-size 2 )
+  if $shfmt_use && $beautysh_use
+  then
+    "${shfmt_cmd[@]}" - \
+    | sed 's/; do$/\ndo/;s/; then$/\nthen/' \
+    | "${beautysh_cmd[@]}" -
+  elif $shfmt_use
+  then
+    "${shfmt_cmd[@]}" -
+  elif $beautysh_use
+  then
+    "${beautysh_cmd[@]}" -
+  else
+    cat
+  fi
 }
 
-function _diff
+function _diff()
 {
   local f0="$1"
   local f1="$2"
   if [[ -t 1 ]]
   then
-    diff -burNd --color=always "$f0" "$f1" | less -FRXi
+    diff -uNd --color=always "$f0" "$f1" | less -FRXi
   else
-    diff -burNd "$f0" "$f1"
+    diff -uNd "$f0" "$f1"
   fi
 }
 
 tmpfile=
 tmpfile2=
-function on_exit ()
+function on_exit()
 {
   if [[ -n $tmpfile ]] && [[ -f $tmpfile ]]
   then
@@ -77,12 +132,6 @@ function on_exit ()
   fi
 }
 trap on_exit EXIT
-
-fn=
-if [[ $# -gt 0 ]]
-then
-  fn="$1" ; shift
-fi
 
 if $passthrough
 then
@@ -134,7 +183,6 @@ then
       exit
     fi
   fi
-  # todo: allow for diff based on stdin
   echo "You want me to format what?  Gimme a filename or something on stdin." 2>&1
   exit 1
 fi
