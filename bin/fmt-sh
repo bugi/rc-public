@@ -1,11 +1,21 @@
 #!/usr/bin/env bash
 # vim: set tabstop=2 softtabstop=2 shiftwidth=2 expandtab autoindent copyindent :
 
-if type shfmt >/dev/null 2>&1 && type beautysh >/dev/null 2>&1
+shfmt_exists=false
+beautysh_exists=false
+if type shfmt >/dev/null 2>&1
+then
+  shfmt_exists=true
+fi
+if type beautysh >/dev/null 2>&1
 then
   :
-else
-  echo "I just passed your input through unchanged because you don't have both shfmt and beautysh installed." 1>&2
+  beautysh_exists=true
+fi
+
+if ! $shfmt_exists && ! $beautysh_exists
+then
+  echo "I just passed your input through unchanged because you have neither both shfmt nor beautysh installed." 1>&2
   exec cat
 fi
 
@@ -15,6 +25,9 @@ replace=false
 shfmt_use=true
 beautysh_use=true
 lint=false
+$shfmt_exists || shfmt_use=false
+$beautysh_exists || beautysh_use=false
+
 if [[ ! -t 0 ]] && read -t 0
 then
   # assume user wants to just format stdin to stdout
