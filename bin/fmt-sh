@@ -27,6 +27,7 @@ else
   passthrough=false
 fi
 
+# @formatter:off
 while [[ $# -gt 0 ]]
 do
 
@@ -77,6 +78,7 @@ do
   esac
 
 done
+# @formatter:on
 
 function _fmt()
 {
