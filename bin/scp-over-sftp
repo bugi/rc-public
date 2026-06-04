@@ -1,0 +1,106 @@
+#!/usr/bin/env bash
+
+# Test via OpenSSH version string
+# OpenSSH 9.0+ defaults to SFTP. If we see OpenSSH_9, OpenSSH_10, etc., it's a pass.
+SSH_VER_STR=$(ssh -V 2>&1)
+if [[ $SSH_VER_STR =~ OpenSSH_([9][0-9]|[1-9][0-9]{2,})\. ]]
+then
+  exec scp "$@"
+elif scp -O 2>&1 |grep -E '^usage:[^[]+[[]-[^ ]*'O
+then
+  # Fallback test for backported versions (e.g., RHEL 8.x/9.x using 8.7p1)
+  # Check if 'scp -O' returns an unrecognized flag/option error string.
+  exec scp "$@"
+fi
+# ==============================================================================
+
+if [[ $# -eq 0 ]]
+then
+  echo "Usage: $(basename "$0") [-r] [-p] [-P port] [user@host:]source [user@host:]destination" 1>&2
+  exit 1
+fi
+
+# FALLBACK PATH (Parse arguments manually for legacy sftp wrapping)
+echo "Notice: Legacy scp architecture detected.  Wrapping sftp directly for security." 1>&2
+
+RECURSIVE=false
+sftp_args=()
+while getopts "rpP:" opt; do
+  case ${opt} in
+    (r) sftp_args+=( -r ) ; RECURSIVE=true ;;
+    (p) sftp_args+=( -p ) ;;
+    (P) sftp_args+=( -P ${OPTARG} ) ;;
+    (\?) exit 1 ;;
+  esac
+done
+shift $((OPTIND -1))
+
+# After shifting options, all remaining positional arguments are files/targets
+if [[ $# -lt 2 ]]
+then
+  echo "Error: At least one source and one destination are required." 1>&2
+  exit 1
+fi
+
+# Extract the final argument as the destination
+DEST="${@: -1}"
+
+# The rest are sources.
+SOURCES=( "${@:1:$#-1}" )
+
+# Determine whether we are uploading or downloading
+if [[ $DEST =~ : ]]
+then
+  REMOTE_HOST=${DEST%%:*}
+  REMOTE_PATH=${DEST#*:}
+
+  echo "Executing sftp batch upload for ${#SOURCES[@]} source(s)..."
+
+  # Open an interactive sftp stream to feed multiple "put" operations
+  sftp "${sftp_args[@]}" "$REMOTE_HOST" <<EOF
+$(
+for SRC in "${SOURCES[@]}"
+do
+  # SCP Trailing Slash Emulation for local folder targets
+  if [[ $RECURSIVE == true && $SRC =~ .+/+$ ]]
+  then
+      SRC=${SRC%%+(/)}
+  fi
+  echo "put $SRC $REMOTE_PATH"
+done
+)
+bye
+EOF
+
+# Determine whether we are uploading or downloading
+if [[ $DEST =~ : ]]
+then
+  REMOTE_HOST=${DEST%%:*}
+  REMOTE_PATH=${DEST#*:}
+
+  if [[ $RECURSIVE == true ]] && [[ $SRC =~ .+/+$ ]]
+  then
+    SRC=${SRC%%+(/)}
+  fi
+
+  echo "Executing sftp batch upload..."
+  sftp "${sftp_args[@]}" "$REMOTE_HOST" <<EOF
+put $SRC $REMOTE_PATH
+bye
+EOF
+
+elif [[ $SRC =~ : ]]
+then
+  REMOTE_HOST=${SRC%%:*}
+  REMOTE_PATH=${SRC#*:}
+
+  echo "Executing sftp batch download..."
+  sftp "${sftp_args[@]}" "$REMOTE_HOST" <<EOF
+get $REMOTE_PATH $DEST
+bye
+EOF
+
+else
+  echo "Error: Neither source nor destination appears to be a remote host (missing ':')." 1>&2
+  exit 1
+fi

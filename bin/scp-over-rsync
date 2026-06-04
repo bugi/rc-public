@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+
+if [[ $# -eq 0 ]]
+then
+  echo "Usage: $(basename "$0") [-r] [-P port] [user@host:]source [user@host:]destination" 1>&2
+  exit 1
+fi
+
+# Initialize rsync arguments
+rsync_args=(
+  -ah
+  --partial
+  --progress
+)
+
+SSH_PORT=
+RECURSIVE=false
+
+while getopts "rP:" opt; do
+  case ${opt} in
+    (r) RECURSIVE=true ;;
+    (P) SSH_PORT=${OPTARG} ;;
+    (\?) exit 1 ;;
+  esac
+done
+shift $((OPTIND -1))
+
+# Append the appropriate recursive flag based on input
+if [[ $RECURSIVE == false ]]
+then
+  rsync_args+=( --no-recursive )
+fi
+
+# Append the custom SSH port safely if it was specified
+if [[ -n $SSH_PORT ]]
+then
+  rsync_args+=( -e "ssh -p $SSH_PORT" )
+fi
+
+SRC=$1
+DEST=$2
+
+if [[ -z $SRC ]] || [[ -z $DEST ]]
+then
+  echo "Error: Both source and destination are required."
+  exit 1
+fi
+
+# SCP Trailing Slash Emulation for local sources
+if [[ $SRC =~ .+/+$ ]]
+then
+  SRC=${SRC%%+(/)}
+fi
+
+# Append the final source and destination to our array
+rsync_args+=( "$SRC" "$DEST" )
+
+# Execute rsync safely by expanding the array elements exactly as they are
+echo "Executing: rsync ${rsync_args[*]}"
+exec rsync "${rsync_args[@]}"
