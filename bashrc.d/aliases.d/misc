@@ -18,9 +18,9 @@ alias z=suspend
 alias xvm='xv -maxpect -geometry +0+0'
 alias mroe='less -FRXi'
 alias jbos=jobs
-alias R='more [Rr][Ee][Aa][Dd]{,_,.}[Mm][Ee]*'
+alias R='more [Rr][Ee][Aa][Dd]{,_,.}[Mm][Ee]*{,.txt,.TXT,.md,.MD}'
 spel () {
-  echo "$@" | aspell -a
+  echo "$*" | aspell -a
   }
 
 # colorize grep
