@@ -4,6 +4,11 @@
 function gi ()
 {
   local one="$1" ; shift
+  if [[ $1 == tpu ]] && [[ $2 == sh ]]
+  then
+    one=tpush
+    shift
+  fi
   case "$one" in
     (tpush) git push "$@" ;;
     (tpull) git pull "$@" ;;
