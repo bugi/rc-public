@@ -72,35 +72,32 @@ done
 bye
 EOF
 
-# Determine whether we are uploading or downloading
-if [[ $DEST =~ : ]]
-then
-  REMOTE_HOST=${DEST%%:*}
-  REMOTE_PATH=${DEST#*:}
+else
 
-  if [[ $RECURSIVE == true ]] && [[ $SRC =~ .+/+$ ]]
+  # For downloads, the sources must contain the remote host info.
+  # We'll extract the host information from the first source argument.
+  FIRST_SRC="${SOURCES[0]}"
+
+  if ! [[ $FIRST_SRC =~ : ]]
   then
-    SRC=${SRC%%+(/)}
+    echo "Error: Neither destination nor sources specify a remote host (missing ':')." 1>&2
+    exit 1
   fi
 
-  echo "Executing sftp batch upload..."
-  sftp "${sftp_args[@]}" "$REMOTE_HOST" <<EOF
-put $SRC $REMOTE_PATH
-bye
-EOF
+  REMOTE_HOST=${FIRST_SRC%%:*}
 
-elif [[ $SRC =~ : ]]
-then
-  REMOTE_HOST=${SRC%%:*}
+  echo "Executing sftp batch download for ${#SOURCES[@]} source(s)..."
+
+  sftp "${sftp_args[@]}" "$REMOTE_HOST" <<EOF
+$(
+for SRC in "${SOURCES[@]}"
+do
+  # Strip host prefix (e.g., user@host:/path -> /path)
   REMOTE_PATH=${SRC#*:}
-
-  echo "Executing sftp batch download..."
-  sftp "${sftp_args[@]}" "$REMOTE_HOST" <<EOF
-get $REMOTE_PATH $DEST
+  echo "get $REMOTE_PATH $DEST"
+done
+)
 bye
 EOF
 
-else
-  echo "Error: Neither source nor destination appears to be a remote host (missing ':')." 1>&2
-  exit 1
 fi
