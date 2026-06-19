@@ -93,6 +93,9 @@ then
   PATH="${GOPATH}/bin:${PATH}"
 fi
 
+export unameS="${unameS:-$(uname -s)}"
+export unameM="${unameM:-$(uname -m)}"
+
 # my own stuff comes first
 for f in \
   "${HOME}/usr/bin-public" \
@@ -103,6 +106,14 @@ for f in \
   if [ -d "$f"/ ]
   then
     PATH="${f}:${PATH}"
+  fi
+  if [ -d "$f"/"$unameS/$unameM"/ ]
+  then
+    PATH="${f}/$unameS/$unameM:${PATH}"
+  fi
+  if [ -d "$f"/"$unameS"/ ]
+  then
+    PATH="${f}/$unameS:${PATH}"
   fi
 done
 # never do this!  PATH=".:${PATH}"
