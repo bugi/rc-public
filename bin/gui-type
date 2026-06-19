@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # vim: set tabstop=2 softtabstop=2 shiftwidth=2 expandtab autoindent copyindent :
 
 # Tells user what renderer is in use.
@@ -22,29 +22,20 @@
 # If called as program name x11-or-wayland, always returns false
 # if neither x11 nor wayland is available for use.
 
-wanted="$1" ; shift
+wanted=${1,,} ; shift # ,, makes it lowercase
 bname="$(basename "$0")"
-
-check_macos_gui ()
-{
-  command -v swift >/dev/null && swift <(cat <<"EOF"
-  import Security
-  var attrs = SessionAttributeBits(rawValue:0)
-  let result = SessionGetInfo(callerSecuritySession, nil, &attrs)
-  exit((result == 0 && attrs.contains(.sessionHasGraphicAccess)) ? 0 : 1)
-EOF
-  )
-}
 
 # true if was called as x11-or-wayland
 is_x11_or_wayland=false
-if [ "$bname" = x11-or-wayland ]
+if [[ $bname = x11-or-wayland ]]
 then
   is_x11_or_wayland=true
 fi
 
 special_x11_or_wayland ()
-{ # exits if the special case of x11-or-wayland is satisfied
+{ # If there is an arg of pass-on-unknown, we don't exit unless we know whether we're x11 or wayland.
+  # otherwise:
+  # Always exits if the special case of x11-or-wayland is satisfied.
   # If it returns, it returns true, but true doesn't mean anything.
   if ! $is_x11_or_wayland
   then
@@ -52,16 +43,16 @@ special_x11_or_wayland ()
     return
   fi
   # check the x11-or-wayland case early to avoid OS calls in a common case
-  if [ -n "$wanted" ]
+  if [[ -n $wanted ]]
   then
-    if $isWayland && [ "$wanted" = wayland ]
+    if $isWayland && [[ $wanted = wayland ]]
     then
       exit 0
-    elif $isX11 && [ "$wanted" = x11 ]
+    elif $isX11 && [[ $wanted = x11 ]]
     then
       exit 0
     fi
-  elif [ -z "$wanted" ]
+  elif [[ -z $wanted ]]
   then
     if $isWayland
     then
@@ -73,84 +64,161 @@ special_x11_or_wayland ()
       exit 0
     fi
   fi
-  true
+  # none of the known conditions is satisfied, so we default to exit 1
+  if [[ $1 == pass-on-unknown ]]
+  then
+    false
+    return
+  fi
+  exit 1
+  false
+}
+
+function test_for_wanted ()
+{
+  if [[ -n $wanted ]]
+  then
+    case "$wanted" in
+      (wayland) $isWayland ; exit ;;
+      (x11) $isX11 ; exit ;;
+      (quartz|macos) $isQuartz ; exit ;;
+      (screen) $isScreen ; exit ;;
+      (tmux) $isTMUX ; exit ;;
+      (ssh) $isSSH ; exit ;;
+      (tty) $isTTY ; exit ;;
+    esac
+  fi
+}
+function test_for_wanted2 ()
+{ # tests for cases that we can't determine before exhausting all other $wanted possibilities
+  if [[ -n $wanted ]]
+  then
+    case "$wanted" in
+      (unknown|other) true ; exit ;;
+      (*) exit 1 ;;
+    esac
+  fi
 }
 
 
+
 isWayland=false
-if [ -n "$WAYLAND_DISPLAY" ]
+if [[ -n $WAYLAND_DISPLAY ]]
 then
   isWayland=true
-  [ "$wanted" = wayland ] && exit 0
+  [[ $wanted = wayland ]] && exit 0
 fi
 
 isX11=false
-if [ -n "$DISPLAY" ]
+if [[ -n $DISPLAY ]]
 then
   isX11=true
-  [ "$wanted" = x11 ] && exit 0
+  [[ $wanted = x11 ]] && exit 0
 fi
 
-special_x11_or_wayland
-
-isQuartz=false
-if check_macos_gui
+isScreen=false
+if [[ -n $STY ]]
 then
-  isQuartz=true
-  if ! $is_x11_or_wayland
-  then # quick path to avoid path search for loginctl
-    [ "$wanted" = quartz ] && exit 0
-    [ "$wanted" = macos ] && exit 0
-  fi
+  isScreen=true
+  isTTY=true
+fi
+
+isTMUX=false
+if [[ -n $TMUX ]]
+then
+  isTMUX=true
+  isTTY=true
+fi
+
+isSSH=false
+if [[ -n $SSH_CLIENT ]] || [[ -n $SSH_TTY ]]
+then
+  isSSH=true
+  isTTY=true
 fi
 
 isTTY=false
-if [ -n "$XDG_SESSION_ID" ] && type -f loginctl >/dev/null 2>&1
+if [[ -n $TERM ]]
 then
-  answer="$( loginctl show-session "$XDG_SESSION_ID" -p Type | cut -s -f2 -d= )"
-  case "$answer" in
-    (x11)
-      isX11=true
-      [ "$wanted" = "$answer" ] && exit 0
-      ;;
-    (wayland)
-      isWayland=true
-      [ "$wanted" = "$answer" ] && exit 0
-      ;;
-    (tty)
-      # means no display manager, like if one were to tunnel x11 via ssh
-      isTTY=true
-      if ! $is_x11_or_wayland
-      then
-        [ "$wanted" = "$answer" ] && exit 0
-      fi
-      ;;
-  esac
+  isTTY=true
 fi
 
-special_x11_or_wayland
+special_x11_or_wayland pass-on-unknown  # doesn't exit even in the special case
+R=$?
 
-# Return is special if called as x11-or-wayland.
-R_on_match=0
-if $is_x11_or_wayland
+if [[ $R -eq 0 ]]
 then
-  R_on_match=1
+  # early test to short circuit calling launchctl or loginctl
+  test_for_wanted
 fi
 
-
-# x11-or-wayland is taken care of above, manifesting below as $R_on_match.
-
-if $isQuartz
+isQuartz=false
+if [[ $(uname -s) == Darwin ]]
 then
-  [ -z "$wanted" ] && echo quartz
-  exit $R_on_match
+  if [[ $(launchctl managername) == Aqua ]]
+  then
+    isQuartz=true
+  else # == Background
+    isTTY=true
+  fi
+fi
+
+if ! $isX11 && ! $isWayland
+then
+  if [[ -n $XDG_SESSION_ID ]] && type -f loginctl >/dev/null 2>&1
+  then
+    answer="$( loginctl show-session "$XDG_SESSION_ID" -p Type | cut -s -f2 -d= )"
+    case "$answer" in
+      (wayland) isWayland=true ;;
+      (x11) isX11=true ;;
+      (tty)
+        # means no display manager, like if one were to tunnel x11 via ssh
+        # It is possible to wind up with isX11 and isTTY both true.
+        isTTY=true
+        ;;
+    esac
+  fi
+fi
+
+# echo "umm isQuartz($isQuartz) isWayland($isWayland) isX11($isX11) answer($answer) wanted($wanted) R_on_match($R_on_match)" 1>&2
+
+special_x11_or_wayland   # exits on the special case
+
+test_for_wanted
+test_for_wanted2
+
+if $isWayland
+then
+  echo wayland
+  exit 0
+elif $isX11
+then
+  echo x11
+  exit 0
+elif $isQuartz
+then
+  echo quartz
+  exit 0
+elif $isScreen
+then
+  echo screen
+  exit 0
+elif $isTMUX
+then
+  echo tmux
+  exit 0
+elif $isSSH
+then
+  echo ssh
+  exit 0
 elif $isTTY
 then
-  [ -z "$wanted" ] && echo tty
-  exit $R_on_match
+  echo tty
+  exit 0
+else
+  echo unknown
+  exit 0
 fi
 
-[ "$wanted" = unknown ] && exit $R_on_match
-
-echo unknown
+echo impossible
 exit 1
