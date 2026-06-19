@@ -71,7 +71,6 @@ special_x11_or_wayland ()
     return
   fi
   exit 1
-  false
 }
 
 function test_for_wanted ()
@@ -219,6 +218,3 @@ else
   echo unknown
   exit 0
 fi
-
-echo impossible
-exit 1
