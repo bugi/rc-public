@@ -32,7 +32,7 @@ then
   is_x11_or_wayland=true
 fi
 
-special_x11_or_wayland ()
+function special_x11_or_wayland ()
 { # If there is an arg of pass-on-unknown, we don't exit unless we know whether we're x11 or wayland.
   # otherwise:
   # Always exits if the special case of x11-or-wayland is satisfied.
