@@ -1,1 +1,20 @@
-gui-type
+#!/usr/bin/env bash
+# vim: set tabstop=2 softtabstop=2 shiftwidth=2 expandtab autoindent copyindent :
+
+# Says which of wayland or x11 is running.
+# Exits 0 if it's either.
+# Exits 1 otherwise.
+
+if gui-type wayland
+then
+  echo wayland
+  exit 0
+fi
+
+if gui-type x11
+then
+  echo x11
+  exit 0
+fi
+
+exit 1
