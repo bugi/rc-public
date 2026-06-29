@@ -63,9 +63,9 @@ if [[ $(uname -s) == Darwin ]]
 then
   if [[ $(launchctl managername) == Aqua ]]
   then
-    gui[quartz]=quartz
+    gui[quartz]=true
   else # == Background
-    gui[tty]=tty
+    gui[tty]=true
   fi
 fi
 
@@ -103,5 +103,6 @@ do
   fi
 done
 
+# echo "${gui[*]}"
 echo unknown
 exit 1
