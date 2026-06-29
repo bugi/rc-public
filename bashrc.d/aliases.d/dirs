@@ -45,6 +45,11 @@ function Dpd ()
 
 function Dpdj ()
 { # like Dpd(), but also names jobs so human can manually restore that part
+  # I do this to save my state using this before rebooting:
+  #   Once:
+  #     date >| ~/RECOVER
+  #   Then for each terminal window:
+  #     Dpdj ; Dpdj >> ~/RECOVER ; pd ~
   echo '{'
   _Dpd | sed 's/^/  /'
   jobs |grep -v Done | sed 's/^/  /;s/ *$//'
