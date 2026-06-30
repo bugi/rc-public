@@ -1,9 +1,28 @@
 #!bash
 # vim:set ft=sh tabstop=2 softtabstop=2 shiftwidth=2 expandtab autoindent copyindent :
 
+function elide_path ()
+{
+  local path
+  path="${1/#$HOME/\~}" # Replace $HOME with ~
 
+  # Split the path into an array using '/' as the delimiter
+  IFS=/ read -ra parts <<< "$path"
 
-#----------- DIRS -----------
+  # If the path is short, just print it as-is
+  if [[ ${#parts[@]} -le 4 ]]
+  then
+      printf '%s\n' "$path"
+      return
+  fi
+
+  # Grab the first couple elements and the last couple elements
+  local first="${parts[0]}/${parts[1]}"
+  local last="${parts[@]: -2:2}"
+
+  # Rejoin with the ellipsis in the middle
+  printf '%s\n' "$first/.../${last// / /}"
+}
 
 unalias D 2>/dev/null
 function D ()
@@ -64,47 +83,58 @@ function d_git ()
   local g R
   local orig="$f"
 
-  if [ "$f" = "$HOME" ]
+  if [[ $f = $HOME ]] || [[ $f = ~ ]]
   then
     # ignore user's home directory
     false
     return
   fi
 
+  f="${f/#\~/$HOME}" # Replace ~ with $HOME
+
   g="$( cd "$f" && git rev-parse --is-inside-work-tree 2>/dev/null )"
   R=$?
-  if [ $R -ne 0 ] || [ "$g" != true ]
+  if [[ $R -ne 0 ]] || [[ $g != true ]]
   then # is not a git path
     false
     return
   fi
 
+  local interior_path
+  local branch="$( git branch --show-current )"
+  local repo="$( git config --get remote.origin.url )"
+  repo="${repo#*//*/}"
+  repo="${repo%%[\?#]*}"
+  repo="${repo%.git}"
+
   local gitroot="$( cd "$f" && git rev-parse --show-toplevel 2>/dev/null )"
-  if [ "$gitroot" = "$f" ]
+
+  if [[ $gitroot = $f ]]
   then
     # is at root of a git checkout
-    # special case
-    # return formatted as repo name and position within repo
-    f=.
-    printf "%s:%s\n" \
-      "$(cd "$gitroot" && basename -s .git "$(git config --get remote.origin.url)")" \
-      "$f"
-    return
+    interior_path=.
+  else
+    interior_path="${f#$gitroot/}"
   fi
 
-  f="${f#$gitroot\/}"
-  # The $HOME=>~ transformation is useful for when there's a symlink
-  # in ~ to another directory within a git repo.  It's a bit of a
-  # compromise, to avoid expanding all symlinks using abspath.
-  g="${f#$HOME/}"
-  if [ "$f" != "$g" ]
+  local elided_directory="${f/#$HOME/\~}"
+
+  # final output should look like:
+  #   interior_path  branch @ repo @ elided_directory
+  f="$( printf '%s  %s @ %s @ %s' "$interior_path" "$branch" "$repo" "$elided_directory" )"
+  if [[ -n $COLUMNS ]]
   then
-    f="~/$g"
+    if [[ ${#f} -gt $(( $COLUMNS - 5 )) ]]
+    then
+      elided_directory="$( elide_path "$elided_directory" )"
+      f="$( printf '%s  %s @ %s @ %s' "$interior_path" "$branch" "$repo" "$elided_directory"  \
+        | cut -c 1-$COLUMNS
+        )"
+    fi
   fi
-  # return formatted as repo name and position within repo
-  printf "%s:%s\n" \
-    "$(cd "$gitroot" && basename -s .git "$(git config --get remote.origin.url)")" \
-    "$f"
+
+  printf '%s\n' "$f"
+  return
 }
 
 unalias d 2>/dev/null
@@ -148,8 +178,20 @@ function d ()
       continue
     fi
 
-    # otherwise pass it through unchanged
-    printf "%2d  %s\n" $n "~/${orig#$HOME/}"
+    # otherwise pass it through mostly unchanged
+    g="${orig/#$HOME/\~}"
+    g="$( printf "%2d  %s" $n "$g" )"
+    if [[ -n $COLUMNS ]]
+    then
+      if [[ ${#g} -gt $(( $COLUMNS - 5 )) ]]
+      then
+        g="$( elide_path "$orig" )"
+        g="$( printf "%2d  %s" $n "$g" \
+          | cut -c 1-$COLUMNS
+          )"
+      fi
+    fi
+    printf "%s\n" "$g"
     continue
 
   done <<<"$(dirs -l -p)"
