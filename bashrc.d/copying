@@ -1,0 +1,14 @@
+#!bash
+# vim:set ft=sh tabstop=2 softtabstop=2 shiftwidth=2 expandtab autoindent copyindent :
+
+function syncy ()
+{
+  # -P: This is a convenience flag equivalent to --partial --progress.
+  # -H: Preserves hard links.
+  # -h: human-readable numbers
+  # -a: The archive mode flag. It is a bundle option equivalent to -rlptgoD.
+  # -x: Prevents rsync from crossing filesystem boundaries.
+  # -S: Handles sparse files efficiently.
+  # -8: blindly trust 8-bit characters regardless of locale
+  rsync -PHhaxS "$@"
+}
