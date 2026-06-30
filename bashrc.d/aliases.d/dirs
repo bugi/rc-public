@@ -141,7 +141,7 @@ unalias d 2>/dev/null
 function d ()
 { # like `dirs -v` but with with edits to add context and usually shorten
   local head="$1" ; shift
-  if [ -z "$head" ] ; then head=9 ; fi
+  if [[ -z $head ]] ; then head=9 ; fi
   local i=0 n
   local orig
   local f g
@@ -152,19 +152,19 @@ function d ()
 
     n="$i"
     i=$(( i + 1 ))
-    if [ $n -gt $head ]
+    if [[ $n -gt $head ]]
     then
       continue
     fi
 
     # home directory is a special case
-    if [ "$f" = '~' ] || [ "$f" = "$HOME" ]
+    if [[ "$f" = ~ ]] || [[ $f = $HOME ]]
     then
       printf "%2d  %s\n" $n '~'
       continue
     fi
 
-    if ! [ -e "$f" ]
+    if ! [[ -e $f ]]
     then
       f="~/${f#$HOME/}"
       printf "%2d  DNE: %s\n" $n "$f"
@@ -196,7 +196,7 @@ function d ()
 
   done <<<"$(dirs -l -p)"
 
-  if [ $n -gt $head ]
+  if [[ $n -gt $head ]]
   then
     printf "...\n"
     printf "%2d  ?\n" $n
@@ -207,7 +207,7 @@ function d ()
 function pd ()
 { # like builtin pushd, but smarter
   # The Dpd() function produces a pd command suitable for a save&restore of the directory stack.
-  if [ $# -eq 0 ]
+  if [[ $# -eq 0 ]]
   then
     builtin pushd >/dev/null || return
     d
@@ -218,11 +218,11 @@ function pd ()
   for ((i=$#;i>0;i--))
   do
     d="${!i}"
-    if [ -z "$d" ]
+    if [[ -z $d ]]
     then
       # treat '' as lack of an argument instead of just complaining
       builtin pushd >/dev/null || return
-    elif [ "$(dirs -p)" = '~' ]
+    elif [[ "$(dirs -p)" = ~ ]]
     then
       builtin cd "$d" >/dev/null || return
     else
@@ -272,7 +272,7 @@ function POPD ()
 function UP ()
 {
   local n=1
-  if [ -n "$1" ]
+  if [[ -n $1 ]]
   then
     n="$1" ; shift
   fi
@@ -282,7 +282,7 @@ function UP ()
 function DOWN ()
 {
   local n=1
-  if [ -n "$1" ]
+  if [[ -n "$1" ]]
   then
     n="$1" ; shift
   fi
@@ -293,7 +293,7 @@ alias Down=DOWN
 
 function rotd ()
 {
-  if [ $# -eq 0 ]
+  if [[ $# -eq 0 ]]
   then
     PUSHD +1
     return
