@@ -102,10 +102,15 @@ function d_git ()
 
   local interior_path
   local branch="$( cd "$f" && git branch --show-current )"
-  local repo="$( cd "$f" && git config --get remote.origin.url )"
-  repo="${repo#*//*/}"
-  repo="${repo%%[\?#]*}"
-  repo="${repo%.git}"
+  local repo="$( cd "$f" && git config --get remote.origin.url || true)"
+  if [[ -z $repo ]]
+  then
+    repo='…'
+  else
+    repo="${repo#*//*/}"
+    repo="${repo%%[\?#]*}"
+    repo="${repo%.git}"
+  fi
 
   local gitroot="$( cd "$f" && git rev-parse --show-toplevel 2>/dev/null )"
 
