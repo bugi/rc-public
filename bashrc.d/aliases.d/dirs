@@ -21,7 +21,7 @@ function elide_path ()
   local last="${parts[@]: -2:2}"
 
   # Rejoin with the ellipsis in the middle
-  printf '%s\n' "$first/.../${last// / /}"
+  printf '%s\n' "$first/…/${last// / /}"
 }
 
 unalias D 2>/dev/null
@@ -201,7 +201,7 @@ function d ()
 
   if [[ $n -gt $head ]]
   then
-    printf "...\n"
+    printf "…\n"
     printf "%2d  ?\n" $n
   fi
   echo
