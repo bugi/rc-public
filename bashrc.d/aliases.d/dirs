@@ -113,13 +113,11 @@ function d_git ()
   fi
 
   local gitroot="$( cd "$f" && git rev-parse --show-toplevel 2>/dev/null )"
+  interior_path="$( git rev-parse --show-prefix )"
 
-  if [[ $gitroot = $f ]]
+  if [[ -z $interior_path ]]
   then
-    # is at root of a git checkout
     interior_path=.
-  else
-    interior_path="${f#$gitroot/}"
   fi
 
   local elided_directory="${f/#$HOME/\~}"
