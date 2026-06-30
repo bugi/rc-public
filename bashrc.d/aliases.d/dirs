@@ -113,7 +113,7 @@ function d_git ()
   fi
 
   local gitroot="$( cd "$f" && git rev-parse --show-toplevel 2>/dev/null )"
-  interior_path="$( git rev-parse --show-prefix )"
+  interior_path="$( cd "$f" && git rev-parse --show-prefix 2>/dev/null )"
 
   if [[ -z $interior_path ]]
   then
