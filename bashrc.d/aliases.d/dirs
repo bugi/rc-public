@@ -101,8 +101,8 @@ function d_git ()
   fi
 
   local interior_path
-  local branch="$( git branch --show-current )"
-  local repo="$( git config --get remote.origin.url )"
+  local branch="$( cd "$f" && git branch --show-current )"
+  local repo="$( cd "$f" && git config --get remote.origin.url )"
   repo="${repo#*//*/}"
   repo="${repo%%[\?#]*}"
   repo="${repo%.git}"
