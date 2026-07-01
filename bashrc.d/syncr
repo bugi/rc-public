@@ -1,7 +1,7 @@
 #!bash
 # vim:set ft=sh tabstop=2 softtabstop=2 shiftwidth=2 expandtab autoindent copyindent :
 
-function syncy ()
+function syncr ()
 {
   # -P: This is a convenience flag equivalent to --partial --progress.
   # -H: Preserves hard links.
