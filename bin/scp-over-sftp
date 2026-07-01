@@ -14,14 +14,16 @@ then
 fi
 # ==============================================================================
 
+usage_short="Usage: $(basename "$0") [-r] [-p] [-P port] [user@host:]source [user@host:]destination"
+
 if [[ $# -eq 0 ]]
 then
-  echo "Usage: $(basename "$0") [-r] [-p] [-P port] [user@host:]source [user@host:]destination" 1>&2
+  printf '%s\n' "$usage_short" 1>&2
   exit 1
 fi
 
 # FALLBACK PATH (Parse arguments manually for legacy sftp wrapping)
-echo "Notice: Legacy scp architecture detected.  Wrapping sftp directly for security." 1>&2
+echo "Notice: Legacy scp architecture detected.  Wrapping sftp directly for security.  Not all features will be available." 1>&2
 
 RECURSIVE=false
 sftp_args=()
@@ -30,7 +32,14 @@ while getopts "rpP:" opt; do
     (r) sftp_args+=( -r ) ; RECURSIVE=true ;;
     (p) sftp_args+=( -p ) ;;
     (P) sftp_args+=( -P ${OPTARG} ) ;;
-    (\?) exit 1 ;;
+    (-h|--help)
+      printf '%s\n' "$usage_short"
+      exit 0
+      ;;
+    (\?)
+      printf '%s\n' "$usage_short" 1>&2
+      exit 1
+      ;;
   esac
 done
 shift $((OPTIND -1))

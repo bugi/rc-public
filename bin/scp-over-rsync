@@ -7,10 +7,13 @@ then
 fi
 
 # Initialize rsync arguments
-rsync_args=(
-  -ah
+rsync_args=( # -PHhaxS
   --partial
   --progress
+  --human-readable
+  -a
+  --one-file-system
+  --sparse
 )
 
 SSH_PORT=
@@ -46,7 +49,7 @@ then
   exit 1
 fi
 
-# SCP Trailing Slash Emulation for local sources
+# SCP Trailing Slash Emulation for local sources (as in remove it to avoid rsync's feature)
 if [[ $SRC =~ .+/+$ ]]
 then
   SRC=${SRC%%+(/)}
