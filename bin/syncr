@@ -9,4 +9,13 @@
 # -S: Handles sparse files efficiently.
 # -8: blindly trust 8-bit characters regardless of locale
 
-exec rsync -PHhaxS "$@"
+CMD=( rsync -PHhaxS )
+
+if [[ $1 = =remind ]]
+then
+  shift
+  echo "${CMD[*]}"
+  exit
+fi
+
+exec "${CMD[@]}" "$@"
