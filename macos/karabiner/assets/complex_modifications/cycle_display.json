@@ -1,0 +1,73 @@
+{
+  "description": "Cycle Display Focus (Shift + Ctrl + Arrows)",
+  "manipulators": [
+    {
+      "type": "basic",
+      "from": {
+        "key_code": "left_arrow",
+        "modifiers": {
+          "mandatory": [
+            "left_shift",
+            "left_control"
+          ]
+        }
+      },
+      "to": [
+        {
+          "shell_command": "$HOME/usr/bin/cycle-display left"
+        }
+      ]
+    },
+    {
+      "type": "basic",
+      "from": {
+        "key_code": "right_arrow",
+        "modifiers": {
+          "mandatory": [
+            "left_shift",
+            "left_control"
+          ]
+        }
+      },
+      "to": [
+        {
+          "shell_command": "$HOME/usr/bin/cycle-display right"
+        }
+      ]
+    },
+    {
+      "type": "basic",
+      "from": {
+        "key_code": "up_arrow",
+        "modifiers": {
+          "mandatory": [
+            "left_shift",
+            "left_control"
+          ]
+        }
+      },
+      "to": [
+        {
+          "shell_command": "$HOME/usr/bin/cycle-display up"
+        }
+      ]
+    },
+    {
+      "type": "basic",
+      "from": {
+        "key_code": "down_arrow",
+        "modifiers": {
+          "mandatory": [
+            "left_shift",
+            "left_control"
+          ]
+        }
+      },
+      "to": [
+        {
+          "shell_command": "$HOME/usr/bin/cycle-display down"
+        }
+      ]
+    }
+  ]
+}
