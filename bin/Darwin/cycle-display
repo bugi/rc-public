@@ -1,0 +1,634 @@
+#!/opt/homebrew/bin/bash
+set -euo pipefail
+export PATH="/opt/homebrew/bin:/usr/local/bin:$HOME/usr/bin:$HOME/usr/bin-public/$(uname -s):$HOME/usr/bin-public:$PATH"
+
+# Core navigation tools
+for cmd in osascript
+do
+  if ! command -v "$cmd" >/dev/null 2>&1
+  then
+    echo "Error: Required command '$cmd' not found in PATH." >&2
+    exit 1
+  fi
+done
+
+if (( $# == 0 ))
+then
+  set -- "right"
+fi
+
+# Explicit integer typing for coordinate tracking
+declare -i current_x current_y
+declare -i cur_ox cur_oy cur_w cur_h cur_cx cur_cy cur_bottom cur_builtin
+declare cur_uuid=""
+declare -i d_ox d_oy d_w d_h d_is_bi d_cx d_cy d_bottom
+declare d_uuid=""
+
+# --- Geometry & Parsing Helpers ---
+
+load_display()
+{
+  local idx=$1
+  read -r d_ox d_oy d_w d_h d_is_bi d_uuid <<< "${sorted_by_x[idx]}"
+  d_cx=$(( d_ox + (d_w / 2) ))
+  d_cy=$(( d_oy + (d_h / 2) ))
+  d_bottom=$(( d_oy + d_h - 1 ))
+}
+
+has_x_overlap()
+{
+  local -i ox1=$1 w1=$2 ox2=$3 w2=$4
+  (( ox1 < (ox2 + w2) && (ox1 + w1) > ox2 ))
+}
+
+distance_sq()
+{
+  local -i x1=$1 y1=$2 x2=$3 y2=$4
+  local -i dx=$(( x1 - x2 ))
+  local -i dy=$(( y1 - y2 ))
+  echo $(( (dx ** 2) + (dy ** 2) ))
+}
+
+# --- State Synchronization ---
+update_state()
+{
+  payload_raw=$(osascript -l JavaScript -e '
+  ObjC.import("AppKit");
+  ObjC.import("CoreGraphics");
+
+  var screens = $.NSScreen.screens;
+  var primaryH = screens.objectAtIndex(0).frame.size.height;
+
+  var mouseLoc = $.NSEvent.mouseLocation;
+  var mouse_x = Math.round(mouseLoc.x);
+  var mouse_y = Math.round(primaryH - mouseLoc.y);
+
+  var list = [];
+  for (var i = 0; i < screens.count; i++) {
+    var s = screens.objectAtIndex(i);
+    var f = s.frame;
+    var cg_y = primaryH - (f.origin.y + f.size.height);
+
+    var desc = s.deviceDescription.js;
+    var numKey = ObjC.unwrap(desc["NSScreenNumber"]);
+    var uuid = "";
+    var isBuiltin = 0;
+
+    if (numKey) {
+      if ($.CGDisplayIsBuiltin(numKey)) {
+        isBuiltin = 1;
+        if ($.CGDisplayIsAsleep(numKey) || f.size.width === 0 || f.size.height === 0) {
+          isBuiltin = 2;
+        }
+      }
+      var cfUuid = $.CGDisplayCreateUUIDFromDisplayID(numKey);
+      if (!$.CFEqual(cfUuid, null)) {
+        uuid = ObjC.unwrap($.CFUUIDCreateString(null, cfUuid));
+      }
+    }
+
+    list.push({
+      x: Math.round(f.origin.x),
+      y: Math.round(cg_y),
+      w: Math.round(f.size.width),
+      h: Math.round(f.size.height),
+      builtin: isBuiltin,
+      uuid: uuid
+    });
+  }
+
+  list.sort(function(a, b) { return a.x - b.x; });
+
+  var lines = ["POINTER " + mouse_x + " " + mouse_y];
+  for (var j = 0; j < list.length; j++) {
+    var d = list[j];
+    lines.push("DISPLAY " + d.x + " " + d.y + " " + d.w + " " + d.h + " " + d.builtin + " " + d.uuid);
+  }
+
+  var rows = [];
+  for (var k = 0; k < list.length; k++) {
+    var item = list[k];
+    var assigned = false;
+    for (var r = 0; r < rows.length; r++) {
+      var rep = rows[r].rep;
+      var top1 = item.y, bot1 = item.y + item.h;
+      var top2 = rep.y, bot2 = rep.y + rep.h;
+      var overlap = Math.min(bot1, bot2) - Math.max(top1, top2);
+      if (overlap > 100) {
+        rows[r].indices.push(k);
+        assigned = true;
+        break;
+      }
+    }
+    if (!assigned) {
+      rows.push({ y: item.y, rep: item, indices: [k] });
+    }
+  }
+
+  rows.sort(function(a, b) { return a.y - b.y; });
+
+  for (var r_idx = 0; r_idx < rows.length; r_idx++) {
+    var rowIndices = rows[r_idx].indices;
+    var rowItems = [];
+    for (var c = 0; c < list.length; c++) {
+      if (rowIndices.indexOf(c) !== -1) {
+        rowItems.push(c);
+      } else {
+        rowItems.push(-1);
+      }
+    }
+    lines.push("GRIDROW " + rowItems.join(" "));
+  }
+
+  lines.join("\n");
+  ')
+
+  if [[ -z $payload_raw ]]
+  then
+    echo "Error: Failed to obtain display state from JXA." >&2
+    exit 1
+  fi
+
+  sorted_by_x=()
+  grid_rows=()
+
+  while IFS= read -r line
+  do
+    case "$line" in
+      (POINTER\ *)
+        read -r _ current_x current_y <<< "$line"
+        ;;
+      (DISPLAY\ *)
+        sorted_by_x+=("${line#DISPLAY }")
+        ;;
+      (GRIDROW\ *)
+        grid_rows+=("${line#GRIDROW }")
+        ;;
+    esac
+  done <<< "$payload_raw"
+
+  total_displays="${#sorted_by_x[@]}"
+
+  if (( total_displays == 0 ))
+  then
+    echo "Error: No displays detected via NSScreen." >&2
+    exit 1
+  fi
+
+  # Match current display by full 2D bounding box
+  current_idx=-1
+  for i in "${!sorted_by_x[@]}"
+  do
+    load_display "$i"
+    if (( current_x >= d_ox && current_x < (d_ox + d_w) && current_y >= d_oy && current_y < (d_oy + d_h) ))
+    then
+      current_idx=$i
+      cur_ox=$d_ox
+      cur_oy=$d_oy
+      cur_w=$d_w
+      cur_h=$d_h
+      cur_cx=$d_cx
+      cur_cy=$d_cy
+      cur_bottom=$d_bottom
+      cur_builtin=$d_is_bi
+      cur_uuid=$d_uuid
+      break
+    fi
+  done
+
+  # Fallback clamp: find nearest display center if cursor sits on an outer seam
+  if (( current_idx == -1 ))
+  then
+    local -i min_dist=-1 best_idx=0 dist
+    for i in "${!sorted_by_x[@]}"
+    do
+      load_display "$i"
+      dist=$(distance_sq "$d_cx" "$d_cy" "$current_x" "$current_y")
+      if (( min_dist == -1 || dist < min_dist ))
+      then
+        min_dist=$dist
+        best_idx=$i
+      fi
+    done
+    current_idx=$best_idx
+    load_display "$current_idx"
+    cur_ox=$d_ox
+    cur_oy=$d_oy
+    cur_w=$d_w
+    cur_h=$d_h
+    cur_cx=$d_cx
+    cur_cy=$d_cy
+    cur_bottom=$d_bottom
+    cur_builtin=$d_is_bi
+    cur_uuid=$d_uuid
+  fi
+}
+
+function warp_pointer_and_activate_window_there ()
+{
+  # Warp pointer and activate window under coordinates in one JXA pass
+    load_display "$target_idx"
+    osascript -l JavaScript -e "
+      ObjC.import('AppKit');
+      ObjC.import('ApplicationServices');
+      ObjC.import('CoreGraphics');
+
+      var x = ${d_cx};
+      var y = ${d_cy};
+
+      var pt = $.CGPointMake(x, y);
+      var ev = $.CGEventCreateMouseEvent(null, $.kCGEventMouseMoved, pt, $.kCGMouseButtonLeft);
+      $.CGEventPost($.kCGHIDEventTap, ev);
+
+      var elemRef = Ref();
+      if ($.AXUIElementCopyElementAtPosition($.AXUIElementCreateSystemWide(), x, y, elemRef) === 0) {
+        var elem = elemRef[0];
+        var pidRef = Ref();
+        if ($.AXUIElementGetPid(elem, pidRef) === 0) {
+          var app = $.NSRunningApplication.runningApplicationWithProcessIdentifier(pidRef[0]);
+          if (app) {
+            app.activateWithOptions($.NSApplicationActivateIgnoringOtherApps);
+          }
+        }
+        var winRef = elem;
+        while (winRef) {
+          var roleRef = Ref();
+          if ($.AXUIElementCopyAttributeValue(winRef, 'AXRole', roleRef) === 0 && ObjC.unwrap(roleRef[0]) === 'AXWindow') {
+            $.AXUIElementPerformAction(winRef, 'AXRaise');
+            break;
+          }
+          var parentRef = Ref();
+          if ($.AXUIElementCopyAttributeValue(winRef, 'AXParent', parentRef) === 0) {
+            winRef = parentRef[0];
+          } else {
+            break;
+          }
+        }
+      }
+      "
+}
+
+function slap_bottom_edge ()
+{
+    osascript -l JavaScript -e "
+    ObjC.import('Foundation');
+    ObjC.import('CoreGraphics');
+
+    function postMoveWithDelta(x, y, deltaY) {
+      var pt = $.CGPointMake(x, y);
+      var ev = $.CGEventCreateMouseEvent(null, $.kCGEventMouseMoved, pt, $.kCGMouseButtonLeft);
+
+      // kCGMouseEventDeltaY is field index 4
+      $.CGEventSetIntegerValueField(ev, 4, deltaY);
+
+      $.CGEventPost($.kCGHIDEventTap, ev);
+    }
+
+    // 1. Move to the physical bottom edge
+    postMoveWithDelta(${cur_cx}, ${cur_bottom}, 0);
+    $.NSThread.sleepForTimeInterval(0.1);
+
+    // 2. Pump downward DeltaY pressure while pinned at the bottom edge
+    for (var i = 0; i < 15; i++) {
+      // Push with positive downward delta
+      postMoveWithDelta(${cur_cx}, ${cur_bottom}, 20);
+      $.NSThread.sleepForTimeInterval(0.03);
+    }
+
+    // 3. Dwell briefly so Dock completes transfer
+    $.NSThread.sleepForTimeInterval(0.5);
+
+    // 4. Return cursor to original position
+    postMoveWithDelta(${current_x}, ${current_y}, 0);
+    " >/dev/null
+}
+
+# --- Action Execution Loop ---
+
+for action in "$@"
+do
+  # 1. Numeric argument check: sleep pause
+  if [[ $action =~ ^[0-9]+([.][0-9]+)?$ ]]
+  then
+    sleep "$action"
+    continue
+  fi
+
+  # 2. Wait-for argument processing
+  if [[ $action =~ ^wait-for: ]]
+  then
+    wait_body="${action#wait-for:}"
+
+    case "$wait_body" in
+      (nmonitors=*)
+        rule_params="${wait_body#nmonitors=}"
+        target_count="${rule_params%%:*}"
+        timeout=30
+
+        if [[ $rule_params == *:* ]]
+        then
+          timeout="${rule_params#*:}"
+        fi
+
+        waited=0
+        matched=0
+
+        while (( waited < timeout ))
+        do
+          current_count=$(osascript -l JavaScript -e 'ObjC.import("AppKit"); $.NSScreen.screens.count;' 2>/dev/null || echo 1)
+
+          if (( current_count == target_count ))
+          then
+            matched=1
+            break
+          fi
+
+          sleep 1
+          (( waited += 1 ))
+        done
+
+        if (( matched == 0 ))
+        then
+          echo "Error: Timed out after ${timeout}s waiting for exactly ${target_count} monitors (found: ${current_count})." >&2
+          exit 1
+        fi
+        continue
+        ;;
+
+      (unlocked|unlocked:*)
+        timeout=300
+
+        if [[ $wait_body == *:* ]]
+        then
+          timeout="${wait_body#*:}"
+        fi
+
+        waited=0
+        matched=0
+
+        while (( waited < timeout ))
+        do
+          is_locked=$(osascript -l JavaScript -e '
+            ObjC.import("CoreGraphics");
+            var dict = $.CGSessionCopyCurrentDictionary();
+            var locked = dict ? ObjC.unwrap(dict.js["CGSSessionScreenIsLocked"]) : null;
+            console.log(locked ? 1 : 0);
+          ' 2>/dev/null || echo 0)
+
+          if [[ $is_locked == 0 ]]
+          then
+            matched=1
+            break
+          fi
+
+          sleep 1
+          (( waited += 1 ))
+        done
+
+        if (( matched == 0 ))
+        then
+          echo "Error: Timed out after ${timeout}s waiting for session to unlock." >&2
+          exit 1
+        fi
+        continue
+        ;;
+
+      (*)
+        echo "Error: Unrecognized wait-for directive '$action'" >&2
+        echo "Usage: wait-for:nmonitors=<N>[:<timeout>] | wait-for:unlocked[:<timeout>]" >&2
+        exit 1
+        ;;
+    esac
+  fi
+
+  # 3. Validate standard navigation actions
+  case "$action" in
+    (left|right|up|down|leftmost|rightmost|builtin|center|slap-bottom-edge|info)
+      ;;
+    (*)
+      echo "Error: Invalid argument '$action'" >&2
+      echo "Usage: $0 [left|right|up|down|leftmost|rightmost|builtin|center|slap-bottom-edge|info|<seconds>|wait-for:...] ..." >&2
+      exit 1
+      ;;
+  esac
+
+  # Sync current pointer and screen topology
+  update_state
+
+  # --- Handle "slap-bottom-edge" action ---
+  if [[ $action == slap-bottom-edge ]]
+  then
+    slap_bottom_edge
+    continue
+  fi
+
+  # --- Handle "info" action ---
+  if [[ $action == info ]]
+  then
+    for cmd in jq plutil
+    do
+      if ! command -v "$cmd" >/dev/null 2>&1
+      then
+        echo "Error: Required command '$cmd' for 'info' not found in PATH." >&2
+        exit 1
+      fi
+    done
+
+    echo "Current Mouse: (${current_x}, ${current_y})"
+    echo ""
+    printf "%-3s %-9s %-12s %-16s %-12s %-14s %-10s\n" "Idx" "Status" "Type" "Origin (X,Y)" "Logical Size" "Center (X,Y)" "Spaces"
+    echo "-------------------------------------------------------------------------------------"
+
+    spaces_plist="$HOME/Library/Preferences/com.apple.spaces.plist"
+    spaces_info=""
+    if [[ -f $spaces_plist ]]
+    then
+      spaces_info=$(plutil -convert json -r -o - "$spaces_plist" 2>/dev/null | jq -r '
+        .SpacesDisplayConfiguration["Management Data"].Monitors[]? |
+        . as $m |
+        ($m.Spaces // []) as $spaces |
+        ($m["Current Space"].uuid // "") as $cur_uuid |
+        ($m["Current Space"].ManagedSpaceID // -1) as $cur_msid |
+        (([ $spaces[] | (.uuid == $cur_uuid or (.ManagedSpaceID != null and .ManagedSpaceID == $cur_msid)) ] | index(true) // 0) + 1) as $active_idx |
+        "\($m["Display Identifier"] // "") \($spaces | length) \($active_idx)"
+      ' || true)
+    fi
+
+    for i in "${!sorted_by_x[@]}"
+    do
+      load_display "$i"
+      status=" "
+      if (( i == current_idx ))
+      then
+        status="* ACTIVE"
+      fi
+
+      type_str="Ext"
+      if (( d_is_bi == 1 ))
+      then
+        type_str="Builtin"
+      elif (( d_is_bi == 2 ))
+      then
+        type_str="Builtin (Lid)"
+      fi
+
+      spaces_str="-"
+      if [[ -n $spaces_info ]]
+      then
+        while read -r s_uuid s_total s_active
+        do
+          if [[ -n $d_uuid && $s_uuid == "$d_uuid" ]]
+          then
+            spaces_str="${s_active} of ${s_total}"
+            break
+          fi
+        done <<< "$spaces_info"
+
+        if [[ $spaces_str == "-" && $d_ox -eq 0 && $d_oy -eq 0 ]]
+        then
+          while read -r s_uuid s_total s_active
+          do
+            if [[ -z $s_uuid || $s_uuid == Main ]]
+            then
+              spaces_str="${s_active} of ${s_total}"
+              break
+            fi
+          done <<< "$spaces_info"
+        fi
+      fi
+
+      printf "[%d] %-9s %-12s (%6d, %6d)   %5dx%-5d   (%6d, %6d)   %-10s\n" "$((i+1))" "$status" "$type_str" "$d_ox" "$d_oy" "$d_w" "$d_h" "$d_cx" "$d_cy" "$spaces_str"
+    done
+
+    echo ""
+    echo "Spatial Arrangement:"
+
+    for r_str in "${grid_rows[@]}"
+    do
+      read -r -a row_cols <<< "$r_str"
+      line=""
+      for c_idx in "${row_cols[@]}"
+      do
+        if (( c_idx == -1 ))
+        then
+          line+=$(printf "%-6s" "    ")
+        else
+          if (( c_idx == current_idx ))
+          then
+            line+=$(printf "%-6s" "[$((c_idx + 1))*]")
+          else
+            line+=$(printf "%-6s" "[$((c_idx + 1))]")
+          fi
+        fi
+      done
+      echo "${line%"${line##*[![:space:]]}"}"
+    done
+    continue
+  fi
+
+  if (( total_displays <= 1 ))
+  then
+    continue
+  fi
+
+  # --- Determine Target Display ---
+  target_idx=-1
+
+  case "$action" in
+    (center)
+      if (( total_displays % 2 != 0 ))
+      then
+        target_idx=$(( total_displays / 2 ))
+      else
+        left_cand=$(( (total_displays / 2) - 1 ))
+        right_cand=$(( total_displays / 2 ))
+
+        load_display "$left_cand"
+        dist_left=$(distance_sq "$d_cx" "$d_cy" "$current_x" "$current_y")
+
+        load_display "$right_cand"
+        dist_right=$(distance_sq "$d_cx" "$d_cy" "$current_x" "$current_y")
+
+        if (( dist_left <= dist_right ))
+        then
+          target_idx=$left_cand
+        else
+          target_idx=$right_cand
+        fi
+      fi
+      ;;
+    (builtin)
+      for i in "${!sorted_by_x[@]}"
+      do
+        load_display "$i"
+        if (( d_is_bi == 1 ))
+        then
+          target_idx=$i
+          break
+        fi
+      done
+
+      if (( target_idx == -1 ))
+      then
+        target_idx=0
+      fi
+      ;;
+    (leftmost)
+      target_idx=0
+      ;;
+    (rightmost)
+      target_idx=$(( total_displays - 1 ))
+      ;;
+    (right)
+      target_idx=$(( (current_idx + 1) % total_displays ))
+      ;;
+    (left)
+      target_idx=$(( (current_idx - 1 + total_displays) % total_displays ))
+      ;;
+    (up|down)
+      best_cand=-1
+      min_dy=-1
+
+      for i in "${!sorted_by_x[@]}"
+      do
+        if (( i == current_idx ))
+        then
+          continue
+        fi
+
+        load_display "$i"
+
+        if has_x_overlap "$cur_ox" "$cur_w" "$d_ox" "$d_w"
+        then
+          if [[ $action == down && d_cy -gt cur_cy ]]
+          then
+            dy=$(( d_cy - cur_cy ))
+            if (( min_dy == -1 || dy < min_dy ))
+            then
+              min_dy=$dy
+              best_cand=$i
+            fi
+          elif [[ $action == up && d_cy -lt cur_cy ]]
+          then
+            dy=$(( cur_cy - d_cy ))
+            if (( min_dy == -1 || dy < min_dy ))
+            then
+              min_dy=$dy
+              best_cand=$i
+            fi
+          fi
+        fi
+      done
+
+      if (( best_cand == -1 ))
+      then
+        continue
+      fi
+
+      target_idx=$best_cand
+      ;;
+  esac
+
+  # Warp pointer to center of target display
+  warp_pointer_and_activate_window_there
+done
