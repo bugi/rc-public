@@ -1,0 +1,15 @@
+#!/bin/bash
+set -euo pipefail
+export PATH="/opt/homebrew/bin:/usr/local/bin:$HOME/usr/bin:$HOME/usr/bin-public/$(uname -s):$HOME/usr/bin-public:$PATH"
+
+# 1. Wait for all 3 displays to negotiate over DisplayPort/USB
+cycle-display wait-for:nmonitors=3:30 || true
+
+# 2. Re-anchor Dock and Spaces immediately while still at the lock screen
+killall Dock 2>/dev/null || true
+
+# 3. Block until authentication succeeds
+cycle-display wait-for:unlocked:300 || exit 1
+
+# 4. Pull Dock to built-in display, brief settle pause, then park at center
+cycle-display builtin 0.2 slap-bottom-edge 0.3 center
