@@ -2,6 +2,8 @@
 set -euo pipefail
 export PATH="/opt/homebrew/bin:/usr/local/bin:$HOME/usr/bin:$HOME/usr/bin-public/$(uname -s):$HOME/usr/bin-public:$PATH"
 
+# TODO: add instructions for how to enable this to run on wakeup using sleepwatcher and launchctl
+
 # 1. Wait for all 3 displays to negotiate over DisplayPort/USB
 cycle-display wait-for:nmonitors=3:30 || true
 
