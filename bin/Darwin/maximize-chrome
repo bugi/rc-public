@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+export PATH="/opt/homebrew/bin:/usr/local/bin:$HOME/usr/bin:$HOME/usr/bin-public/$(uname -s):$HOME/usr/bin-public:$PATH"
+
+cycle-display rightmost
+
+osascript -l JavaScript <<"EOF"
+
+ObjC.import('AppKit');
+
+function run() {
+  const chrome = Application('Google Chrome');
+  if (!chrome.running()) return;
+
+  const screens = $.NSScreen.screens;
+  const primaryHeight = screens.objectAtIndex(0).frame.size.height;
+  const mouseLoc = $.NSEvent.mouseLocation;
+
+  // 1. Find the screen currently under the mouse pointer
+  let targetScreen = screens.objectAtIndex(0);
+  for (let i = 0; i < screens.count; i++) {
+    const scr = screens.objectAtIndex(i);
+    if ($.NSPointInRect(mouseLoc, scr.frame)) {
+      targetScreen = scr;
+      break;
+    }
+  }
+
+  // 2. Define the usable screen rectangle (top-left coordinate system)
+  const sf = targetScreen.frame;
+  const vf = targetScreen.visibleFrame;
+
+  // Full screen bounds for containment check
+  const screenLeft = sf.origin.x;
+  const screenRight = sf.origin.x + sf.size.width;
+  const screenTop = primaryHeight - (sf.origin.y + sf.size.height);
+  const screenBottom = screenTop + sf.size.height;
+
+  // Usable area (visibleFrame minus menu bar & dock)
+  const targetBounds = {
+    x: Math.round(vf.origin.x),
+    y: Math.round(primaryHeight - (vf.origin.y + vf.size.height)),
+    width: Math.round(vf.size.width),
+    height: Math.round(vf.size.height)
+  };
+
+  // 3. Resize only windows whose centers sit within this screen
+  const wins = chrome.windows();
+  for (let i = 0; i < wins.length; i++) {
+    try {
+      const b = wins[i].bounds();
+      const midX = b.x + (b.width / 2);
+      const midY = b.y + (b.height / 2);
+
+      if (midX >= screenLeft && midX <= screenRight &&
+          midY >= screenTop && midY <= screenBottom) {
+        wins[i].bounds = targetBounds;
+      }
+    } catch (e) {
+      // Ignore minimized windows or windows that reject bounds calls
+    }
+  }
+}
+EOF
