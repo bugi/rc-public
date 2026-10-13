@@ -37,12 +37,9 @@ fi
 function get_chrome_window_names()
 {
   osascript -l JavaScript -e '
-    const sys = Application("System Events");
-    const chrome = sys.processes.byName("Google Chrome");
-    if (!chrome.exists()) $.exit(1);
-    const items = chrome.menuBars[0].menuBarItems.byName("Window").menus[0].menuItems();
-    const skip = /^(Minimize|Zoom|Tile|Move|Bring All to Front|Name Window…|Downloads|Extensions|Fill|Center|Full Screen Tile|Task Manager|Arrange in Front|Remove Window from Set)/i;
-    items.map(i => i.name()).filter(n => n && !skip.test(n)).join("\n");
+    const chrome = Application("Google Chrome");
+    if (!chrome.running()) $.exit(1);
+    chrome.windows().map(w => w.title()).join("\n");
   '
 }
 
@@ -61,9 +58,9 @@ function run(argv) {
 }
 EOF
 
-if [[ $1 == --list ]]
+if [[ $1 == --list ]] || [[ $1 == -l ]]
 then
-  get_chrome_window_names
+  get_chrome_window_names | LC_ALL=C sort -f
   exit
 fi
 
@@ -72,8 +69,8 @@ FZF+=( --layout=reverse )
 FZF+=( --info=inline-right )
 
 # Fuzzy select and click the chosen window name
-target_window=$(get_chrome_window_names | fzf "${FZF[@]}" \
-  --prompt="Select Chrome Window > "
+target_window=$(get_chrome_window_names | LC_ALL=C sort -f | fzf "${FZF[@]}" \
+  --prompt="Select Chrome Window > " \
 )
 
 if [[ -n "$target_window" ]]
