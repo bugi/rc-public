@@ -1,0 +1,124 @@
+#!/opt/homebrew/bin/bash
+export PATH="/opt/homebrew/bin:/usr/local/bin:$HOME/usr/bin:$HOME/usr/bin-public/$(uname -s):$HOME/usr/bin-public:$PATH"
+
+# Have too many chrome windows?
+# This lists chrome windows and lets you pick one and jumps to it.
+
+# I use this as an iterm2 hotkey window.
+
+# Note that this does not handle the case where chrome has multiple
+# instances via --no-first-run --user-data-dir=DIRNAME.
+
+make_popup_terminal=unknown
+list_windows=false
+pick_chrome_window=false
+
+if [[ $# -eq 0 ]] && [[ -z $TERM ]]
+then
+  make_popup_terminal=false
+  pick_chrome_window=true
+elif [[ $# -eq 0 ]]
+then
+  make_popup_terminal=true
+  pick_chrome_window=true
+
+else
+  while [[ $# -gt 0 ]]
+  do
+    case "$1" in
+    (--no-make-terminal|--make-terminal=false)
+      make_popup_terminal=false
+      shift
+      ;;
+    (--make-terminal|--make-terminal=true)
+      make_popup_terminal=true
+      shift
+      ;;
+    (pick|--pick-window)
+      pick_chrome_window=true
+      shift
+      ;;
+    (--list|-l)
+      list_windows=true
+      shift
+      ;;
+    esac
+  done
+fi
+
+function popup_terminal_and_run ()
+{
+  local rp
+  rp=$1
+  shift
+  cd
+  osascript <<EOF
+tell application "Terminal"
+  set newWindow to (do script "$rp $* ; exit")
+  activate
+
+  -- Wait until the command completes and the shell exits
+  repeat while busy of newWindow
+      delay 0.1
+  end repeat
+
+  close (first window whose selected tab is newWindow) saving no
+end tell
+EOF
+}
+
+if [[ $pick_window == true ]] && [[ $make_popup_terminal == true ]]
+then
+  popup_terminal_and_run "$(realpath "$0")" --make-terminal=false --pick-window
+  exit
+fi
+
+# List all window items from Chrome's Window menu
+function get_chrome_window_names()
+{
+  osascript -l JavaScript -e '
+    const chrome = Application("Google Chrome");
+    if (!chrome.running()) $.exit(1);
+    chrome.windows().map(w => w.title()).join("\n");
+  '
+}
+
+read -r -d '' open_target_chrome_window <<'EOF' || true
+function run(argv) {
+  const targetName = argv[0];
+  const sys = Application("System Events");
+  const chrome = Application("Google Chrome");
+
+  chrome.activate();
+  const menu = sys.processes.byName("Google Chrome").menuBars[0].menuBarItems.byName("Window").menus[0];
+  const item = menu.menuItems.byName(targetName);
+
+  if (item.exists())
+    item.click();
+}
+EOF
+
+if [[ $list_windows == true ]]
+then
+  get_chrome_window_names | LC_ALL=C sort -f
+  exit
+fi
+
+if [[ $pick_chrome_window == true ]]
+then
+
+  FZF=()
+  FZF+=( --layout=reverse )
+  FZF+=( --info=inline-right )
+
+  # Fuzzy select and click the chosen window name
+  target_window=$(get_chrome_window_names | LC_ALL=C sort -f | fzf "${FZF[@]}" \
+    --prompt="Select Chrome Window > " \
+  )
+
+  if [[ -n "$target_window" ]]
+  then
+    osascript -l JavaScript -e "$open_target_chrome_window" "$target_window"
+  fi
+
+fi
