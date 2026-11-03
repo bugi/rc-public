@@ -1,6 +1,0 @@
-#!/usr/bin/env bash
-export PATH="/opt/homebrew/bin:/usr/local/bin:$HOME/usr/bin:$HOME/usr/bin-public/$(uname -s):$HOME/usr/bin-public:$PATH"
-
-cycle-display rightmost
-
-app-maximize com.google.Chrome

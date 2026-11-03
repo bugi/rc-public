@@ -4,7 +4,8 @@ export PATH="/opt/homebrew/bin:/usr/local/bin:$HOME/usr/bin:$HOME/usr/bin-public
 case "$1" in
   (--maximize|--max)
     shift
-    exec chrome-maximize "$@"
+    cycle-display rightmost "$@"
+    exec app-maximize com.google.Chrome
     ;;
   (--pick-one|--pick)
     shift
