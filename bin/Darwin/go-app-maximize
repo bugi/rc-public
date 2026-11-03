@@ -1,17 +1,74 @@
 #!/usr/bin/env bash
 export PATH="/opt/homebrew/bin:/usr/local/bin:$HOME/usr/bin:$HOME/usr/bin-public/$(uname -s):$HOME/usr/bin-public:$PATH"
 
-cycle-display leftmost
-app-maximize com.googlecode.iterm2
-cycle-display 0s center
-app-maximize com.googlecode.iterm2
-cycle-display 0s rightmost
-app-maximize com.googlecode.iterm2
+appname=$1
+shift
 
-cycle-display 0s rightmost
+if [[ -z $appname ]]
+then
+  echo "1st argument is mandatory; use app name or bundle identifier" 1>&2
+  exit 1
+fi
 
-app-maximize com.microsoft.Outlook
-app-maximize org.mozilla.firefox
-app-maximize com.google.Chrome
+# cycle-display rightmost
 
-cycle-display 0s center
+read -r -d '' jscode <<"EOF"
+ObjC.import('AppKit');
+
+function run() {
+  const chrome = Application('%s');
+  if (!chrome.running()) return;
+
+  const screens = $.NSScreen.screens;
+  const primaryHeight = screens.objectAtIndex(0).frame.size.height;
+  const mouseLoc = $.NSEvent.mouseLocation;
+
+  // 1. Find the screen currently under the mouse pointer
+  let targetScreen = screens.objectAtIndex(0);
+  for (let i = 0; i < screens.count; i++) {
+    const scr = screens.objectAtIndex(i);
+    if ($.NSPointInRect(mouseLoc, scr.frame)) {
+      targetScreen = scr;
+      break;
+    }
+  }
+
+  // 2. Define the usable screen rectangle (top-left coordinate system)
+  const sf = targetScreen.frame;
+  const vf = targetScreen.visibleFrame;
+
+  // Full screen bounds for containment check
+  const screenLeft = sf.origin.x;
+  const screenRight = sf.origin.x + sf.size.width;
+  const screenTop = primaryHeight - (sf.origin.y + sf.size.height);
+  const screenBottom = screenTop + sf.size.height;
+
+  // Usable area (visibleFrame minus menu bar & dock)
+  const targetBounds = {
+    x: Math.round(vf.origin.x),
+    y: Math.round(primaryHeight - (vf.origin.y + vf.size.height)),
+    width: Math.round(vf.size.width),
+    height: Math.round(vf.size.height)
+  };
+
+  // 3. Resize only windows whose centers sit within this screen
+  const wins = chrome.windows();
+  for (let i = 0; i < wins.length; i++) {
+    try {
+      const b = wins[i].bounds();
+      const midX = b.x + (b.width / 2);
+      const midY = b.y + (b.height / 2);
+
+      if (midX >= screenLeft && midX <= screenRight &&
+          midY >= screenTop && midY <= screenBottom) {
+        wins[i].bounds = targetBounds;
+      }
+    } catch (e) {
+      // Ignore minimized windows or windows that reject bounds calls
+    }
+  }
+}
+EOF
+
+jscode=$( printf "$jscode" "$appname" )
+osascript -l JavaScript <<<"$jscode"

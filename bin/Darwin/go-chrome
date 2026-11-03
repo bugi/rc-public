@@ -2,10 +2,12 @@
 export PATH="/opt/homebrew/bin:/usr/local/bin:$HOME/usr/bin:$HOME/usr/bin-public/$(uname -s):$HOME/usr/bin-public:$PATH"
 
 case "$1" in
-  (--maximize|--max)
+  (--maximize|--max|max)
     shift
     cycle-display rightmost "$@"
-    exec app-maximize com.google.Chrome
+    go-app --maximize com.google.Chrome
+    cycle-display center
+    exit
     ;;
   (--pick-one|--pick)
     shift

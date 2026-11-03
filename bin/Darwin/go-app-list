@@ -3,7 +3,7 @@ export PATH="/opt/homebrew/bin:/usr/local/bin:$HOME/usr/bin:$HOME/usr/bin-public
 
 # lists the names and bundle identifiers of all currently running GUI apps
 #
-# Use with app-maximize.
+# Use with go-app --maximize.
 
 osascript -l JavaScript -e '
   Application("System Events").applicationProcesses.where({backgroundOnly: false})()

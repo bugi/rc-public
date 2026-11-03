@@ -4,7 +4,13 @@ export PATH="/opt/homebrew/bin:/usr/local/bin:$HOME/usr/bin:$HOME/usr/bin-public
 case "$1" in
   (--maximize|--max|max)
     shift
-    exec go-app-maximize "$@"
+    if [[ $1 == mine ]]
+    then
+      shift
+      exec go-app-maximize-mine "$@"
+    else
+      exec go-app-maximize "$@"
+    fi
     ;;
   (--list|-l|list)
     shift
