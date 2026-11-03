@@ -7,4 +7,11 @@ cycle-display 0s center
 app-maximize com.googlecode.iterm2
 cycle-display 0s rightmost
 app-maximize com.googlecode.iterm2
+
+cycle-display 0s rightmost
+
+app-maximize com.microsoft.Outlook
+app-maximize org.mozilla.firefox
+app-maximize com.google.Chrome
+
 cycle-display 0s center
