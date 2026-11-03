@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+export PATH="/opt/homebrew/bin:/usr/local/bin:$HOME/usr/bin:$HOME/usr/bin-public/$(uname -s):$HOME/usr/bin-public:$PATH"
+
+# lists the names and bundle identifiers of all currently running GUI apps
+#
+# Use with app-maximize.
+
+osascript -l JavaScript -e '
+  Application("System Events").applicationProcesses.where({backgroundOnly: false})()
+    .map(p => `${p.name()}: ${p.bundleIdentifier()}`)
+    .sort()
+    .join("\n")
+'
