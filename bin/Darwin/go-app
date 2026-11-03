@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+export PATH="/opt/homebrew/bin:/usr/local/bin:$HOME/usr/bin:$HOME/usr/bin-public/$(uname -s):$HOME/usr/bin-public:$PATH"
+
+case "$1" in
+  (--maximize|--max|max)
+    shift
+    exec go-app-maximize "$@"
+    ;;
+  (--list|-l|list)
+    shift
+    exec go-app-list "$@"
+    ;;
+esac
+
+echo "You'll need to tell me what chromey thing you want." 1>&2
+exit 1
