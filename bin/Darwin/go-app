@@ -4,7 +4,11 @@ export PATH="/opt/homebrew/bin:/usr/local/bin:$HOME/usr/bin:$HOME/usr/bin-public
 case "$1" in
   (--maximize|--max|max)
     shift
-    if [[ $1 == mine ]] || [[ -z $1 ]]
+    if [[ $1 == 1 ]] || [[ -z $1 ]]
+    then
+      shift
+      exec go-app-maximize-collection-1 "$@"
+    elif [[ $1 == mine ]]
     then
       shift
       exec go-app-maximize-mine "$@"
@@ -18,5 +22,5 @@ case "$1" in
     ;;
 esac
 
-echo "You'll need to tell me what chromey thing you want." 1>&2
+echo "You'll need to tell me what appy thing you want." 1>&2
 exit 1
